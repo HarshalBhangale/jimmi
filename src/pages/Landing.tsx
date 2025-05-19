@@ -7,7 +7,6 @@ import {
   Flex,
   Heading,
   SimpleGrid,
-  Stack,
   Text,
   Icon,
   HStack,
@@ -15,7 +14,6 @@ import {
   VStack,
   Link,
   Divider,
-  Badge,
   Accordion,
   AccordionItem,
   AccordionButton,
@@ -27,7 +25,7 @@ import {
   Card,
   CardBody,
 } from '@chakra-ui/react';
-import { FiCheck, FiArrowRight, FiDollarSign, FiClock, FiShield, FiTrendingUp, FiFileText, FiUserCheck, FiUser, FiCreditCard, FiCheckCircle, FiMessageSquare } from 'react-icons/fi';
+import { FiArrowRight, FiUser, FiCheckCircle, FiMessageSquare } from 'react-icons/fi';
 
 // Import components
 import Navbar from '../components/landing/Navbar';
@@ -37,263 +35,6 @@ import Comparison from '../components/landing/comparison';
 import Tools from '../components/landing/tools';
 import Pricing from '../components/landing/pricing';
 
-// Feature component
-const Feature = ({ title, text, icon }: { title: string; text: string; icon: React.ReactElement }) => {
-  return (
-    <Stack 
-      direction={'row'} 
-      align={'start'}
-      p={6}
-      rounded="xl"
-      boxShadow="md"
-      bg={useColorModeValue('white', 'gray.800')}
-      borderTop="4px solid"
-      borderColor={useColorModeValue('blue.400', 'blue.300')}
-      transition="all 0.3s"
-      _hover={{
-        transform: "translateY(-5px)",
-        boxShadow: "xl",
-      }}
-    >
-      <Flex 
-        w={16} 
-        h={16} 
-        align={'center'} 
-        justify={'center'} 
-        rounded={'full'} 
-        bg={useColorModeValue('blue.100', 'blue.900')} 
-        mb={4}
-      >
-        {icon}
-      </Flex>
-      <Box ml={4}>
-        <Text fontWeight={600} fontSize={'lg'} mb={1}>
-          {title}
-        </Text>
-        <Text color={useColorModeValue('gray.600', 'gray.400')}>{text}</Text>
-      </Box>
-    </Stack>
-  );
-};
-
-// Testimonial component
-const Testimonial = ({ content, author, role }: { content: string; author: string; role: string }) => {
-  return (
-    <Box
-      mb={8}
-      p={8}
-      boxShadow={'lg'}
-      rounded={'xl'}
-      bg={useColorModeValue('white', 'gray.700')}
-      borderTop="4px solid"
-      borderColor={useColorModeValue('blue.500', 'blue.300')}
-      transition="all 0.3s"
-      _hover={{
-        transform: "translateY(-5px)",
-        boxShadow: "xl",
-      }}
-    >
-      <Text fontSize={'lg'} mb={4}>
-        "{content}"
-      </Text>
-      <HStack spacing={3}>
-        <UserAvatar name={author} size="md" />
-        <Box>
-          <Text fontWeight={600}>{author}</Text>
-          <Text fontSize={'sm'} color={useColorModeValue('gray.600', 'gray.400')}>
-            {role}
-          </Text>
-        </Box>
-      </HStack>
-    </Box>
-  );
-};
-
-// Step component
-const StepItem = ({ number, title, description, icon }: { number: number; title: string; description: string; icon: React.ReactElement }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('blue.400', 'blue.300');
-  const iconBg = useColorModeValue('blue.50', 'blue.900');
-  const iconColor = useColorModeValue('blue.600', 'blue.200');
-  const textColor = useColorModeValue('gray.600', 'gray.400');
-
-  return (
-    <Flex
-      position="relative"
-      mb={12}
-      direction={{ base: 'column', md: 'row' }}
-      align={{ base: 'center', md: 'flex-start' }}
-      textAlign={{ base: 'center', md: 'left' }}
-      _hover={{
-        transform: 'translateY(-8px)',
-        transition: 'all 0.3s ease'
-      }}
-    >
-      {/* Step Number Circle */}
-      <Flex
-        position="relative"
-        alignItems="center"
-        justifyContent="center"
-        w={{ base: "80px", md: "100px" }}
-        h={{ base: "80px", md: "100px" }}
-        rounded="full"
-        bg={iconBg}
-        color={iconColor}
-        fontSize={{ base: "xl", md: "2xl" }}
-        fontWeight="bold"
-        mb={{ base: 4, md: 0 }}
-        zIndex={2}
-        boxShadow="xl"
-        border="4px solid"
-        borderColor={borderColor}
-        transition="all 0.3s ease"
-        _hover={{
-          transform: 'scale(1.05)',
-          boxShadow: '2xl'
-        }}
-      >
-        {icon}
-      </Flex>
-
-      {/* Content Box */}
-      <Box 
-        flex="1"
-        ml={{ base: 0, md: 6 }}
-        position="relative"
-      >
-        {/* Connecting Line */}
-        {number < 7 && (
-          <Box
-            position="absolute"
-            left={{ base: "40px", md: "-50px" }}
-            top={{ base: "-40px", md: "50px" }}
-            bottom={{ base: "auto", md: "-40px" }}
-            width={{ base: "2px", md: "2px" }}
-            height={{ base: "40px", md: "calc(100% + 40px)" }}
-            bgGradient="linear(to-b, blue.400, blue.100)"
-            display={{ base: 'none', md: 'block' }}
-            zIndex={1}
-          />
-        )}
-        
-        {/* Content Card */}
-        <Box
-          p={8}
-          bg={bgColor}
-          borderRadius="2xl"
-          boxShadow="xl"
-          transition="all 0.3s"
-          border="1px solid"
-          borderColor={borderColor}
-          position="relative"
-          _before={{
-            content: '""',
-            position: "absolute",
-            left: { base: "50%", md: "-15px" },
-            top: { base: "-15px", md: "30px" },
-            transform: { base: "translateX(-50%)", md: "none" },
-            borderWidth: { base: "0 15px 15px", md: "15px 0 15px 15px" },
-            borderStyle: "solid",
-            borderColor: { 
-              base: `transparent transparent ${borderColor} transparent`,
-              md: `transparent ${borderColor} transparent transparent`
-            }
-          }}
-          _hover={{
-            boxShadow: '2xl',
-            borderColor: 'blue.500'
-          }}
-        >
-          <Text 
-            fontWeight="bold" 
-            fontSize={{ base: "xl", md: "2xl" }}
-            mb={3}
-            bgGradient="linear(to-r, blue.400, blue.600)"
-            bgClip="text"
-            display="flex"
-            alignItems="center"
-          >
-            Step {number}: {title}
-          </Text>
-          <Text 
-            color={textColor}
-            fontSize={{ base: "md", md: "lg" }}
-            lineHeight="tall"
-          >
-            {description}
-          </Text>
-        </Box>
-      </Box>
-    </Flex>
-  );
-};
-
-// Custom Avatar component (for testimonials)
-const UserAvatar = ({ name, size }: { name: string; size: string }) => {
-  return (
-    <Flex
-      alignItems="center"
-      justifyContent="center"
-      borderRadius="full"
-      bgGradient="linear(to-r, blue.400, purple.500)"
-      color="white"
-      fontWeight="bold"
-      boxShadow="sm"
-      w={size === 'md' ? '50px' : '40px'}
-      h={size === 'md' ? '50px' : '40px'}
-    >
-      {name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase()}
-    </Flex>
-  );
-};
-
-// Stats component
-const StatCard = ({ label, value, icon }: { label: string; value: string; icon: React.ReactElement }) => {
-  return (
-    <Box
-      bg={useColorModeValue('white', 'gray.800')}
-      p={6}
-      rounded="xl"
-      shadow="md"
-      border="1px solid"
-      borderColor={useColorModeValue('gray.100', 'gray.700')}
-      transition="all 0.3s"
-      _hover={{
-        transform: "translateY(-5px)",
-        boxShadow: "lg",
-      }}
-    >
-      <Flex mb={3} align="center">
-        <Flex
-          w={12}
-          h={12}
-          align="center"
-          justify="center"
-          rounded="full"
-          bg={useColorModeValue('blue.100', 'blue.900')}
-          mr={3}
-        >
-          {icon}
-        </Flex>
-        <Text fontWeight="medium" fontSize="lg" color={useColorModeValue('gray.600', 'gray.400')}>
-          {label}
-        </Text>
-      </Flex>
-      <Text 
-        fontSize="3xl" 
-        fontWeight="bold" 
-        bgGradient="linear(to-r, blue.400, blue.600)" 
-        bgClip="text"
-      >
-        {value}
-      </Text>
-    </Box>
-  );
-};
 
 // Right For You Component
 const RightForYou = () => {

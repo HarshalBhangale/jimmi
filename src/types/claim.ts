@@ -1,4 +1,4 @@
-import  { Agreement } from '../components/claims/AgreementList';
+import type { Agreement } from "./agreement";
 
 // Extended status types for claims
 export type ClaimStatus = 
@@ -89,3 +89,4 @@ export interface Claim {
   agreements?: Agreement[];
   lenderResponse?: LenderResponse;
 } 
+

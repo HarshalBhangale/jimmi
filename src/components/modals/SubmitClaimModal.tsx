@@ -16,7 +16,6 @@ import {
   Textarea,
   useColorModeValue,
   Flex,
-  Badge,
   Divider,
   Card,
   CardBody,

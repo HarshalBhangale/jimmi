@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Box,
   Container,
-  Flex,
   Heading,
   Text,
   SimpleGrid,

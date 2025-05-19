@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import { checkAuth } from '@api/services/auth';
 import { getClaims } from '@api/services/claims';
-import type { Claim } from '@/types/claim';
+// import type { Claim } from '@/types/claim';
 
 // This atom acts as a signal to trigger refetch
 export const authRefetchTriggerAtom = atom(0);

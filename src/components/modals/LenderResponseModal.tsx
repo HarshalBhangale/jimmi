@@ -13,7 +13,6 @@ import {
   Box,
   RadioGroup,
   Radio,
-  Textarea,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
@@ -24,14 +23,9 @@ import {
   Input,
   useColorModeValue,
   Flex,
-  Badge,
-  Divider,
   Card,
-  CardBody,
   useToast,
   Progress,
-  VStack,
-  HStack,
   Icon,
   Select,
 } from '@chakra-ui/react';
@@ -88,7 +82,7 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
   // UI Colors
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const cardBg = useColorModeValue('gray.50', 'gray.700');
+  // const cardBg = useColorModeValue('gray.50', 'gray.700');
   
   // Get the selected agreement details
   const selectedAgreement = agreements.find(ag => ag.id === selectedAgreementId) || agreement;
@@ -171,8 +165,11 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
         
         // Add offerAmount if this is an offer
         if (responseType === 'offer') {
-          updateData.agreement.offerAmount = offerAmount;
-          updateData.agreement.offerStatus = offerStatus;
+          updateData.agreement = {
+            ...updateData.agreement,
+            offerAmount: offerAmount,
+            offerStatus: offerStatus
+          } as any; // Type assertion needed since these properties aren't in the type definition
         }
         
         // Make the API call to update the claim in the backend

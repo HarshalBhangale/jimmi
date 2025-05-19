@@ -24,7 +24,7 @@ import {
   Spinner,
   Center,
 } from '@chakra-ui/react';
-import { FiArrowRight, FiPlus, FiX } from 'react-icons/fi';
+import { FiArrowRight, FiX } from 'react-icons/fi';
 import {getLenders, addLenders} from '@api/services/lender';
 import { userAtom } from '@/jotai/atoms';
 import { useAtomValue } from 'jotai';

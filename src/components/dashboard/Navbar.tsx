@@ -35,7 +35,7 @@ import {
   FiLogOut, 
   FiHelpCircle,
 } from 'react-icons/fi';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink} from 'react-router-dom';
 import { userAtom } from '@/jotai/atoms';   
 import { useAtomValue } from 'jotai';
 
