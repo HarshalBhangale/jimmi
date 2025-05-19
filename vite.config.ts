@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   server: {
     allowedHosts: [
-      "https://cd4e-18-175-165-31.ngrok-free.app",
+      "https://4294-18-175-165-31.ngrok-free.app",
       "https://2227-18-175-165-31.ngrok-free.app",
       "localhost",
       "127.0.0.1",
