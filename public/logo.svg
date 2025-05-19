@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Letter J -->
+  <path d="M30 10 L30 40 Q30 45 25 45 L20 45" stroke="#4299E1" stroke-width="4" stroke-linecap="round"/>
+  <!-- Letter i -->
+  <path d="M45 25 L45 45" stroke="#4299E1" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="45" cy="15" r="3" fill="#4299E1"/>
+  <!-- Letter m -->
+  <path d="M60 45 L60 25 Q60 20 65 20 L70 20 Q75 20 75 25 L75 45" stroke="#4299E1" stroke-width="4" stroke-linecap="round"/>
+  <path d="M75 45 L75 25 Q75 20 80 20 L85 20 Q90 20 90 25 L90 45" stroke="#4299E1" stroke-width="4" stroke-linecap="round"/>
+  <!-- Letter m -->
+  <path d="M100 45 L100 25 Q100 20 105 20 L110 20 Q115 20 115 25 L115 45" stroke="#4299E1" stroke-width="4" stroke-linecap="round"/>
+  <path d="M115 45 L115 25 Q115 20 120 20 L125 20 Q130 20 130 25 L130 45" stroke="#4299E1" stroke-width="4" stroke-linecap="round"/>
+  <!-- Letter i -->
+  <path d="M145 25 L145 45" stroke="#4299E1" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="145" cy="15" r="3" fill="#4299E1"/>
+  <!-- Robot icon -->
+  <rect x="160" y="15" width="25" height="30" rx="5" stroke="#4299E1" stroke-width="4" fill="none"/>
+  <circle cx="168" cy="25" r="2" fill="#4299E1"/>
+  <circle cx="177" cy="25" r="2" fill="#4299E1"/>
+  <path d="M165 35 L180 35" stroke="#4299E1" stroke-width="2" stroke-linecap="round"/>
+</svg> 
