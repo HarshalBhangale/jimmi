@@ -64,10 +64,10 @@ const Navbar = () => {
               to="/auth/login"
               variant="outline"
               color="yellow.400"
+              bg="yellow.900"
               borderColor="yellow.400"
-              bg={scrolled ? "yellow.50" : "transparent"}
               _hover={{
-                bg: scrolled ? "yellow.100" : "yellow.900"
+                bg: scrolled ? "yellow.900" : "purple.400"
               }}
             >
               Login
