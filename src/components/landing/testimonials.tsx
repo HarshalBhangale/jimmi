@@ -6,7 +6,6 @@ import {
   SimpleGrid,
   Text,
   HStack,
-  Flex,
   Icon,
   Avatar,
   useColorModeValue,
@@ -114,7 +113,6 @@ interface TestimonialCardProps {
 }
 
 const TestimonialCard = ({ quote, name, location, avatarColor, rating }: TestimonialCardProps) => {
-  const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue(`${avatarColor}.400`, `${avatarColor}.500`);
   const avatarBg = useColorModeValue(`${avatarColor}.500`, `${avatarColor}.400`);
   const quoteBg = useColorModeValue(`${avatarColor}.50`, `${avatarColor}.900`);

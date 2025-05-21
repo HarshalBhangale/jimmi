@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Box,
   Container,
@@ -7,7 +6,6 @@ import {
   SimpleGrid,
   Text,
   HStack,
-  Flex,
   Icon,
   Avatar,
   useColorModeValue,

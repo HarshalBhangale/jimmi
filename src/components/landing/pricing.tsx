@@ -27,7 +27,7 @@ import {
   ListItem,
   ListIcon,
 } from '@chakra-ui/react';
-import { FiArrowRight, FiShield, FiDollarSign, FiCreditCard, FiCheck, FiStar } from 'react-icons/fi';
+import { FiArrowRight, FiShield, FiDollarSign, FiCheck, FiStar } from 'react-icons/fi';
 
 const Pricing: React.FC = () => {
   const [agreements, setAgreements] = useState<number>(2);
@@ -48,7 +48,6 @@ const Pricing: React.FC = () => {
   );
   const statBg = useColorModeValue('blue.50', 'blue.900');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const highlightColor = useColorModeValue('purple.500', 'purple.300');
   const cardBg = useColorModeValue('white', 'gray.800');
   
   return (
