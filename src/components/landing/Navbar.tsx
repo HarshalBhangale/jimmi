@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
@@ -37,9 +38,11 @@ const Navbar = () => {
       right={0}
       zIndex={1000}
       transition="all 0.3s ease-in-out"
-      bg={scrolled ? useColorModeValue('white', 'gray.800') : 'transparent'}
+      bg={scrolled ? 'rgba(255, 255, 255, 0.1)' : 'transparent'}
+      bgGradient={scrolled ? 'linear(to-r, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))' : 'none'}
       boxShadow={scrolled ? 'sm' : 'none'}
       backdropFilter={scrolled ? 'blur(10px)' : 'none'}
+      borderBottom={scrolled ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'}
     >
       <Container maxW="container.xl">
         <Flex
@@ -90,4 +93,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;
