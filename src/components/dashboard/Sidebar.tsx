@@ -38,14 +38,12 @@ interface SidebarProps {
 const SidebarItem = ({ icon, children, to, activeColor, onClose, badge }: SidebarItemProps) => {
   const location = useLocation();
   const isActive = to === '/dashboard' 
-    ? location.pathname === '/dashboard'  // Exact match for dashboard
-    : location.pathname === to || location.pathname.startsWith(to + '/');  // Normal behavior for other routes
+    ? location.pathname === '/dashboard'
+    : location.pathname === to || location.pathname.startsWith(to + '/');
   const defaultActiveColor = useColorModeValue('blue.500', 'blue.300');
   const color = activeColor || defaultActiveColor;
   const bgColor = useColorModeValue('white', 'gray.800');
   const hoverBg = useColorModeValue('gray.100', 'gray.700');
-
-  
 
   return (
     <NavLink 
@@ -72,7 +70,7 @@ const SidebarItem = ({ icon, children, to, activeColor, onClose, badge }: Sideba
         boxShadow={isActive ? 'sm' : 'none'}
         borderLeft={isActive ? `4px solid ${color}` : 'none'}
         pl={isActive ? 3 : 4}
-      >
+        >
         <Icon
           mr={4}
           fontSize="20px"
@@ -102,55 +100,85 @@ const Sidebar = ({ onClose }: SidebarProps) => {
   const user = useAtomValue(userAtom);
 
   return (
-    <Box
+    <Flex
+      direction="column"
       w="full"
       h="full"
       bg={bgColor}
-      pt={6}
       borderRight="1px"
       borderColor={borderColor}
-      overflowY="auto"
     >
-      {/* User Profile */}
-      <VStack spacing={3} align="center" mb={6}>
-        <Avatar size="lg" name={user?.firstName} src="https://bit.ly/dan-abramov" />
-        <Text fontWeight="medium">{user?.firstName}</Text>
-      </VStack>
+      {/* Main Content */}
+      <Box flex="1" overflowY="auto" pt={6}>
+        {/* User Profile */}
+        <VStack spacing={3} align="center" mb={6}>
+          <Avatar
+            size="lg"
+            name={user?.firstName + ' ' + user?.lastName}
+            background="blue.500"
+            color="white"
+          />
+          <Text fontWeight="medium">{user?.firstName + ' ' + user?.lastName}</Text>
+        </VStack>
 
-      <Divider mb={6} borderColor={borderColor} />
+        <Divider mb={6} borderColor={borderColor} />
 
-      {/* Navigation Links */}
-      <VStack spacing={1} align="stretch" px={3} mb={6}>
-        <SidebarItem icon={FiHome} to="/dashboard" onClose={onClose}>
-          Dashboard
-        </SidebarItem>
-        
-        <SidebarItem icon={FiMail} to="/dashboard/mailbox" onClose={onClose}>
-          Jimmi Mailbox
-        </SidebarItem>
+        {/* Navigation Links */}
+        <VStack spacing={1} align="stretch" px={3} mb={6} >
+          <SidebarItem icon={FiHome} to="/dashboard" onClose={onClose}>
+            Dashboard
+          </SidebarItem>
+          
+          <SidebarItem icon={FiMail} to="/dashboard/mailbox" onClose={onClose}>
+            Jimmi Mailbox
+          </SidebarItem>
 
-        <SidebarItem icon={FiUser} to="/dashboard/profile" onClose={onClose}>
-          My Profile
-        </SidebarItem>
-        
-        {/* <SidebarItem icon={FiCreditCard} to="/dashboard/payments" onClose={onClose}>
-          Payments
-        </SidebarItem> */}
+          <SidebarItem icon={FiUser} to="/dashboard/profile" onClose={onClose}>
+            My Profile
+          </SidebarItem>
 
-        <SidebarItem icon={FiHelpCircle} to="/dashboard/help" onClose={onClose}>
-          Help Center
-        </SidebarItem>
-      </VStack>
+          <SidebarItem icon={FiHelpCircle} to="/dashboard/help" onClose={onClose}>
+            Help Center
+          </SidebarItem>
+        </VStack>
+      </Box>
 
-      <Divider my={6} borderColor={borderColor} />
+      {/* Bottom Section */}
+      <Box 
+        borderTop="1px" 
+        borderColor={borderColor}
+        p={4}
+        bg={useColorModeValue('white.50', 'gray.800')}
+      >
+        {/* Support Box */}
+        <Box 
+          mb={4} 
+          p={4} 
+          borderRadius="md" 
+          bg={useColorModeValue('blue.50', 'blue.900')}
+        >
+          <HStack spacing={3} mb={2}>
+            <Icon as={FiAlertCircle} color="blue.500" boxSize={5} />
+            <Text fontWeight="medium" fontSize="sm">Need Help?</Text>
+          </HStack>
+          <Text fontSize="xs" mb={3}>
+            Our support team is available 24/7 to assist you.
+          </Text>
+          <Button size="sm" colorScheme="blue" width="full">
+            Contact Support
+          </Button>
+        </Box>
 
-      {/* Logout */}
-      <Box px={6} mb={6}>
+        {/* Logout Button */}
         <Button
           leftIcon={<FiLogOut />}
-          variant="outline"
+          variant="ghost"
           w="full"
           justifyContent="flex-start"
+          colorScheme="red"
+          border="1px"
+          borderColor="black.500"
+          borderRadius="md"
           onClick={() => {
             if (onClose) onClose();
             // Implement logout functionality
@@ -159,27 +187,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
           Logout
         </Button>
       </Box>
-      
-      {/* Support Box */}
-      <Box 
-        mx={4} 
-        mb={6} 
-        p={4} 
-        borderRadius="md" 
-        bg={useColorModeValue('blue.50', 'blue.900')}
-      >
-        <HStack spacing={3} mb={2}>
-          <Icon as={FiAlertCircle} color="blue.500" boxSize={5} />
-          <Text fontWeight="medium" fontSize="sm">Need Help?</Text>
-        </HStack>
-        <Text fontSize="xs" mb={3}>
-          Our support team is available 24/7 to assist you.
-        </Text>
-        <Button size="sm" colorScheme="blue" width="full">
-          Contact Support
-        </Button>
-      </Box>
-    </Box>
+    </Flex>
   );
 };
 

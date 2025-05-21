@@ -24,6 +24,18 @@ import {
   Container,
   Divider,
   useDisclosure,
+  Step,
+  StepDescription,
+  StepIcon,
+  StepIndicator,
+  StepNumber,
+  StepSeparator,
+  StepStatus,
+  StepTitle,
+  Stepper,
+  useSteps,
+  Progress,
+  Center,
 } from '@chakra-ui/react';
 import {
   FiPlus,
@@ -33,6 +45,7 @@ import {
   FiFileText,
   FiDollarSign,
   FiMail,
+  FiCheck,
 } from 'react-icons/fi';
 import AddLenderModal from '../components/modals/AddLenderModal';
 import AddAgreementModal from '../components/modals/AddAgreementModal';
@@ -86,123 +99,6 @@ interface DashboardLender {
   potentialRefund: number;
   agreements: DashboardAgreement[];
 }
-
-// Timeline step component
-const TimelineStep = ({
-  number,
-  active,
-  text,
-  description
-}: {
-  number: number,
-  active: boolean,
-  text: string,
-  description?: string
-}) => {
-  // Colors for active steps - adjusted to match the design
-  const activeColors = {
-    1: { bg: 'green.100', text: 'green.700', border: 'green.500', 
-         activeBg: active ? 'green.100' : 'gray.100', activeText: active ? 'green.700' : 'gray.400' },
-    2: { bg: 'yellow.100', text: 'yellow.700', border: 'yellow.500', 
-         activeBg: active ? 'yellow.100' : 'gray.100', activeText: active ? 'yellow.700' : 'gray.400' },
-    3: { bg: 'blue.100', text: 'blue.700', border: 'blue.500', 
-         activeBg: active ? 'blue.100' : 'gray.100', activeText: active ? 'blue.700' : 'gray.400' },
-    4: { bg: 'purple.100', text: 'purple.700', border: 'purple.500', 
-         activeBg: active ? 'purple.100' : 'gray.100', activeText: active ? 'purple.700' : 'gray.400' },
-  };
-  
-  const colors = activeColors[number as keyof typeof activeColors];
-
-  return (
-    <Flex direction="column" align="center" flex={1} position="relative" zIndex={1}>
-      <Flex
-        w="60px"
-        h="60px"
-        borderRadius="full"
-        bg={colors.activeBg}
-        color={colors.activeText}
-        justify="center"
-        align="center"
-        fontWeight="bold"
-        fontSize="xl"
-        mb={3}
-        border="2px solid"
-        borderColor={active ? colors.border : 'gray.200'}
-        boxShadow={active ? "0 2px 4px rgba(0,0,0,0.05)" : "none"}
-        position="relative"
-        transition="all 0.3s ease"
-      >
-        {number}
-      </Flex>
-      <Text 
-        fontSize="sm" 
-        textAlign="center" 
-        color={active ? colors.activeText : 'gray.500'} 
-        fontWeight="semibold"
-        mb={description ? 1 : 0}
-      >
-        {text}
-      </Text>
-      {description && (
-        <Text fontSize="xs" textAlign="center" color="gray.500" maxW="150px">
-          {description}
-        </Text>
-      )}
-    </Flex>
-  );
-};
-
-// Timeline component with connecting line styling
-const Timeline = ({ 
-  steps,
-  activeStep
-}: { 
-  steps: {number: number, text: string, description?: string}[],
-  activeStep: number
-}) => {
-  // Color for active line
-  const activeLineColor = useColorModeValue('blue.400', 'blue.500');
-  
-  return (
-    <Flex position="relative" w="100%" py={6} px={4}>
-      {/* Horizontal line that connects all steps */}
-      <Box 
-        position="absolute" 
-        height="2px" 
-        bg="gray.200" 
-        top="36px" 
-        left="40px" 
-        right="40px" 
-        zIndex={0} 
-      />
-      
-      {/* Active portion of the line */}
-      <Box 
-        position="absolute"
-        height="2px"
-        bg={activeLineColor}
-        top="36px"
-        left="40px"
-        width={`calc(${(Math.max(1, Math.min(activeStep, steps.length)) - 1) / (steps.length - 1)} * (100% - 80px))`}
-        zIndex={0}
-        transition="width 0.5s ease-in-out"
-      />
-      
-      {/* Steps */}
-      <Flex justify="space-between" w="100%" position="relative">
-        {steps.map((step) => (
-          <TimelineStep 
-            key={step.number}
-            number={step.number} 
-            active={step.number <= activeStep} 
-            text={step.text}
-            description={step.description}
-          />
-        ))}
-      </Flex>
-    </Flex>
-  );
-};
 
 // Agreement card component
 const AgreementCard = ({ id = '001', status = 'Pending', carRegistration = '', createdAt = '', onClick }: { id?: string, status?: string, carRegistration?: string, createdAt?: string, onClick?: () => void }) => {
@@ -290,17 +186,20 @@ const LenderSection = ({
   const borderColor = useColorModeValue('gray.200', 'gray.600');
 
   // Determine active step based on lender status
-  let activeStep = 1; // Default to first step
-  if (lender.agreementsCount > 0) activeStep = 2;
-  if (lender.claimSubmitted) activeStep = 3;
-  if (lender.lenderResponded) activeStep = 4;
+  let activeStep = 0; // Default to first step
+  if (lender.agreementsCount > 0) activeStep = 1;
+  if (lender.claimSubmitted) activeStep = 2;
+  if (lender.lenderResponded) activeStep = 3;
+
+  // Define color schemes for different steps
+  const stepColorSchemes = ['green', 'yellow', 'blue', 'purple'];
 
   // Timeline steps configuration
-  const timelineSteps = [
-    { number: 1, text: "Document requested", description: "Documents requested from lender" },
-    { number: 2, text: "Agreement added", description: "Agreement details added" },
-    { number: 3, text: "Submit claim", description: "Claim submitted to lender" },
-    { number: 4, text: "Lender Responded", description: "Response received from lender" }
+  const steps = [
+    { title: "Document requested", description: "Documents requested from lender" },
+    { title: "Agreement added", description: "Agreement details added" },
+    { title: "Submit claim", description: "Claim submitted to lender" },
+    { title: "Lender Responded", description: "Response received from lender" }
   ];
 
   return (
@@ -358,16 +257,73 @@ const LenderSection = ({
         </Button>
       </Flex>
 
-      {/* Improved Timeline */}
-      <Box px={4} py={4} borderBottomWidth="1px" borderColor={borderColor}>
-        <Timeline steps={timelineSteps} activeStep={activeStep} />
+      {/* Improved Progress Tracker */}
+      <Box position="relative" px={{ base: 2, md: 6 }} py={{ base: 4, md: 6 }} borderBottomWidth="1px" borderColor={borderColor}>
+        {/* Desktop view - Horizontal stepper (hidden on mobile) */}
+        <Box display={{ base: 'none', md: 'block' }}>
+          <Stepper 
+            index={activeStep} 
+            colorScheme={stepColorSchemes[activeStep]} 
+            size="sm"
+          >
+            {steps.map((step, index) => (
+              <Step key={index}>
+                <StepIndicator>
+                  <StepStatus
+                    complete={<StepIcon as={FiCheck} />}
+                    incomplete={<StepNumber />}
+                    active={<StepNumber />}
+                  />
+                </StepIndicator>
+                
+                <Box flexShrink="0">
+                  <StepTitle>{step.title}</StepTitle>
+                  <StepDescription>{step.description}</StepDescription>
+                </Box>
+                
+                <StepSeparator />
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
+        
+        {/* Mobile view - Vertical stepper (hidden on desktop) */}
+        <Box display={{ base: 'block', md: 'none' }}>
+          <VStack spacing={0} align="stretch">
+            {steps.map((step, index) => (
+              <Flex key={index} mb={index < steps.length - 1 ? 3 : 0} align="center">
+                <Flex
+                  w="40px"
+                  h="40px"
+                  borderRadius="full"
+                  bg={index <= activeStep ? `${stepColorSchemes[activeStep]}.100` : 'gray.100'}
+                  color={index <= activeStep ? `${stepColorSchemes[activeStep]}.600` : 'gray.400'}
+                  justify="center"
+                  align="center"
+                  fontWeight="bold"
+                  fontSize="md"
+                  border="2px solid"
+                  borderColor={index <= activeStep ? `${stepColorSchemes[activeStep]}.500` : 'gray.200'}
+                  boxShadow={index <= activeStep ? "0 2px 4px rgba(0,0,0,0.05)" : "none"}
+                  mr={3}
+                >
+                  {index < activeStep ? <Icon as={FiCheck} /> : index + 1}
+                </Flex>
+                <Box>
+                  <Text fontWeight="medium" fontSize="sm">{step.title}</Text>
+                  <Text fontSize="xs" color="gray.500">{step.description}</Text>
+                </Box>
+              </Flex>
+            ))}
+          </VStack>
+        </Box>
       </Box>
 
       {/* Agreement cards */}
       <Box p={6}>
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-          {lender.agreementsCount > 0 ? (
-            lender.agreements.map((agreement) => (
+        {lender.agreementsCount > 0 ? (
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+            {lender.agreements.map((agreement) => (
               <AgreementCard
                 key={agreement.id}
                 id={agreement.id}
@@ -375,11 +331,13 @@ const LenderSection = ({
                 carRegistration={agreement.carRegistration}
                 createdAt={agreement.startDate}
               />
-            ))
-          ) : (
+            ))}
+          </SimpleGrid>
+        ) : (
+          <Center w="100%" p={4}>
             <Text color="gray.500">No agreements added yet.</Text>
-          )}
-        </SimpleGrid>
+          </Center>
+        )}
 
         {/* Add Agreement button */}
         <Flex justify="center" mt={6}>
@@ -658,122 +616,12 @@ const Dashboard = () => {
           </HStack>
         </Flex>
 
-        {/* Stats Overview */}
-        {/* <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={10}>
-          <Stat
-            p={6}
-            boxShadow="md"
-            border="1px"
-            borderColor={borderColor}
-            borderRadius="xl"
-            bg={cardBg}
-          >
-            <Flex mb={2}>
-              <Box p={2} bg="blue.50" borderRadius="md" color="blue.500" mr={2}>
-                <Icon as={FiUsers} boxSize={5} />
-              </Box>
-              <Text fontSize="sm" fontWeight="medium" color="gray.500">
-                Total Lenders
-              </Text>
-            </Flex>
-            <StatNumber fontSize="3xl" fontWeight="bold">{statistics.totalLenders}</StatNumber>
-            <StatHelpText mt={2} mb={0}>
-              <StatArrow type="increase" />
-              <Text as="span" fontWeight="medium" color="green.500">
-                {statistics.percentIncrease}% from last month
-              </Text>
-            </StatHelpText>
-          </Stat>
-
-          <Stat
-            p={6}
-            boxShadow="md"
-            border="1px"
-            borderColor={borderColor}
-            borderRadius="xl"
-            bg={cardBg}
-          >
-            <Flex mb={2}>
-              <Box p={2} bg="orange.50" borderRadius="md" color="orange.500" mr={2}>
-                <Icon as={FiUsers} boxSize={5} />
-              </Box>
-              <Text fontSize="sm" fontWeight="medium" color="gray.500">
-                Active Lenders
-              </Text>
-            </Flex>
-            <StatNumber fontSize="3xl" fontWeight="bold">{statistics.activeLenders}</StatNumber>
-            <StatHelpText mt={2} mb={0}>
-              <Flex align="center">
-                <Box w="2" h="2" borderRadius="full" bg="orange.400" mr={2}></Box>
-                <Text fontSize="xs" color="gray.500" fontWeight="medium">
-                  Awaiting action
-                </Text>
-              </Flex>
-            </StatHelpText>
-          </Stat>
-
-          <Stat
-            p={6}
-            boxShadow="md"
-            border="1px"
-            borderColor={borderColor}
-            borderRadius="xl"
-            bg={cardBg}
-          >
-            <Flex mb={2}>
-              <Box p={2} bg="green.50" borderRadius="md" color="green.500" mr={2}>
-                <Icon as={FiDollarSign} boxSize={5} />
-              </Box>
-              <Text fontSize="sm" fontWeight="medium" color="gray.500">
-                Potential Refund
-              </Text>
-            </Flex>
-            <StatNumber fontSize="3xl" fontWeight="bold">£{statistics.potentialRefund.toLocaleString()}</StatNumber>
-            <StatHelpText mt={2} mb={0}>
-              <Flex align="center">
-                <Box w="2" h="2" borderRadius="full" bg="blue.400" mr={2}></Box>
-                <Text fontSize="xs" color="gray.500" fontWeight="medium">
-                  Estimated total
-                </Text>
-              </Flex>
-            </StatHelpText>
-          </Stat>
-
-          <Stat
-            p={6}
-            boxShadow="md"
-            border="1px"
-            borderColor={borderColor}
-            borderRadius="xl"
-            bg={cardBg}
-          >
-            <Flex mb={2}>
-              <Box p={2} bg="purple.50" borderRadius="md" color="purple.500" mr={2}>
-                <Icon as={FiFileText} boxSize={5} />
-              </Box>
-              <Text fontSize="sm" fontWeight="medium" color="gray.500">
-                Total Agreements
-              </Text>
-            </Flex>
-            <StatNumber fontSize="3xl" fontWeight="bold">{statistics.totalAgreements}</StatNumber>
-            <StatHelpText mt={2} mb={0}>
-              <Flex align="center">
-                <Box w="2" h="2" borderRadius="full" bg="green.400" mr={2}></Box>
-                <Text fontSize="xs" color="gray.500" fontWeight="medium">
-                  Across all lenders
-                </Text>
-              </Flex>
-            </StatHelpText>
-          </Stat>
-        </SimpleGrid> */}
-
         {/* My Lenders section */}
         <Box mb={10}>
           <Flex
             justify="space-between"
             align="center"
             mb={6}
-            bg={cardBg}
             p={5}
           >
             <Heading as="h2" size="lg" fontWeight="bold" >

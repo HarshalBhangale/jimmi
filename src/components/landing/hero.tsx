@@ -31,7 +31,7 @@ const Hero: React.FC = () => {
         left={0}
         right={0}
         bottom={0}
-        bgImage="url('/bg1.jpg')"
+        bgImage="url('/bg3.jpg')"
         bgSize="cover"
         bgPosition="center"
         bgRepeat="no-repeat"

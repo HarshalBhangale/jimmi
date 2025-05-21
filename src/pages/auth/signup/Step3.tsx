@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -23,8 +24,9 @@ import {
   IconButton,
   Spinner,
   Center,
+  Collapse,
 } from '@chakra-ui/react';
-import { FiArrowRight, FiX } from 'react-icons/fi';
+import { FiArrowRight, FiX, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import {getLenders, addLenders} from '@api/services/lender';
 import { userAtom } from '@/jotai/atoms';
 import { useAtomValue } from 'jotai';
@@ -32,6 +34,8 @@ import { useAtomValue } from 'jotai';
 interface Lender {
   _id: string;
   name: string;
+  subLenders?: string[];
+  major?: boolean;
 }
 
 const Step3 = () => {
@@ -41,22 +45,24 @@ const Step3 = () => {
   const [error, setError] = useState('');
   const [lenders, setLenders] = useState<Lender[]>([]);
   const [isLoadingLenders, setIsLoadingLenders] = useState(true);
+  const [displayCount, setDisplayCount] = useState(6);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expandedLenders, setExpandedLenders] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const toast = useToast();
   const user = useAtomValue(userAtom);
+
   // Fetch lenders from API
   useEffect(() => {
-    
     const fetchLenders = async () => {
       try {
         setIsLoadingLenders(true);
         const response = await getLenders();
         if (response?.success && Array.isArray(response.data)) {
           setLenders(response.data);
-          console.log(user, "user11");
           const userLenders = user.lenders.map((lender:any)=>{
             return response.data.find((lender1:any)=> lender1._id === lender.id);
-          })
+          }).filter(Boolean);
           setSelectedLenders(userLenders);
         } else {
           setError('Failed to load lenders');
@@ -83,25 +89,61 @@ const Step3 = () => {
       }
     };
     fetchLenders();
-
   }, [toast, user]);
 
-  // Filter lenders based on search query
-  const filteredLenders = searchQuery
-    ? lenders.filter((lender) => 
-        lender.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : lenders;
+  const toggleLenderExpand = (lenderId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the parent click event
+    setExpandedLenders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(lenderId)) {
+        newSet.delete(lenderId);
+      } else {
+        newSet.add(lenderId);
+      }
+      return newSet;
+    });
+  };
 
-  const handleToggleLender = (lender: Lender) => {
+  const handleToggleLender = (lender: Lender, isSubLender: boolean = false) => {
     if (selectedLenders.some(l => l._id === lender._id)) {
       setSelectedLenders(selectedLenders.filter((l) => l._id !== lender._id));
     } else {
       setSelectedLenders([...selectedLenders, lender]);
     }
     
-    // Clear any error when user selects a lender
     if (error) setError('');
+  };
+
+  const handleToggleSubLender = (parentLender: Lender, subLenderName: string) => {
+    const subLender: Lender = {
+      _id: `${parentLender._id}-${subLenderName}`,
+      name: subLenderName,
+    };
+
+    handleToggleLender(subLender, true);
+  };
+
+  const isLenderExpanded = (lenderId: string) => expandedLenders.has(lenderId);
+
+  // Filter lenders based on search query and pagination
+  const filteredLenders = searchQuery
+    ? lenders.filter((lender) => 
+        lender.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        lender.subLenders?.some(sub => 
+          sub.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      )
+    : lenders;
+
+  const paginatedLenders = filteredLenders.slice(0, displayCount);
+  const hasMoreLenders = filteredLenders.length > displayCount;
+
+  const handleShowMore = () => {
+    if (displayCount === 6) {
+      setDisplayCount(15);
+    } else {
+      setDisplayCount(displayCount + 15);
+    }
   };
 
   const handleSubmit = async () => {
@@ -133,6 +175,79 @@ const Step3 = () => {
   const labelColor = useColorModeValue('gray.600', 'gray.400');
   const selectedBg = useColorModeValue('blue.50', 'blue.900');
   const selectedBorder = useColorModeValue('blue.500', 'blue.300');
+
+  const LenderCard = ({ lender }: { lender: Lender }) => {
+    const hasSubLenders = lender.subLenders && lender.subLenders.length > 0;
+    const isExpanded = isLenderExpanded(lender._id);
+    const isSelected = selectedLenders.some(l => l._id === lender._id);
+
+    return (
+      <Box>
+        <Flex
+          p={3}
+          borderWidth="1px"
+          borderRadius="md"
+          alignItems="center"
+          borderColor={isSelected ? selectedBorder : borderColor}
+          bg={isSelected ? selectedBg : 'transparent'}
+          cursor="pointer"
+          onClick={() => handleToggleLender(lender)}
+          transition="all 0.2s"
+          _hover={{
+            borderColor: selectedBorder,
+            shadow: "sm"
+          }}
+        >
+          <Checkbox
+            isChecked={isSelected}
+            onChange={() => handleToggleLender(lender)}
+            colorScheme="blue"
+            mr={3}
+          />
+          <Text flex="1">{lender.name}</Text>
+          {hasSubLenders && (
+            <IconButton
+              aria-label={isExpanded ? "Collapse sublenders" : "Expand sublenders"}
+              icon={isExpanded ? <FiChevronDown /> : <FiChevronRight />}
+              size="sm"
+              variant="ghost"
+              onClick={(e) => toggleLenderExpand(lender._id, e)}
+            />
+          )}
+        </Flex>
+        
+        {hasSubLenders && (
+          <Collapse in={isExpanded}>
+            <Box pl={8} mt={2}>
+              {lender.subLenders?.map((subLender) => (
+                <Flex
+                  key={`${lender._id}-${subLender}`}
+                  p={2}
+                  alignItems="center"
+                  borderLeftWidth="1px"
+                  borderLeftColor={borderColor}
+                  _hover={{
+                    bg: selectedBg,
+                  }}
+                >
+                  <Checkbox
+                    isChecked={selectedLenders.some(l => 
+                      l._id === `${lender._id}-${subLender}`
+                    )}
+                    onChange={() => handleToggleSubLender(lender, subLender)}
+                    colorScheme="blue"
+                    mr={3}
+                  />
+                  <Text fontSize="sm">{subLender}</Text>
+                </Flex>
+              ))}
+            </Box>
+          </Collapse>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Container maxW="container.md" py={8}>
       <Stack spacing={8}>
@@ -201,34 +316,26 @@ const Step3 = () => {
                   <Spinner size="xl" color="blue.500" />
                 </Center>
               ) : (
+                <>
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
-                  {filteredLenders.map((lender) => (
-                    <Flex
-                      key={lender._id}
-                      p={3}
-                      borderWidth="1px"
-                      borderRadius="md"
-                      alignItems="center"
-                      borderColor={selectedLenders.some(l => l._id === lender._id) ? selectedBorder : borderColor}
-                      bg={selectedLenders.some(l => l._id === lender._id) ? selectedBg : 'transparent'}
-                      cursor="pointer"
-                      onClick={() => handleToggleLender(lender)}
-                      transition="all 0.2s"
-                      _hover={{
-                        borderColor: selectedBorder,
-                        shadow: "sm"
-                      }}
-                    >
-                      <Checkbox
-                        isChecked={selectedLenders.some(l => l._id === lender._id)}
-                        onChange={() => handleToggleLender(lender)}
+                    {paginatedLenders.map((lender) => (
+                      <LenderCard key={lender._id} lender={lender} />
+                    ))}
+                  </SimpleGrid>
+                  
+                  {hasMoreLenders && (
+                    <Center mt={4}>
+                      <Button
+                        variant="ghost"
+                        rightIcon={<FiChevronDown />}
+                        onClick={handleShowMore}
                         colorScheme="blue"
-                        mr={3}
-                      />
-                      <Text>{lender.name}</Text>
-                    </Flex>
-                  ))}
-                </SimpleGrid>
+                      >
+                        Show More Lenders
+                      </Button>
+                    </Center>
+                  )}
+                </>
               )}
             </Box>
             

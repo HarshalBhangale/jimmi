@@ -29,7 +29,7 @@ import {
   useOutsideClick,
   Spinner,
 } from '@chakra-ui/react';
-import { FiArrowRight, FiCalendar, FiPlus, FiTrash2, FiSearch } from 'react-icons/fi';
+import { FiArrowRight, FiPlus, FiTrash2, FiSearch } from 'react-icons/fi';
 import type { IAddress, IPreviousName, IUser } from '@/api/services/profile';
 import { updateProfile, getAddressSuggestions, getAddressDetails } from '@/api/services/profile';
 import { userAtom } from '@/jotai/atoms';
@@ -415,9 +415,6 @@ const Step4 = () => {
                   }}
                   max={formatDate(new Date().toISOString())}
                 />
-                <InputRightElement>
-                  <FiCalendar />
-                </InputRightElement>
               </InputGroup>
               {errors.dob && (
                 <FormErrorMessage>{errors.dob}</FormErrorMessage>

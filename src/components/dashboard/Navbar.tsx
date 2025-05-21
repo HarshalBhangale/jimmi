@@ -14,7 +14,6 @@ import {
   MenuItem,
   MenuDivider,
   useColorModeValue,
-  useColorMode,
   HStack,
   Tooltip,
   Image,
@@ -25,8 +24,6 @@ import {
   useBreakpointValue,
 } from '@chakra-ui/react';
 import { 
-  FiMoon, 
-  FiSun, 
   FiBell, 
   FiChevronDown, 
   FiSearch, 
@@ -44,8 +41,6 @@ interface NavbarProps {
 }
 
 const Navbar = ({ children }: NavbarProps) => {
-  const { colorMode, toggleColorMode } = useColorMode();
-  const isLight = colorMode === 'light';
   const user = useAtomValue(userAtom);
   
   const bgColor = useColorModeValue('white', 'gray.800');
@@ -100,16 +95,7 @@ const Navbar = ({ children }: NavbarProps) => {
         )}
 
         <HStack spacing={{ base: 2, md: 4 }}>
-          <Tooltip label={`Switch to ${isLight ? 'dark' : 'light'} mode`}>
-            <IconButton
-              aria-label="Toggle color mode"
-              icon={isLight ? <FiMoon /> : <FiSun />}
-              onClick={toggleColorMode}
-              variant="ghost"
-              color={useColorModeValue('gray.600', 'gray.300')}
-              size={{ base: "sm", md: "md" }}
-            />
-          </Tooltip>
+          
 
           <Tooltip label="Notifications">
             <IconButton

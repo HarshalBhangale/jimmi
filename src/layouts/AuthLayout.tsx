@@ -48,16 +48,23 @@ const AuthLayout = () => {
   }, [searchParams]);
   return (
     <Flex minH="100vh" overflow="hidden">
-      {/* Left side - Brand */}
+      {/* Left side - Brand (Fixed) */}
       <Box
         display={{ base: 'none', md: 'flex' }}
         flexDir="column"
         justifyContent="center"
         alignItems="center"
-        w="40%"
+        w="40vw"
+        minW="350px"
+        maxW="500px"
         bg={useColorModeValue('blue.500', 'blue.600')}
         color="white"
         p={8}
+        position="fixed"
+        left={0}
+        top={0}
+        h="100vh"
+        zIndex={10}
       >
         <Box textAlign="center" maxW="400px">
           <Image
@@ -78,9 +85,11 @@ const AuthLayout = () => {
 
       {/* Right side - Auth Forms */}
       <Box
-        w={{ base: '100%', md: '60%' }}
+        w={{ base: '100%', md: '60vw' }}
+        ml={{ base: 0, md: '40vw' }}
         p={{ base: 4, md: 12 }}
         position="relative"
+        minH="100vh"
       >
         <Link to="/">
           <Flex

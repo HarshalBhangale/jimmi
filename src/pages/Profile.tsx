@@ -11,14 +11,13 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Avatar,
   VStack,
   HStack,
   Divider,
   FormErrorMessage,
   useToast,
 } from '@chakra-ui/react';
-import { FiEdit2, FiUpload } from 'react-icons/fi';
+import { FiEdit2} from 'react-icons/fi';
 import { userAtom } from '@/jotai/atoms';     
 import { useAtomValue } from 'jotai';
 import { updateProfile, type IUser } from '@/api/services/profile';
@@ -180,15 +179,6 @@ const Profile = () => {
     setIsEditing(false);
   };
 
-  const handleProfileImageUpload = () => {
-    toast({
-      title: 'Feature not available',
-      description: 'Profile image upload functionality is not available in this demo.',
-      status: 'info',
-      duration: 3000,
-      isClosable: true,
-    });
-  };
 
   if (isLoading) {
     return (
@@ -219,51 +209,6 @@ const Profile = () => {
       </Flex>
 
       {/* Main content */}
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-        {/* Profile Image Section */}
-        <Box
-          bg={cardBg}
-          p={6}
-          borderRadius="lg"
-          boxShadow="sm"
-          border="1px"
-          borderColor={borderColor}
-          height="fit-content"
-        >
-          <VStack spacing={4} align="center">
-            <Avatar
-              size="2xl"
-              name={`${userData?.firstName} ${userData?.lastName}`}
-              src={userData?.profileImage}
-              bg="blue.500"
-            />
-            <Text fontWeight="medium">
-              {userData?.firstName} {userData?.lastName}
-            </Text>
-            <Button
-              leftIcon={<FiUpload />}
-              variant="outline"
-              size="sm"
-              onClick={handleProfileImageUpload}
-            >
-              Change Photo
-            </Button>
-            <Divider />
-            <Box w="full">
-              <Text fontSize="sm" color={textColor} mb={1}>
-                Member Since
-              </Text>
-              <Text fontWeight="medium">
-                {new Date(userData?.createdAt || '').toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </Text>
-            </Box>
-          </VStack>
-        </Box>
-
         {/* Profile Details Section */}
         <Box
           bg={cardBg}
@@ -465,7 +410,7 @@ const Profile = () => {
             </SimpleGrid>
           )}
         </Box>
-      </SimpleGrid>
+
     </Box>
   );
 };

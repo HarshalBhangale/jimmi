@@ -36,6 +36,17 @@ import {
   MenuList,
   MenuOptionGroup,
   MenuItemOption,
+  Step,
+  StepDescription,
+  StepIcon,
+  StepIndicator,
+  StepNumber,
+  StepSeparator,
+  StepStatus,
+  StepTitle,
+  Stepper,
+  useSteps,
+  Progress,
 } from '@chakra-ui/react';
 import {
   FiArrowLeft,
@@ -56,6 +67,7 @@ import {
   FiAlertTriangle,
   FiFlag,
   FiFilter,
+  FiCheck,
 } from 'react-icons/fi';
 import AddAgreementModal from '../components/modals/AddAgreementModal';
 import SubmitClaimModal from '../components/modals/SubmitClaimModal';
@@ -812,6 +824,23 @@ const LenderDetails = () => {
     setStatusFilter([]);
   };
 
+  // Determine active step based on agreements and claim status
+  let activeStep = 0; // Default to first step
+  if (agreements.length > 0) activeStep = 1;
+  if (agreements.some(agreement => agreement.status === 'Submitted')) activeStep = 2;
+  if (agreements.some(agreement => ['OfferMade', 'Rejected', 'ClaimAlreadySubmitted', 'FOSEscalation', 'Completed'].includes(agreement.status))) activeStep = 3;
+
+  // Define color schemes for different steps
+  const stepColorSchemes = ['green', 'yellow', 'blue', 'purple'];
+  
+  // Define steps for the stepper
+  const steps = [
+    { title: "Document requested", description: "Documents requested from lender" },
+    { title: "Agreement added", description: "Agreement details added" },
+    { title: "Submit claim", description: "Claim submitted to lender" },
+    { title: "Lender Responded", description: "Response received from lender" }
+  ];
+
   if (isLoading) {
     return (
       <Center h="100vh">
@@ -833,83 +862,88 @@ const LenderDetails = () => {
     );
   }
 
-  // Add this inside the component:
-  const timelineSteps = [
-    { number: 1, text: "Document requested", description: "Documents requested from lender" },
-    { number: 2, text: "Agreement added", description: "Agreement details added" },
-    { number: 3, text: "Submit claim", description: "Claim submitted to lender" },
-    { number: 4, text: "Lender Responded", description: "Response received from lender" }
-  ];
-  
-  // Determine active step based on agreements and claim status
-  let activeStep = 1; // Default to first step
-  if (agreements.length > 0) activeStep = 2;
-  if (agreements.some(agreement => agreement.status === 'Submitted')) activeStep = 3;
-  if (agreements.some(agreement => ['OfferMade', 'Rejected', 'ClaimAlreadySubmitted', 'FOSEscalation', 'Completed'].includes(agreement.status))) activeStep = 4;
-  
   return (
     <Box bg={bgColor} minH="100vh" py={8}>
       <Container maxW="container.xl">
         {/* Header with back button */}
-        <Flex mb={6}>
+        <VStack 
+          mb={6} 
+          spacing={3}
+          align="flex-start"
+          width="100%"
+        >
           <Button
             leftIcon={<FiArrowLeft />}
             variant="ghost"
             onClick={() => navigate('/dashboard')}
-            mr={4}
+            size={{ base: 'sm', md: 'md' }}
           >
             Back to Dashboard
           </Button>
-          <Heading size="lg">Lender Details</Heading>
-        </Flex>
+          <Heading 
+            size={{ base: "lg", md: "xl" }}
+            fontWeight="bold"
+            borderBottomWidth="1px"
+            borderColor={borderColor}
+            pb={2}
+            width="100%"
+          >
+            Lender Details
+          </Heading>
+        </VStack>
 
         {/* Lender info card */}
         <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="sm">
           <CardBody>
-            <Flex justify="space-between" align="center" wrap={{ base: 'wrap', md: 'nowrap' }}>
+            <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }} gap={4}>
               <Box>
                 <Heading size="lg">{lender.name}</Heading>
                 <Text color="gray.500">Last updated: {lender.lastUpdated}</Text>
               </Box>
-              <HStack>
+              <VStack align="stretch" spacing={3} width={{ base: "100%", md: "auto" }}>
                 <StatusBadge status={lender.status} />
-                <Button
-                  colorScheme="blue"
-                  leftIcon={<FiPlus />}
-                  onClick={onAddAgreementOpen}
-                  size="sm"
-                  variant="outline"
-                >
-                  Add Agreement
-                </Button>
-                {agreements.some(agreement => agreement.status !== 'Submitted') && (
+                <Flex gap={2} flexWrap="wrap">
                   <Button
-                    colorScheme="green"
-                    leftIcon={<FiSend />}
-                    onClick={onSubmitClaimOpen}
+                    colorScheme="blue"
+                    leftIcon={<FiPlus />}
+                    onClick={onAddAgreementOpen}
                     size="sm"
-                    isDisabled={!agreements.some(agreement => agreement.status !== 'Submitted')}
+                    variant="outline"
+                    flexGrow={{ base: 1, sm: 0 }}
                   >
-                    Submit Claim
+                    Add Agreement
                   </Button>
-                )}
-                {agreements.some(agreement => agreement.status === 'Submitted') && (
-                  <Button
-                    colorScheme="orange"
-                    leftIcon={<FiMessageSquare />}
-                    onClick={() => {
-                      // Find the first submitted agreement to record response for
-                      const firstSubmitted = agreements.find(a => a.status === 'Submitted');
-                      if (firstSubmitted) {
-                        handleRecordResponse(firstSubmitted);
-                      }
-                    }}
-                    size="sm"
-                  >
-                    Record Lender Response
-                  </Button>
-                )}
-              </HStack>
+                  {agreements.some(agreement => agreement.status !== 'Submitted') && (
+                    <Button
+                      colorScheme="green"
+                      leftIcon={<FiSend />}
+                      onClick={onSubmitClaimOpen}
+                      size="sm"
+                      isDisabled={!agreements.some(agreement => agreement.status !== 'Submitted')}
+                      flexGrow={{ base: 1, sm: 0 }}
+                    >
+                      Submit Claim
+                    </Button>
+                  )}
+                  {agreements.some(agreement => agreement.status === 'Submitted') && (
+                    <Button
+                      colorScheme="orange"
+                      leftIcon={<FiMessageSquare />}
+                      onClick={() => {
+                        // Find the first submitted agreement to record response for
+                        const firstSubmitted = agreements.find(a => a.status === 'Submitted');
+                        if (firstSubmitted) {
+                          handleRecordResponse(firstSubmitted);
+                        }
+                      }}
+                      size="sm"
+                      flexGrow={{ base: 1, sm: 0 }}
+                    >
+                      Record Lender Response
+                    </Button>
+                  )}
+                </Flex>
+              </VStack>
             </Flex>
           </CardBody>
         </Card>
@@ -953,7 +987,7 @@ const LenderDetails = () => {
                 </Stat>
               </SimpleGrid>
 
-              {/* 2. Claim Progress Timeline section */}
+              {/* 2. Claim Progress Timeline section - UPDATED */}
               <Box
                 mb={8}
                 p={6}
@@ -964,12 +998,71 @@ const LenderDetails = () => {
               >
                 <Heading size="md" mb={6}>Claim Progress</Heading>
                 
-                <Timeline steps={timelineSteps} activeStep={activeStep} />
+                <Box position="relative" px={{ base: 2, md: 4 }}>
+                  {/* Desktop view - Horizontal stepper (hidden on mobile) */}
+                  <Box display={{ base: 'none', md: 'block' }}>
+                    <Stepper 
+                      index={activeStep} 
+                      colorScheme={stepColorSchemes[activeStep]} 
+                      size="md"
+                    >
+                      {steps.map((step, index) => (
+                        <Step key={index}>
+                          <StepIndicator>
+                            <StepStatus
+                              complete={<StepIcon as={FiCheck} />}
+                              incomplete={<StepNumber />}
+                              active={<StepNumber />}
+                            />
+                          </StepIndicator>
+                          
+                          <Box flexShrink="0">
+                            <StepTitle>{step.title}</StepTitle>
+                            <StepDescription>{step.description}</StepDescription>
+                          </Box>
+                          
+                          <StepSeparator />
+                        </Step>
+                      ))}
+                    </Stepper>
+                  </Box>
+                  
+                  {/* Mobile view - Vertical stepper (hidden on desktop) */}
+                  <Box display={{ base: 'block', md: 'none' }}>
+                    <VStack spacing={0} align="stretch">
+                      {steps.map((step, index) => (
+                        <Flex key={index} mb={index < steps.length - 1 ? 3 : 0} align="center">
+                          <Flex
+                            w="40px"
+                            h="40px"
+                            borderRadius="full"
+                            bg={index <= activeStep ? `${stepColorSchemes[activeStep]}.100` : 'gray.100'}
+                            color={index <= activeStep ? `${stepColorSchemes[activeStep]}.600` : 'gray.400'}
+                            justify="center"
+                            align="center"
+                            fontWeight="bold"
+                            fontSize="md"
+                            border="2px solid"
+                            borderColor={index <= activeStep ? `${stepColorSchemes[activeStep]}.500` : 'gray.200'}
+                            boxShadow={index <= activeStep ? "0 2px 4px rgba(0,0,0,0.05)" : "none"}
+                            mr={3}
+                          >
+                            {index < activeStep ? <Icon as={FiCheck} /> : index + 1}
+                          </Flex>
+                          <Box>
+                            <Text fontWeight="medium" fontSize="sm">{step.title}</Text>
+                            <Text fontSize="xs" color="gray.500">{step.description}</Text>
+                          </Box>
+                        </Flex>
+                      ))}
+                    </VStack>
+                  </Box>
+                </Box>
                 
                 <Text textAlign="center" color="gray.500" mt={6}>
                   {agreements.length === 0
                     ? "Add your first agreement to proceed with your claim"
-                    : agreements.some(agreement => agreement.status === 'Submitted') && hasSubmittedAgreements
+                    : agreements.some(agreement => agreement.status === 'Submitted') && agreements.some(agreement => agreement.status === 'Submitted')
                     ? "Waiting for lender response. You can record their response when received in agreements tab."
                     : agreements.some(agreement => agreement.status === 'Submitted')
                     ? "Your claim has been submitted. All lender responses have been recorded."
@@ -987,9 +1080,6 @@ const LenderDetails = () => {
                     </Button>
                   </Flex>
                 )}
-                
-                
-                
               </Box>
 
               {/* 3. Lender Information section */}

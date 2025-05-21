@@ -1,3 +1,4 @@
+//@ts-nocheck
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -66,14 +67,22 @@ Yours faithfully,
 };
 
 const Step6 = () => {
-  const [selectedLenders, setSelectedLenders] = useState<string[]>([]);
+  const user = useAtomValue(userAtom);
+  const [selectedLenders, setSelectedLenders] = useState<string[]>(
+    user.lenders ? user.lenders.map((l: any) => l.id) : []
+  );
   const [selectedOption, setSelectedOption] = useState<string>('full_dsar');
   const [customRequestText, setCustomRequestText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
   const [, refetchUser] = useAtom(refetchUserAtom);
-  const user = useAtomValue(userAtom);
+
+  useEffect(() => {
+    if (user.lenders && user.lenders.length > 0) {
+      setSelectedLenders(user.lenders.map((l: any) => l.id));
+    }
+  }, [user.lenders]);
 
   const handleToggleLender = (lenderId: string) => {
     if (selectedLenders.includes(lenderId)) {
@@ -84,10 +93,25 @@ const Step6 = () => {
   };
 
   const getPreviewText = () => {
+    // Get selected lender names
+    const selectedLenderNames = user.lenders
+      .filter((l: any) => selectedLenders.includes(l.id))
+      .map((l: any) => l.name);
+
+    // Get user's full name
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+
+    // If custom, just return as before
     if (selectedOption === 'custom') {
       return customRequestText || 'Please enter your custom request text.';
     }
-    return requestTemplates[selectedOption as keyof typeof requestTemplates];
+
+    // Replace placeholders
+    let template = requestTemplates[selectedOption as keyof typeof requestTemplates];
+    template = template.replace('[Lender]', selectedLenderNames.join(', '));
+    template = template.replace('[Full Name]', fullName);
+
+    return template;
   };
 
   const canSendRequests = selectedLenders.length > 0 && selectedOption && 
@@ -131,6 +155,10 @@ const Step6 = () => {
   useEffect(() => {
     refetchUser();
   }, []);
+
+  const selectedLenderNames = user.lenders
+    .filter((l: any) => selectedLenders.includes(l.id))
+    .map((l: any) => l.name);
 
   return (
     <Container maxW="container.md" py={8}>
