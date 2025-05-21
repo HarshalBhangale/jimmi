@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Box,
   Container,
@@ -14,8 +15,8 @@ import {
 } from '@chakra-ui/react';
 import { FiMessageSquare, FiStar } from 'react-icons/fi';
 
-// Testimonials Component
-const Testimonials = () => {
+// Modern Testimonials Component
+const ModernTestimonials = () => {
   const bgGradient = useColorModeValue(
     'linear(to-b, white, gray.50)',
     'linear(to-b, gray.800, gray.900)'
@@ -78,7 +79,8 @@ const Testimonials = () => {
         </VStack>
         
         <SimpleGrid 
-          columns={{ base: 1, md: 2 }} 
+          columns={{ base: 1, md: 2 }}
+
           spacing={{ base: 8, md: 12 }} 
           maxW="1000px" 
           mx="auto"
@@ -114,7 +116,6 @@ interface TestimonialCardProps {
 }
 
 const TestimonialCard = ({ quote, name, location, avatarColor, rating }: TestimonialCardProps) => {
-  const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue(`${avatarColor}.400`, `${avatarColor}.500`);
   const avatarBg = useColorModeValue(`${avatarColor}.500`, `${avatarColor}.400`);
   const quoteBg = useColorModeValue(`${avatarColor}.50`, `${avatarColor}.900`);
@@ -187,4 +188,4 @@ const TestimonialCard = ({ quote, name, location, avatarColor, rating }: Testimo
   );
 };
 
-export default Testimonials; 
+export default ModernTestimonials; 
