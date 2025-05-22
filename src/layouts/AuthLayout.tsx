@@ -1,4 +1,4 @@
-import { Box, Flex, Image, useColorModeValue } from '@chakra-ui/react';
+import { Box, Flex, Image, useColorModeValue, Button } from '@chakra-ui/react';
 import { Outlet } from 'react-router-dom';
 import { FaChevronLeft } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -92,17 +92,27 @@ const AuthLayout = () => {
         minH="100vh"
       >
         <Link to="/">
-          <Flex
+          <Button
             position="absolute"
             top={4}
             left={4}
-            alignItems="center"
+            leftIcon={<FaChevronLeft />}
+            variant="ghost"
             color={useColorModeValue('gray.600', 'gray.400')}
-            _hover={{ color: useColorModeValue('blue.500', 'blue.300') }}
+            fontWeight="medium"
+            size="md"
+            borderRadius="md"
+            px={4}
+            _hover={{
+              bg: useColorModeValue('blue.50', 'blue.900'),
+              color: useColorModeValue('blue.600', 'blue.300'),
+              transform: 'translateX(-2px)',
+              boxShadow: 'sm',
+            }}
+            transition="all 0.2s"
           >
-            <FaChevronLeft />
-            <Box ml={2}>Back to Home</Box>
-          </Flex>
+            Back to Home
+          </Button>
         </Link>
         <Flex
           h="100%"

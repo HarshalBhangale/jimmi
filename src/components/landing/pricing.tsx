@@ -179,7 +179,7 @@ const Pricing: React.FC = () => {
                 </Stat>
                 
                 <Stat>
-                  <StatLabel color="gray.600">Your Savings</StatLabel>
+                  <StatLabel color="gray.600">Your Savings upto</StatLabel>
                   <StatNumber 
                     fontSize="2xl" 
                     bgGradient="linear(to-r, purple.500, blue.500)" 
@@ -232,7 +232,7 @@ const Pricing: React.FC = () => {
                       £{potentialRefund.toLocaleString()}
                     </StatNumber>
                     <StatHelpText fontSize="md">
-                      That's an average of £{avgRefundPerAgreement.toLocaleString()} per agreement
+                      That's upto £{avgRefundPerAgreement.toLocaleString()} per agreement
                     </StatHelpText>
                   </Stat>
                 </VStack>
@@ -327,7 +327,7 @@ const Pricing: React.FC = () => {
                       textDecoration="line-through" 
                       color={useColorModeValue('gray.400', 'gray.500')}
                     >
-                      £49.99
+                      £69.99
                     </Text>
                     <Heading 
                       as="h4" 
@@ -336,7 +336,7 @@ const Pricing: React.FC = () => {
                       bgClip="text"
                       fontWeight="extrabold"
                     >
-                      £29.99
+                      £29.00
                     </Heading>
                   </HStack>
                   

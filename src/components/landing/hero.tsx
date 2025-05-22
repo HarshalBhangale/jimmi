@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
@@ -15,8 +15,38 @@ import {
   Badge,
   Image,
   useMediaQuery,
+  ScaleFade,
+  SlideFade,
+  VStack,
+  Tooltip,
+  useDisclosure,
+  CloseButton,
+  Slide,
 } from '@chakra-ui/react';
-import { FiArrowRight, FiBookOpen, FiCheckCircle } from 'react-icons/fi';
+import { FiArrowRight, FiBookOpen, FiCheckCircle, FiClock, FiAlertCircle, FiGift } from 'react-icons/fi';
+import { FaStar, FaBolt, FaTag, FaFire, FaStopwatch, FaRegClock } from 'react-icons/fa';
+import { keyframes } from '@emotion/react';
+// Define animations
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
+
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
+const bounce = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+`;
+
+const flash = keyframes`
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.5; }
+`;
 
 const Hero: React.FC = () => {
   const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });

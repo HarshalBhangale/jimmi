@@ -621,16 +621,22 @@ const LenderDetails = () => {
   const handleSubmitClaim = async (
     templateType: string,
     customText?: string,
-    selectedAgreements?: string[]
+    selectedAgreements?: string[],
+    mail?: {
+      subject: string,
+      body: string
+    }
   ) => {
     const actionTimestamp = new Date().toISOString();
     
     try {
+      console.log(mail, "mail");
       const response = await submitClaim({
         lenderId: lender.id,
         templateType,
         customText,
-        agreementIds: selectedAgreements || []
+        agreementIds: selectedAgreements || [],
+        mail
       });
 
       if (!response.success) {
@@ -1326,12 +1332,12 @@ const LenderDetails = () => {
         onClose={onSubmitClaimClose}
         lenderName={lender.name}
         agreements={agreements.filter(agreement => agreement.status === 'Pending')}
-        onSubmitClaim={async (templateType: string, customText?: string, selectedAgreements?: string[]) => {
-          await handleSubmitClaim(templateType, customText, selectedAgreements);
+        onSubmitClaim={async (templateType: string, customText?: string, selectedAgreements?: string[], mail?: { subject: string, body: string }) => {
+          await handleSubmitClaim(templateType, customText, selectedAgreements, mail);
         }}
       />
       
-      {/* Lender Response Modal */}
+      {/* Lender Response Modal */} 
       {selectedAgreement && (
         <LenderResponseModal
           isOpen={isLenderResponseOpen}

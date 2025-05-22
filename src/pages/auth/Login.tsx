@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
@@ -47,7 +48,7 @@ const countryCodes = [
 ];
 
 const Login = () => {
-  const [countryCode, setCountryCode] = useState('+1');
+  const [countryCode, setCountryCode] = useState('+44');
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [otp, setOtp] = useState('');
@@ -201,8 +202,12 @@ const Login = () => {
               duration: 3000,
               isClosable: true,
             });
-            await refetchUser();
-            navigate('/dashboard');
+            const user = await refetchUser();
+            if (user?.userStatus === 'Paid') {  
+              navigate('/dashboard');
+            } else {
+              navigate('/auth/signup/step-2');
+            }
           } else {
             setOtpError(response.message || 'Invalid OTP');
             toast({
@@ -249,19 +254,6 @@ const Login = () => {
           <FormControl isInvalid={!!phoneError}>
             <FormLabel>Phone Number</FormLabel>
             <HStack spacing={4}>
-              <Select 
-                value={countryCode} 
-                onChange={(e) => setCountryCode(e.target.value)} 
-                width={{ base: "40%", md: "30%" }}
-                size="lg"
-                isDisabled={otpSent}
-              >
-                {countryCodes.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.code} {country.country}
-                  </option>
-                ))}
-              </Select>
               <InputGroup size="lg" flex={1}>
                 <Input
                   type="tel"

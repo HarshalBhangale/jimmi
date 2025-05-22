@@ -26,6 +26,7 @@ import {
 import { FiArrowRight } from 'react-icons/fi';
 import { userAtom, refetchUserAtom } from '@/jotai/atoms';
 import { useAtomValue, useAtom } from 'jotai';
+import { updateProfile } from '@/api/services/profile';
 
 // Template texts for different request types
 const requestTemplates = {
@@ -117,7 +118,7 @@ const Step6 = () => {
   const canSendRequests = selectedLenders.length > 0 && selectedOption && 
     (selectedOption !== 'custom' || customRequestText.trim().length > 0);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!canSendRequests) return;
     
     setIsLoading(true);
@@ -130,6 +131,10 @@ const Step6 = () => {
     };
     
     localStorage.setItem('documentRequestData', JSON.stringify(requestData));
+    await updateProfile({
+      requestDocmentForLenders: selectedLenders,
+    });
+
     
     // Navigate to payment page
     navigate('/auth/signup/step-7');

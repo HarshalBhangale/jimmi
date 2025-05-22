@@ -18,7 +18,9 @@ import Confirmation from '@pages/auth/signup/Confirmation';
 import Success from '@pages/payments';
 import LenderDetails from '@pages/LenderDetails';
 import Mailbox from '@pages/mailbox';
-
+import Privacy from '@pages/privacy';
+import TNC from '@pages/tnc';
+import RefundPolicy from '@pages/refund-policy';
 import Profile from '@pages/Profile';
 import NotFound from '@pages/NotFound';
 import ProtectedRoute from '@layouts/ProtectedRoute';
@@ -61,6 +63,9 @@ const router = createBrowserRouter([
       },
       { path: '404', element: <NotFound /> },
       { path: '*', element: <Navigate to="/404" replace /> },
+      { path: 'privacy', element: <Privacy /> },
+      { path: 'tnc', element: <TNC /> },
+      { path: 'refund-policy', element: <RefundPolicy /> },
     ],
   },
 ]);

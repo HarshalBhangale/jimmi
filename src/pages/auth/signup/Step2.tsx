@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -29,25 +30,11 @@ import { useAtom } from 'jotai';
 
 // List of common country codes with ISO country codes
 const countryCodes = [
-  { code: '+1', country: 'US/CA' },
   { code: '+44', country: 'GB' },
-  { code: '+61', country: 'AU' },
-  { code: '+33', country: 'FR' },
-  { code: '+49', country: 'DE' },
-  { code: '+91', country: 'IN' },
-  { code: '+353', country: 'IE' },
-  { code: '+39', country: 'IT' },
-  { code: '+81', country: 'JP' },
-  { code: '+64', country: 'NZ' },
-  { code: '+65', country: 'SG' },
-  { code: '+34', country: 'ES' },
-  { code: '+46', country: 'SE' },
-  { code: '+41', country: 'CH' },
-  { code: '+971', country: 'AE' },
 ];
 
 const Step2: React.FC = () => {
-  const [countryCode, setCountryCode] = useState('+1');
+  const [countryCode, setCountryCode] = useState('+44');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -85,12 +72,12 @@ const Step2: React.FC = () => {
     }
 
     // Validate phone number format
-    const phoneRegex = /^\d{10}$/;
+    const phoneRegex = /^(0?7\d{9}|7\d{9})$/;
     if (!phoneRegex.test(phoneNumber)) {
-      setError('Please enter a valid 10-digit phone number');
+      setError('Please enter a valid UK mobile number');
       toast({
         title: 'Invalid Phone Number',
-        description: 'Please enter a valid 10-digit phone number',
+        description: 'Please enter a valid UK mobile number',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -100,7 +87,8 @@ const Step2: React.FC = () => {
 
     setIsSendingOtp(true);
     try {
-      const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+      const formattedPhoneNumber = phoneNumber.startsWith('0') ? phoneNumber.slice(1) : phoneNumber;
+      const fullPhoneNumber = `${countryCode}${formattedPhoneNumber}`;
       const response = await generateOtp(fullPhoneNumber);
       
       if (response.success) {
@@ -168,7 +156,8 @@ const Step2: React.FC = () => {
 
     setIsVerifying(true);
     try {
-      const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+      const formattedPhoneNumber = phoneNumber.startsWith('0') ? phoneNumber.slice(1) : phoneNumber;
+      const fullPhoneNumber = `${countryCode}${formattedPhoneNumber}`;
       const response = await verifyOtp(fullPhoneNumber, otp);
       
       if (response.success) {
@@ -238,7 +227,7 @@ const Step2: React.FC = () => {
         {/* Header */}
         <Box textAlign="center">
           <Heading as="h1" size="xl" mb={2}>
-            Verify Your Mobile Number
+          Let's get your account set up! 
           </Heading>
           <Text color={labelColor} fontSize="lg">
             We'll send a verification code to confirm your mobile number
@@ -258,25 +247,16 @@ const Step2: React.FC = () => {
             <FormControl isInvalid={!!error}>
               <FormLabel fontWeight="medium">Mobile Number</FormLabel>
               <HStack spacing={4}>
-                <Select 
-                  value={countryCode} 
-                  onChange={(e) => setCountryCode(e.target.value)} 
-                  width={{ base: "40%", md: "30%" }}
-                  size="lg"
-                  isDisabled={isOtpSent}
-                >
-                  {countryCodes.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.code} {country.country}
-                    </option>
-                  ))}
-                </Select>
+                <Text fontSize="lg" fontWeight="medium">+44</Text>
                 <InputGroup size="lg" flex={1}>
                   <Input
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => {
-                      setPhoneNumber(e.target.value);
+                      const value = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+                      if (value.length <= 11) {
+                        setPhoneNumber(value);
+                      }
                       if (error) {
                         setError('');
                       }
@@ -307,7 +287,7 @@ const Step2: React.FC = () => {
                   boxShadow: "lg",
                 }}
               >
-                Send Verification Code
+                Send Code
               </Button>
             ) : (
               <VStack spacing={6} align="stretch">

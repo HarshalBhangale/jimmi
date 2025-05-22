@@ -15,17 +15,24 @@ import {
   SimpleGrid,
   chakra,
   useBreakpointValue,
+  Divider,
+  Circle,
 } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
-import { FiArrowRight, FiUserPlus, FiFileText, FiMail, FiInbox } from 'react-icons/fi';
-
-interface StepCardProps {
-  number: number;
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  color: string;
-}
+import { 
+  FiArrowRight, 
+  FiUserPlus, 
+  FiFileText, 
+  FiMail, 
+  FiInbox, 
+  FiSearch, 
+  FiBookOpen, 
+  FiSend, 
+  FiClock, 
+  FiAlertTriangle, 
+  FiDollarSign, 
+  FiShare2 
+} from 'react-icons/fi';
 
 const pulse = keyframes`
   0% { transform: scale(1); }
@@ -43,6 +50,110 @@ const HowItWorks = () => {
   const isMobile = useBreakpointValue({ base: true, md: false });
   const containerPadding = useBreakpointValue({ base: 4, md: 8, lg: 12 });
   const headingSize = useBreakpointValue({ base: "2xl", md: "4xl", lg: "5xl" });
+  
+  // Journey steps data
+  const journeySteps = [
+    {
+      number: 1,
+      icon: FiUserPlus,
+      title: "Sign Up",
+      description: "Create your account in seconds",
+      details: [
+        "Enter your phone number and verify with OTP",
+        "Provide basic details like name and email",
+        "Choose a plan: one-time £99",
+        "Get your secure Buddy Mail email and portal",
+        "Check if your lenders were involved in the scandal"
+      ],
+      color: "blue"
+    },
+    {
+      number: 2,
+      icon: FiSearch,
+      title: "Investigate",
+      description: "Find out what claims you might have",
+      details: [
+        "Select your lenders from our smart dropdown",
+        "Check if they're part of the DCA/hidden commission scandal",
+        "Submit SARs to get your finance information",
+        "Track responses inside your dashboard"
+      ],
+      color: "purple"
+    },
+    {
+      number: 3,
+      icon: FiBookOpen,
+      title: "Review & Learn",
+      description: "Understand the documents you've received",
+      details: [
+        "Learn how to read your information and what terms mean",
+        "Discover if your agreement involves hidden commissions",
+        "Get clear guidance to move forward confidently"
+      ],
+      color: "cyan"
+    },
+    {
+      number: 4,
+      icon: FiSend,
+      title: "Claim",
+      description: "Build and submit your claims with ease",
+      details: [
+        "Add key agreement details when your lender replies",
+        "Identify what commission model was used",
+        "Pick a template, review, and send your claim",
+        "Watch your dashboard update with every action"
+      ],
+      color: "teal"
+    },
+    {
+      number: 5,
+      icon: FiClock,
+      title: "Await Response",
+      description: "Track progress while the lender reviews",
+      details: [
+        "See exactly what was sent and when",
+        "Expect to hear back in 28 days (or after FCA deadlines)",
+        "Monitor real-time updates on your dashboard"
+      ],
+      color: "orange"
+    },
+    {
+      number: 6,
+      icon: FiAlertTriangle,
+      title: "Dispute",
+      description: "Handle pushbacks like a pro",
+      details: [
+        "Get tailored response templates for rejections",
+        "Escalate your case to the Financial Ombudsman Service",
+        "Keep your claim progressing without legal stress"
+      ],
+      color: "red"
+    },
+    {
+      number: 7,
+      icon: FiDollarSign,
+      title: "Refund",
+      description: "Get what's owed to you",
+      details: [
+        "Track your accepted claim through to payment",
+        "Mark your refund as received when paid",
+        "Keep 100% of your refund - no fees taken by us"
+      ],
+      color: "green"
+    },
+    {
+      number: 8,
+      icon: FiShare2,
+      title: "Refer Friends & Earn",
+      description: "Share the benefits of My Claim Buddy",
+      details: [
+        "Invite friends using your unique referral link",
+        "Track how many friends sign up from your dashboard",
+        "Earn rewards for every successful referral"
+      ],
+      color: "pink"
+    }
+  ];
   
   return (
     <Box 
@@ -130,44 +241,170 @@ const HowItWorks = () => {
             📅 How It Works
           </Heading>
           
-          <SimpleGrid 
-            columns={{ base: 1, md: 2 }} 
-            spacing={{ base: 6, md: 8, lg: 12 }}
+          {/* Journey Timeline - Desktop */}
+          <Box display={{ base: 'none', lg: 'block' }} mb={{ base: 12, md: 16 }}>
+            <Flex 
+              position="relative" 
+              flexDirection="column"
+              alignItems="center"
+            >
+              {/* Center line */}
+              <Box 
+                position="absolute"
+                width="4px"
+                height="100%"
+                bg="blue.100"
+                left="50%"
+                transform="translateX(-50%)"
+                borderRadius="full"
+                zIndex={1}
+              />
+              
+              {journeySteps.map((step, index) => (
+                <Flex 
+                  key={index} 
+                  width="100%" 
+                  justifyContent={index % 2 === 0 ? "flex-start" : "flex-end"}
+                  position="relative"
+                  mb={index === journeySteps.length - 1 ? 0 : 12}
+                  zIndex={2}
+                >
+                  {/* Step content */}
+                  <Box 
+                    width="45%" 
+                    bg={useColorModeValue('white', 'gray.800')}
+                    borderRadius="xl"
+                    boxShadow="lg"
+                    p={6}
+                    borderTop="4px solid"
+                    borderColor={`${step.color}.400`}
+                    transition="all 0.3s ease"
+                    _hover={{ transform: 'translateY(-5px)', boxShadow: 'xl' }}
+                  >
+                    <Flex align="center" mb={4}>
+                      <Circle
+                        size={12}
+                        bg={`${step.color}.100`}
+                        color={`${step.color}.600`}
+                        mr={4}
+                      >
+                        <Icon as={step.icon} boxSize={6} />
+                      </Circle>
+                      <Box>
+                        <Flex align="baseline">
+                          <Text 
+                            fontSize="3xl"
+                            fontWeight="bold" 
+                            color={`${step.color}.600`}
+                            lineHeight="1"
+                            mr={2}
+                          >
+                            {step.number}
+                          </Text>
+                          <Text fontWeight="bold" fontSize="xl">{step.title}</Text>
+                        </Flex>
+                        <Text color={useColorModeValue('gray.600', 'gray.400')} fontWeight="medium">
+                          {step.description}
+                        </Text>
+                      </Box>
+                    </Flex>
+                    <Box pl={16}>
+                      {step.details.map((detail, i) => (
+                        <Flex key={i} mb={2} align="center">
+                          <Box 
+                            w={1.5} 
+                            h={1.5} 
+                            borderRadius="full" 
+                            bg={`${step.color}.400`} 
+                            mr={3}
+                          />
+                          <Text fontSize="sm">{detail}</Text>
+                        </Flex>
+                      ))}
+                    </Box>
+                  </Box>
+                  
+                  {/* Center dot */}
+                  <Circle
+                    size={8}
+                    bg={`${step.color}.400`}
+                    color="white"
+                    position="absolute"
+                    left="50%"
+                    transform="translateX(-50%)"
+                    boxShadow="md"
+                    border="3px solid white"
+                    zIndex={3}
+                  >
+                    <Text fontWeight="bold">{step.number}</Text>
+                  </Circle>
+                </Flex>
+              ))}
+            </Flex>
+          </Box>
+          
+          {/* Journey Cards - Mobile & Tablet */}
+          <VStack 
+            spacing={6} 
+            display={{ base: 'flex', lg: 'none' }}
             mb={{ base: 12, md: 16 }}
-            px={{ base: 2, md: 4 }}
           >
-            <StepCard 
-              number={1}
-              icon={FiUserPlus}
-              title="Create your account" 
-              description="Quick setup with phone verification"
-              color="blue"
-            />
-            
-            <StepCard 
-              number={2}
-              icon={FiFileText}
-              title="Tell Buddy about your loans" 
-              description="Choose your lender, upload your documents"
-              color="purple"
-            />
-            
-            <StepCard 
-              number={3}
-              icon={FiMail}
-              title="Let Buddy help you prepare your letters" 
-              description="SARs and complaints generated based on your inputs"
-              color="pink"
-            />
-            
-            <StepCard 
-              number={4}
-              icon={FiInbox}
-              title="Track everything" 
-              description="All replies and updates go into your Buddy Inbox"
-              color="teal"
-            />
-          </SimpleGrid>
+            {journeySteps.map((step, index) => (
+              <Box 
+                key={index}
+                width="100%"
+                bg={useColorModeValue('white', 'gray.800')}
+                borderRadius="xl"
+                boxShadow="lg"
+                p={5}
+                borderLeft="4px solid"
+                borderColor={`${step.color}.400`}
+                position="relative"
+              >
+                <Flex align="center" mb={4}>
+                  <Circle
+                    size={10}
+                    bg={`${step.color}.100`}
+                    color={`${step.color}.600`}
+                    mr={4}
+                  >
+                    <Icon as={step.icon} boxSize={5} />
+                  </Circle>
+                  <Box>
+                    <Flex align="baseline">
+                      <Text 
+                        fontSize="2xl"
+                        fontWeight="bold" 
+                        color={`${step.color}.600`}
+                        lineHeight="1"
+                        mr={2}
+                      >
+                        {step.number}
+                      </Text>
+                      <Text fontWeight="bold" fontSize="lg">{step.title}</Text>
+                    </Flex>
+                    <Text color={useColorModeValue('gray.600', 'gray.400')} fontSize="sm">
+                      {step.description}
+                    </Text>
+                  </Box>
+                </Flex>
+                <Box pl={14}>
+                  {step.details.map((detail, i) => (
+                    <Flex key={i} mb={1.5} align="center">
+                      <Box 
+                        w={1} 
+                        h={1} 
+                        borderRadius="full" 
+                        bg={`${step.color}.400`} 
+                        mr={2}
+                      />
+                      <Text fontSize="xs">{detail}</Text>
+                    </Flex>
+                  ))}
+                </Box>
+              </Box>
+            ))}
+          </VStack>
           
           <Box 
             bg={useColorModeValue('white', 'gray.800')}
@@ -242,62 +479,6 @@ const HowItWorks = () => {
           </Box>
         </Box>
       </Container>
-    </Box>
-  );
-};
-
-const StepCard = ({ number, icon, title, description, color }: StepCardProps) => {
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue(`${color}.400`, `${color}.300`);
-  const iconBg = useColorModeValue(`${color}.100`, `${color}.900`);
-  const iconColor = useColorModeValue(`${color}.600`, `${color}.300`);
-  const hoverTransform = { transform: 'translateY(-5px)', boxShadow: 'xl' };
-  
-  return (
-    <Box
-      bg={cardBg}
-      p={{ base: 4, md: 6 }}
-      borderRadius="xl"
-      boxShadow="lg"
-      borderLeft="4px solid"
-      borderColor={borderColor}
-      transition="all 0.3s ease"
-      _hover={hoverTransform}
-      height="100%"
-      display="flex"
-      flexDirection="column"
-    >
-      <Flex align="center" mb={4}>
-        <Flex
-          bg={iconBg}
-          color={iconColor}
-          borderRadius="full"
-          w={{ base: 10, md: 12 }}
-          h={{ base: 10, md: 12 }}
-          align="center"
-          justify="center"
-          mr={4}
-        >
-          <Icon as={icon} boxSize={{ base: 5, md: 6 }} />
-        </Flex>
-        <Box>
-          <Flex align="baseline">
-            <Text 
-              fontSize={{ base: "2xl", md: "3xl" }}
-              fontWeight="bold" 
-              color={iconColor}
-              lineHeight="1"
-              mr={2}
-            >
-              {number}
-            </Text>
-            <Text fontWeight="bold" fontSize="xl">{title}</Text>
-          </Flex>
-          <Text mt={1} color={useColorModeValue('gray.600', 'gray.400')}>
-            {description}
-          </Text>
-        </Box>
-      </Flex>
     </Box>
   );
 };

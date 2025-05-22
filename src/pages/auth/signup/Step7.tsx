@@ -16,34 +16,20 @@ import {
   Flex,
   Alert,
   AlertIcon,
-  Divider,
   useToast,
   Spinner,
+  List,
+  ListItem,
+  ListIcon,
+  Badge,
 } from '@chakra-ui/react';
-import { FiCheck, FiCreditCard } from 'react-icons/fi';
+import { FiCheck, FiCreditCard, FiStar } from 'react-icons/fi';
 import { createPaymentIntent } from '@api/services/payments';
 import { useSearchParams } from 'react-router-dom';
-// Payment options
-const paymentOptions = [
-  {
-    id: 'one_time',
-    name: 'One-time Payment',
-    description: 'Full access to all services with no recurring charges',
-    price: 99,
-  },
-  {
-    id: 'subscription',
-    name: 'Monthly Subscription',
-    description: 'Ongoing access with lower initial cost',
-    price: 25,
-    installments: 4,
-  },
-];
 
 const Step7 = () => {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('sessionId');
-  const [selectedOption, setSelectedOption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
@@ -51,33 +37,30 @@ const Step7 = () => {
   const toast = useToast();
 
   const handlePayment = async () => {
-    if (!selectedOption) {
-      setError('Please select a payment option');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       const paymentIntent = await createPaymentIntent(
         {
-          amount: 99,
-          type: selectedOption === 'one_time' ? 'one_time' : 'subscription',
+          amount: 3999,
+          type: 'one_time',
         }
       );
       window.location.href = paymentIntent.url;
       console.log(paymentIntent);
     } catch (error) {
       console.error(error);
+      setError('An error occurred while processing your payment. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   }
 
-    // Colors
+  // Colors
   const cardBg = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const labelColor = useColorModeValue('gray.600', 'gray.400');
-  const selectedBg = useColorModeValue('blue.50', 'blue.900');
-  const selectedBorderColor = useColorModeValue('blue.500', 'blue.300');
+  const highlightColor = useColorModeValue('blue.500', 'blue.300');
 
   // Show payment confirmation if payment was successful
   if (isPaymentSuccess) {
@@ -130,85 +113,74 @@ const Step7 = () => {
         {/* Header */}
         <Box textAlign="center">
           <Heading as="h1" size="xl" mb={2}>
-            Choose Your Payment Plan
+            Complete Your Purchase
           </Heading>
           <Text color={labelColor} fontSize="lg">
-            Select how you'd like to pay for our service
+            Unlock full access to our premium service
           </Text>
         </Box>
 
-        {/* Payment Options */}
+        {/* Payment Option */}
         <Box
           bg={cardBg}
           borderRadius="xl"
-          boxShadow="md"
+          boxShadow="lg"
           p={{ base: 6, md: 8 }}
-          borderWidth="1px"
-          borderColor={borderColor}
+          borderWidth="2px"
+          borderColor={highlightColor}
+          position="relative"
+          overflow="hidden"
         >
+          <Badge
+            position="absolute"
+            top={4}
+            right={-10}
+            transform="rotate(45deg)"
+            px={8}
+            py={1}
+            colorScheme="red"
+            fontSize="sm"
+            fontWeight="bold"
+          >
+            50% OFF
+          </Badge>
+          
           <VStack spacing={6} align="stretch">
-            <Heading as="h3" size="lg" mb={2}>
-              Payment Options
-            </Heading>
-            
-            <VStack align="stretch" spacing={4}>
-              {paymentOptions.map((option) => (
-                <Box
-
-                  key={option.id}
-                  p={5}
-                  borderWidth="1px"
-                  borderRadius="md"
-                  cursor="pointer"
-                  borderColor={selectedOption === option.id ? selectedBorderColor : borderColor}
-                  bg={selectedOption === option.id ? selectedBg : 'transparent'}
-                  transition="all 0.2s"
-                  onClick={() => {
-                    console.log(option.id, "================");
-                    setSelectedOption(option.id);
-                    setError('');
-                  }}
-                  _hover={{
-                    borderColor: selectedBorderColor,
-                    transform: "translateY(-2px)",
-                    boxShadow: "md",
-                  }}
-                >
-                  <Flex justify="space-between" align="center">
-                    <Box>
-                      <Text fontWeight="semibold">{option.name}</Text>
-                      <Text fontSize="sm" color={labelColor}>
-                        {option.description}
-                      </Text>
-                    </Box>
-                    
-                    <Box textAlign="right">
-                      <Text fontWeight="bold" fontSize="xl">£{option.price}</Text>
-                      {option.installments && (
-                        <Text fontSize="sm" color={labelColor}>
-                          {option.installments} x £{(option.price / option.installments).toFixed(2)}
-                        </Text>
-                      )}
-                    </Box>
-                  </Flex>
-                </Box>
-              ))}
-            </VStack>
-            
-            {selectedOption && (
-              <Box mt={4}>
-                <Alert status="info" borderRadius="md">
-                  <AlertIcon />
-                  <Box>
-                    <Text fontWeight="medium">What happens next?</Text>
-                    <Text fontSize="sm">
-                      After payment, we'll immediately send your document requests to all selected lenders.
-                      You can track the status of your requests from your dashboard.
-                    </Text>
-                  </Box>
-                </Alert>
+            <Flex justify="space-between" align="center">
+              <Heading as="h3" size="lg">
+                Premium Plan
+              </Heading>
+              <Box textAlign="right">
+                <Text as="s" fontSize="xl" color={labelColor}>£79.99</Text>
+                <Text fontWeight="bold" fontSize="3xl" color={highlightColor}>£39.99</Text>
               </Box>
-            )}
+            </Flex>
+            
+            <List spacing={3}>
+              {[
+                'Full access to all services',
+                'Priority document processing',
+                'Dedicated customer support',
+                'Comprehensive lender network',
+                'Advanced analytics and insights',
+              ].map((feature, index) => (
+                <ListItem key={index} display="flex" alignItems="center">
+                  <ListIcon as={FiStar} color={highlightColor} />
+                  <Text>{feature}</Text>
+                </ListItem>
+              ))}
+            </List>
+            
+            <Alert status="info" borderRadius="md">
+              <AlertIcon />
+              <Box>
+                <Text fontWeight="medium">What happens next?</Text>
+                <Text fontSize="sm">
+                  After payment, we'll immediately send your document requests to all selected lenders.
+                  You can track the status of your requests from your dashboard.
+                </Text>
+              </Box>
+            </Alert>
             
             {error && (
               <Alert status="error" borderRadius="md">
@@ -230,7 +202,6 @@ const Step7 = () => {
                 rightIcon={<FiCreditCard />}
                 onClick={handlePayment}
                 isLoading={isLoading}
-                isDisabled={!selectedOption}
                 loadingText="Processing payment..."
                 bgGradient="linear(to-r, blue.400, blue.600)"
                 _hover={{
@@ -249,4 +220,4 @@ const Step7 = () => {
   );
 };
 
-export default Step7; 
+export default Step7;

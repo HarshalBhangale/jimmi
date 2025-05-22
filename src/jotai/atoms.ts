@@ -23,6 +23,7 @@ export const userAtom = atom(async (get) => {
 // Utility atom to trigger a refetch
 export const refetchUserAtom = atom(null, (get, set) => {
   set(authRefetchTriggerAtom, get(authRefetchTriggerAtom) + 1);
+  return get(userAtom);
 });
 
 export const isAuthenticatedAtom = atom(async (get) => {

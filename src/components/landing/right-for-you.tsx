@@ -18,6 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { FiArrowRight, FiUsers, FiCalendar, FiDollarSign, FiTool } from 'react-icons/fi';
 import type { ReactElement } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 // Feature Card Props interface
 interface FeatureCardProps {
@@ -170,6 +171,8 @@ const RightForYou = () => {
           
           <HStack spacing={4} justify="center">
             <Button
+              as={RouterLink}
+              to="/auth/signup/step-1"
               colorScheme="blue"
               size="lg"
               rightIcon={<FiArrowRight />}
