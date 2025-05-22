@@ -52,11 +52,11 @@ const AlreadySignedUp = () => {
           <List spacing={4} mb={8}>
             <ListItem display="flex" alignItems="center">
               <ListIcon as={FiCheckCircle} color="green.500" fontSize="xl" />
-              <Text>Jimmi can help you investigate the status of your claim</Text>
+              <Text>My Claim Buddy can help you investigate the status of your claim</Text>
             </ListItem>
             <ListItem display="flex" alignItems="center">
               <ListIcon as={FiCheckCircle} color="green.500" fontSize="xl" />
-              <Text>If appropriate, Jimmi will guide you through the steps to take back control</Text>
+              <Text>If appropriate, My Claim Buddy will guide you through the steps to take back control</Text>
             </ListItem>
             <ListItem display="flex" alignItems="center">
               <ListIcon as={FiCheckCircle} color="green.500" fontSize="xl" />
@@ -72,7 +72,7 @@ const AlreadySignedUp = () => {
             borderLeft="4px solid"
             borderColor="blue.400"
           >
-            <Text>You're not stuck. Jimmi is here to help you reclaim your refund — and your independence.</Text>
+            <Text>You're not stuck. My Claim Buddy is here to help you reclaim your refund — and your independence.</Text>
           </Box>
         </Box>
       </Container>

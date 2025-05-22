@@ -13,7 +13,6 @@ import FAQ from '../components/landing/faq';
 import AlreadySignedUp from '../components/landing/already-signed-up';
 import Testimonials from '../components/landing/testimonials';
 import HowItWorks from '../components/landing/how-it-works';
-import Disclaimer from '../components/landing/disclaimer';
 import Footer from '../components/landing/footer';
 
 // Main Landing component
@@ -53,10 +52,7 @@ const Landing = () => {
       {/* How It Works Steps */}
       <HowItWorks />
       
-      {/* Disclaimer */}
-      <Disclaimer />
-
-      {/* Footer */}
+      {/* Footer (with Disclaimer) */}
       <Footer />
 
       {/* 

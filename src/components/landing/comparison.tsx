@@ -220,7 +220,7 @@ const Comparison: React.FC = () => {
               borderRadius: 'full',
             }}
           >
-            ⚖️ Jimmi vs Solicitors: The Honest Comparison
+            ⚖️ Buddy vs Solicitors: The Honest Comparison
           </Heading>
           <Text 
             fontSize={{ base: "md", md: "xl" }}
@@ -228,7 +228,7 @@ const Comparison: React.FC = () => {
             color={useColorModeValue('gray.600', 'gray.400')}
             lineHeight="tall"
           >
-            See how Jimmi transforms your claims experience compared to traditional solicitor services:
+            See how Buddy transforms your claims experience compared to traditional solicitor services:
           </Text>
         </VStack>
 

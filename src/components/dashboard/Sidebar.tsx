@@ -130,7 +130,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
           </SidebarItem>
           
           <SidebarItem icon={FiMail} to="/dashboard/mailbox" onClose={onClose}>
-            Jimmi Mailbox
+            Buddy Mailbox
           </SidebarItem>
 
           <SidebarItem icon={FiUser} to="/dashboard/profile" onClose={onClose}>

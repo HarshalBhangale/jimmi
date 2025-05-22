@@ -21,6 +21,9 @@ import { FiEdit2} from 'react-icons/fi';
 import { userAtom } from '@/jotai/atoms';     
 import { useAtomValue } from 'jotai';
 import { updateProfile, type IUser } from '@/api/services/profile';
+import { refetchUserAtom } from '@/jotai/atoms';
+import { useAtom } from 'jotai';
+
 
 interface UserProfile {
   firstName: string;
@@ -43,6 +46,7 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<UserProfile | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [, refetchUser] = useAtom(refetchUserAtom);
   
   const toast = useToast();
   const user = useAtomValue(userAtom);
@@ -148,9 +152,10 @@ const Profile = () => {
         };
 
         await updateProfile(updateData);
-        
+        refetchUser();
         setUserData(formData);
         setIsEditing(false);
+
         
         toast({
           title: 'Profile updated',

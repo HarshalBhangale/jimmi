@@ -133,6 +133,25 @@ const Hero: React.FC = () => {
               Car finance claims made easy
             </Badge>
             
+            <Badge 
+              colorScheme="yellow" 
+              fontSize={{ base: 'xs', md: 'sm', lg: 'md' }} 
+              px={{ base: 3, md: 4 }} 
+              py={1.5} 
+              borderRadius="full"
+              mb={{ base: 6, md: 8 }}
+              ml={{ base: 2, md: 3 }}
+              textTransform="none"
+              fontWeight="bold"
+              bg="yellow.400"
+              color="gray.800"
+              boxShadow="md"
+              display="inline-flex"
+              alignItems="center"
+            >
+              <Box as="span" mr={1}>🔥</Box> Special Offer: £29.99 <Box as="span" fontSize="xs" ml={1} textDecoration="line-through">£49.99</Box>
+            </Badge>
+            
             <Heading
               as="h1"
               fontSize={{ base: '3xl', sm: '4xl', md: '5xl', lg: '6xl' }}
@@ -165,9 +184,32 @@ const Hero: React.FC = () => {
                 mt={{ base: 3, md: 4 }} 
                 color="blue.200"
               >
-                Jimmi makes it easy to reclaim what you're owed — step by step.
+                Buddy makes it easy to reclaim what you're owed — step by step.
               </Text>
             </Text>
+            
+            <Box
+              bg="linear-gradient(135deg, rgba(255,215,0,0.2) 0%, rgba(255,215,0,0.1) 100%)"
+              backdropFilter="blur(8px)"
+              borderRadius="xl"
+              p={{ base: 3, md: 5 }}
+              mb={{ base: 6, md: 8 }}
+              border="1px solid"
+              borderColor="yellow.400"
+              boxShadow="0 4px 12px rgba(255,215,0,0.2)"
+            >
+              <HStack spacing={3} align="center">
+                <Box fontSize={{ base: "xl", md: "2xl" }}>💰</Box>
+                <Box>
+                  <Text fontWeight="bold" color="yellow.400" fontSize={{ base: "sm", md: "md" }}>
+                    LIMITED TIME OFFER
+                  </Text>
+                  <Text color="white" fontSize={{ base: "xs", md: "sm" }}>
+                    Get full access for just £29.99 instead of £49.99. Save 40% today!
+                  </Text>
+                </Box>
+              </HStack>
+            </Box>
             
             <Stack 
               direction={{ base: 'column', sm: 'row' }} 

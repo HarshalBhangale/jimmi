@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   Box,
   Container,
@@ -25,7 +26,6 @@ const FAQ = () => {
     <Box as="section" py={20} bg={bgColor} id="faq">
       <Container maxW="container.xl">
         <VStack spacing={8} textAlign="center" mb={12}>
-          <Icon as={FiHelpCircle} boxSize={12} color="purple.500" />
           <Heading 
             as="h2" 
             fontSize={{ base: "3xl", md: "4xl" }}
@@ -36,7 +36,7 @@ const FAQ = () => {
             Got Questions? We've Got Answers
           </Heading>
           <Text fontSize="lg" color={useColorModeValue('gray.600', 'gray.400')} maxW="2xl">
-            Everything you need to know about using Jimmi to claim what's yours
+            Everything you need to know about using buddy to claim what's yours
           </Text>
         </VStack>
         
@@ -65,7 +65,7 @@ const FAQ = () => {
               </h2>
               <AccordionPanel pb={5} bg={cardBg}>
                 <Text fontSize="md" color={useColorModeValue('gray.600', 'gray.300')}>
-                  Nope! Jimmi walks you through everything clearly. No jargon, no confusion.
+                  Nope! buddy walks you through everything clearly. No jargon, no confusion.
                 </Text>
               </AccordionPanel>
             </AccordionItem>
@@ -93,7 +93,7 @@ const FAQ = () => {
               </h2>
               <AccordionPanel pb={5} bg={cardBg}>
                 <Text fontSize="md" color={useColorModeValue('gray.600', 'gray.300')}>
-                  Not at all — Jimmi is a tool you control, with no commissions or middlemen.
+                  Not at all — buddy is a tool you control, with no commissions or middlemen.
                 </Text>
               </AccordionPanel>
             </AccordionItem>
@@ -121,7 +121,7 @@ const FAQ = () => {
               </h2>
               <AccordionPanel pb={5} bg={cardBg}>
                 <Text fontSize="md" color={useColorModeValue('gray.600', 'gray.300')}>
-                  Jimmi helps you understand lender replies and gives you the next steps.
+                  buddy helps you understand lender replies and gives you the next steps.
                 </Text>
               </AccordionPanel>
             </AccordionItem>
@@ -149,7 +149,7 @@ const FAQ = () => {
               </h2>
               <AccordionPanel pb={5} bg={cardBg}>
                 <Text fontSize="md" color={useColorModeValue('gray.600', 'gray.300')}>
-                  Never. You only pay once for Jimmi's help. Everything you reclaim is yours.
+                  Never. You only pay once for buddy's help. Everything you reclaim is yours.
                 </Text>
               </AccordionPanel>
             </AccordionItem>

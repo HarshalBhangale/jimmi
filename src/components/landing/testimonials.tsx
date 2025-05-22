@@ -72,7 +72,7 @@ const Testimonials = () => {
             maxW="2xl"
             color={useColorModeValue('gray.600', 'gray.400')}
           >
-            See what our customers are saying about their experience with Jimmi
+            See what our customers are saying about their experience with Buddy
           </Text>
         </VStack>
         
@@ -83,7 +83,7 @@ const Testimonials = () => {
           mx="auto"
         >
           <TestimonialCard
-            quote="I had no clue where to start until Jimmi explained it all. I just followed the steps and ended up with over £2,000 back."
+            quote="I had no clue where to start until Buddy explained it all. I just followed the steps and ended up with over £2,000 back."
             name="Jason M"
             location="Leeds"
             avatarColor="purple"

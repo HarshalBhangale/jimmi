@@ -108,7 +108,7 @@ const RightForYou = () => {
             bgClip="text"
             letterSpacing="tight"
           >
-            🙋‍♂️ Is Jimmi Right for You?
+            🙋‍♂️ Is Buddy Right for You?
           </Heading>
           <Text 
             fontSize={{ base: "lg", md: "xl" }}
@@ -180,19 +180,6 @@ const RightForYou = () => {
               transition="all 0.2s"
             >
               Get Started
-            </Button>
-            
-            <Button
-              variant="outline"
-              colorScheme="blue"
-              size="lg"
-              _hover={{
-                bg: 'blue.50',
-                transform: 'translateY(-2px)',
-              }}
-              transition="all 0.2s"
-            >
-              Learn More
             </Button>
           </HStack>
         </Box>

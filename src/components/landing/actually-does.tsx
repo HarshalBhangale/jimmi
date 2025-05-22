@@ -136,7 +136,7 @@ const ActuallyDoes: React.FC = () => {
               letterSpacing="tight"
               mb={4}
             >
-              🤖 What Jimmi Actually Does
+              🤖 What Our Buddy Actually Does
             </Heading>
             <Box
               position="absolute"
@@ -155,7 +155,7 @@ const ActuallyDoes: React.FC = () => {
             color={useColorModeValue('gray.600', 'gray.400')}
             lineHeight="tall"
           >
-            Jimmi makes the claims process feel simple, supportive and stress-free.
+            Buddy makes the claims process feel simple, supportive and stress-free.
           </Text>
         </VStack>
 
@@ -168,25 +168,25 @@ const ActuallyDoes: React.FC = () => {
           <Feature
             icon={<Icon as={FiMessageSquare} />}
             title="Step-by-Step Guidance"
-            text="From signing a letter to replying to your lender — Jimmi walks you through it all like a real assistant."
+            text="From signing a letter to replying to your lender — Buddy walks you through it all like a real assistant."
             delay="0s"
           />
           <Feature
             icon={<Icon as={FiMail} />}
             title="Your Own Inbox"
-            text="Every message from the lender goes to your personal Jimmi Inbox, with clear actions for what to do next."
+            text="Every message from the lender goes to your personal Buddy Inbox, with clear actions for what to do next."
             delay="0.1s"
           />
           <Feature
             icon={<Icon as={FiFileText} />}
             title="Auto-Generated Letters"
-            text="SARs, complaints, appeals — Jimmi writes the right letters at the right time. Just review and send."
+            text="SARs, complaints, appeals — Buddy writes the right letters at the right time. Just review and send."
             delay="0.2s"
           />
           <Feature
             icon={<Icon as={FiZap} />}
             title="Built-In AI Support"
-            text="Don't understand what a lender said? Jimmi breaks it down and helps you reply with confidence."
+            text="Don't understand what a lender said? Buddy breaks it down and helps you reply with confidence."
             delay="0.3s"
           />
         </SimpleGrid>

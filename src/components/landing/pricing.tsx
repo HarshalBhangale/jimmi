@@ -34,7 +34,7 @@ const Pricing: React.FC = () => {
   
   // Calculate pricing and savings
   const solicitorFeePerAgreement = 1620;
-  const jimmiPrice = 39.99;
+  const jimmiPrice = 29.99;
   const solicitorFees = agreements * solicitorFeePerAgreement;
   const savings = solicitorFees - jimmiPrice;
   const savingsPercentage = Math.round((savings / solicitorFees) * 100);
@@ -114,7 +114,7 @@ const Pricing: React.FC = () => {
             maxW="2xl"
             color={useColorModeValue('gray.600', 'gray.400')}
           >
-            See how much you could save with Jimmi compared to traditional solicitors
+            See how much you could save with Buddy compared to traditional solicitors
           </Text>
         </VStack>
 
@@ -133,7 +133,7 @@ const Pricing: React.FC = () => {
             {/* Calculator */}
             <Box width="100%">
               <Heading size="lg" mb={6} textAlign="center">
-                💡 How much will you save with Jimmi?
+                💡 How much will you save with Buddy?
               </Heading>
               
               <Box maxW="md" mx="auto" mb={8}>
@@ -173,7 +173,7 @@ const Pricing: React.FC = () => {
                 </Stat>
                 
                 <Stat>
-                  <StatLabel color="gray.600">Jimmi</StatLabel>
+                  <StatLabel color="gray.600">Buddy</StatLabel>
                   <StatNumber fontSize="2xl" color="green.500">£{jimmiPrice}</StatNumber>
                   <StatHelpText>One-time fee</StatHelpText>
                 </Stat>
@@ -271,7 +271,7 @@ const Pricing: React.FC = () => {
           </Heading>
           
           <Text fontSize={{ base: "lg", md: "xl" }} mb={10} color={useColorModeValue('gray.600', 'gray.400')} maxW="2xl" mx="auto">
-            Worried it's not for you? Jimmi's so confident he can help, he offers a full refund if you're not satisfied. No questions asked.
+            Worried it's not for you? Buddy's so confident he can help, he offers a full refund if you're not satisfied. No questions asked.
           </Text>
           
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8} mb={12}>
@@ -300,19 +300,54 @@ const Pricing: React.FC = () => {
                   MOST POPULAR
                 </Badge>
                 
-                <VStack spacing={2}>
-                  <Text fontWeight="medium" color="gray.500">One-Time Payment</Text>
-                  <Heading 
-                    as="h4" 
-                    size="3xl" 
-                    bgGradient="linear(to-r, blue.500, purple.600)" 
-                    bgClip="text"
+                <VStack spacing={3} align="center">
+                  <Badge 
+                    colorScheme="green" 
+                    fontSize="sm" 
+                    px={3} 
+                    py={1} 
+                    borderRadius="full"
+                    textTransform="none"
                   >
-                    £39.99
-                  </Heading>
-                  <Text color="gray.500">No hidden fees ever</Text>
+                    Limited Time Offer
+                  </Badge>
+                  
+                  <Text 
+                    fontWeight="semibold" 
+                    color={useColorModeValue('gray.600', 'gray.400')}
+                    fontSize="lg"
+                  >
+                    One-Time Payment
+                  </Text>
+                  
+                  <HStack spacing={2} align="baseline">
+                    <Text 
+                      as="span" 
+                      fontSize="xl" 
+                      textDecoration="line-through" 
+                      color={useColorModeValue('gray.400', 'gray.500')}
+                    >
+                      £49.99
+                    </Text>
+                    <Heading 
+                      as="h4" 
+                      size="2xl" 
+                      bgGradient="linear(to-r, blue.500, purple.600)" 
+                      bgClip="text"
+                      fontWeight="extrabold"
+                    >
+                      £29.99
+                    </Heading>
+                  </HStack>
+                  
+                  <Text 
+                    color={useColorModeValue('gray.500', 'gray.400')}
+                    fontSize="sm"
+                    fontWeight="medium"
+                  >
+                    No hidden fees ever
+                  </Text>
                 </VStack>
-                
                 <Divider />
                 
                 <List spacing={3} alignSelf="start" width="100%">

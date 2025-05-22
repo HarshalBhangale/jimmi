@@ -157,7 +157,7 @@ export const PricingSection = () => {
                     spacing={3}
                   >
                     <Text fontWeight="bold" color={useColorModeValue('green.600', 'green.200')}>
-                      Jimmi
+                      Buddy
                     </Text>
                     <Heading size="lg" color={useColorModeValue('green.600', 'green.200')}>
                       £39.99
@@ -246,7 +246,7 @@ export const SimplePriceSection = () => {
             mx="auto"
             color={useColorModeValue('gray.600', 'gray.400')}
           >
-            Worried it's not for you? Jimmi's so confident he can help, he offers a full refund if you're not satisfied. No questions asked.
+            Worried it's not for you? buddy's so confident he can help, he offers a full refund if you're not satisfied. No questions asked.
           </Text>
         </VStack>
         
@@ -471,7 +471,7 @@ export const TestimonialsSection = () => {
             maxW="2xl"
             color={useColorModeValue('gray.600', 'gray.400')}
           >
-            See what our customers are saying about their experience with Jimmi
+            See what our customers are saying about their experience with buddy
           </Text>
         </VStack>
         
@@ -482,7 +482,7 @@ export const TestimonialsSection = () => {
           mx="auto"
         >
           <TestimonialCard
-            quote="I had no clue where to start until Jimmi explained it all. I just followed the steps and ended up with over £2,000 back."
+            quote="I had no clue where to start until buddy explained it all. I just followed the steps and ended up with over £2,000 back."
             name="Jason M"
             location="Leeds"
             avatarColor="purple"
@@ -657,7 +657,7 @@ export const HowItWorksSection = () => {
             maxW="2xl"
             color={useColorModeValue('gray.600', 'gray.400')}
           >
-            Let Jimmi walk you through the process. You've got this — and he's got your back.
+            Let buddy walk you through the process. You've got this — and he's got your back.
           </Text>
         </VStack>
         
@@ -688,7 +688,7 @@ export const HowItWorksSection = () => {
             <StepCard 
               number={2}
               icon={FiFileText}
-              title="Tell Jimmi about your loans" 
+              title="Tell buddy about your loans" 
               description="Choose your lender, upload your documents"
               color="purple"
             />
@@ -696,7 +696,7 @@ export const HowItWorksSection = () => {
             <StepCard 
               number={3}
               icon={FiCalendar}
-              title="Let Jimmi help you prepare your letters" 
+              title="Let buddy help you prepare your letters" 
               description="SARs and complaints generated based on your inputs"
               color="pink"
             />
@@ -705,7 +705,7 @@ export const HowItWorksSection = () => {
               number={4}
               icon={FiInbox}
               title="Track everything" 
-              description="All replies and updates go into your Jimmi Inbox"
+              description="All replies and updates go into your buddy Inbox"
               color="teal"
             />
           </SimpleGrid>
