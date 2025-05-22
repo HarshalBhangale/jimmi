@@ -27,7 +27,7 @@ const AlreadySignedUp = () => {
             bgGradient="linear(to-r, blue.400, purple.500)"
             bgClip="text"
           >
-            🧾 Already Signed Up Somewhere Else?
+            ✍️ Already Signed Up Somewhere Else?
           </Heading>
         </VStack>
         
