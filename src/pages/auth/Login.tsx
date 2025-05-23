@@ -189,7 +189,7 @@ const Login = () => {
         if (user?.userStatus === 'Paid') {  
           navigate('/dashboard');
         } else {
-          navigate('/auth/signup/step-2');
+          navigate('/auth/signup/step-3');
         }
       } else {
         setError(response.message || 'Invalid OTP');
