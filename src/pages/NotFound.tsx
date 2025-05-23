@@ -67,7 +67,7 @@ const NotFound = () => {
         </Text>
         <Button
           as={RouterLink}
-          to="/"
+          to="/dashboard"
           colorScheme="blue"
           size="lg"
           fontWeight="bold"

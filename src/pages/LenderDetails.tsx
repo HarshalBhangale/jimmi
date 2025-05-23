@@ -73,7 +73,8 @@ import AddAgreementModal from '../components/modals/AddAgreementModal';
 import SubmitClaimModal from '../components/modals/SubmitClaimModal';
 import LenderResponseModal from '../components/modals/LenderResponseModal';
 import { useAtomValue } from 'jotai';
-import { claimsAtom } from '@/jotai/atoms';
+import { claimsAtom, refetchClaimsAtom } from '@/jotai/atoms';
+import { useSetAtom } from 'jotai';
 import { submitClaim, createClaim } from '@/api/services/claims';
 
 // Timeline step component
@@ -499,6 +500,7 @@ const LenderDetails = () => {
   const [selectedAgreement, setSelectedAgreement] = useState<any>(null);
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const refetchClaims = useSetAtom(refetchClaimsAtom);
   
   const { 
     isOpen: isAddAgreementOpen, 
@@ -831,10 +833,10 @@ const LenderDetails = () => {
   };
 
   // Determine active step based on agreements and claim status
-  let activeStep = 0; // Default to first step
-  if (agreements.length > 0) activeStep = 1;
-  if (agreements.some(agreement => agreement.status === 'Submitted')) activeStep = 2;
-  if (agreements.some(agreement => ['OfferMade', 'Rejected', 'ClaimAlreadySubmitted', 'FOSEscalation', 'Completed'].includes(agreement.status))) activeStep = 3;
+  let activeStep = 1; // Start at step 1 (Document Requested) by default
+  if (agreements.length > 0) activeStep = 2; // Step 2: Agreement Added
+  if (agreements.some(agreement => agreement.status === 'Submitted')) activeStep = 3; // Step 3: Claim Submitted
+  if (agreements.some(agreement => ['OfferMade', 'Rejected', 'ClaimAlreadySubmitted', 'FOSEscalation', 'Completed'].includes(agreement.status))) activeStep = 4; // Step 4: Lender Responded
 
   // Define color schemes for different steps
   const stepColorSchemes = ['green', 'yellow', 'blue', 'purple'];
@@ -899,56 +901,99 @@ const LenderDetails = () => {
         </VStack>
 
         {/* Lender info card */}
-        <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="sm">
-          <CardBody>
-            <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }} gap={4}>
-              <Box>
-                <Heading size="lg">{lender.name}</Heading>
-                <Text color="gray.500">Last updated: {lender.lastUpdated}</Text>
-              </Box>
-              <VStack align="stretch" spacing={3} width={{ base: "100%", md: "auto" }}>
-                <StatusBadge status={lender.status} />
-                <Flex gap={2} flexWrap="wrap">
+        <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="md" overflow="hidden">
+          <CardBody p={6}>
+            <Flex 
+              direction={{ base: 'column', md: 'row' }} 
+              justify="space-between" 
+              align={{ base: 'stretch', md: 'center' }} 
+              gap={6}
+            >
+              {/* Left section with lender info */}
+              <VStack align="stretch" spacing={3}>
+                <Flex align="center" gap={3}>
+                  <Box
+                    bg="blue.50"
+                    p={2}
+                    borderRadius="lg"
+                    color="blue.500"
+                  >
+                    <Icon as={FiUser} boxSize={6} />
+                  </Box>
+                  <Box>
+                    <Heading size="lg" mb={1}>{lender.name}</Heading>
+                    <HStack spacing={2} color="gray.500" fontSize="sm">
+                      <Icon as={FiClock} />
+                      <Text>Updated {new Date(lender.lastUpdated).toLocaleDateString()}</Text>
+                    </HStack>
+                  </Box>
+                </Flex>
+                <Badge
+                  alignSelf="flex-start"
+                  px={3}
+                  py={1}
+                  borderRadius="full"
+                  colorScheme={
+                    lender.status === 'Document Requested' ? 'blue' :
+                    lender.status === 'Agreement Added' ? 'yellow' :
+                    lender.status === 'Claim Submitted' ? 'green' :
+                    'purple'
+                  }
+                  variant="subtle"
+                  fontSize="sm"
+                >
+                  {lender.status.toUpperCase()}
+                </Badge>
+              </VStack>
+
+              {/* Right section with action buttons */}
+              <VStack 
+                align="stretch" 
+                spacing={4}
+                minW={{ md: '320px' }}
+              >
+                <SimpleGrid columns={{ base: 1, sm: 2, md: 1 }} spacing={3}>
                   <Button
                     colorScheme="blue"
                     leftIcon={<FiPlus />}
                     onClick={onAddAgreementOpen}
-                    size="sm"
-                    variant="outline"
-                    flexGrow={{ base: 1, sm: 0 }}
+                    size="md"
+                    isFullWidth
                   >
                     Add Agreement
                   </Button>
+                  
                   {agreements.some(agreement => agreement.status !== 'Submitted') && (
                     <Button
                       colorScheme="green"
                       leftIcon={<FiSend />}
                       onClick={onSubmitClaimOpen}
-                      size="sm"
+                      size="md"
+                      isFullWidth
                       isDisabled={!agreements.some(agreement => agreement.status !== 'Submitted')}
-                      flexGrow={{ base: 1, sm: 0 }}
                     >
                       Submit Claim
                     </Button>
                   )}
-                  {agreements.some(agreement => agreement.status === 'Submitted') && (
-                    <Button
-                      colorScheme="orange"
-                      leftIcon={<FiMessageSquare />}
-                      onClick={() => {
-                        // Find the first submitted agreement to record response for
-                        const firstSubmitted = agreements.find(a => a.status === 'Submitted');
-                        if (firstSubmitted) {
-                          handleRecordResponse(firstSubmitted);
-                        }
-                      }}
-                      size="sm"
-                      flexGrow={{ base: 1, sm: 0 }}
-                    >
-                      Record Lender Response
-                    </Button>
-                  )}
-                </Flex>
+                </SimpleGrid>
+
+                {agreements.some(agreement => agreement.status === 'Submitted') && (
+                  <Button
+                    colorScheme="orange"
+                    leftIcon={<FiMessageSquare />}
+                    onClick={() => {
+                      const firstSubmitted = agreements.find(a => a.status === 'Submitted');
+                      if (firstSubmitted) {
+                        handleRecordResponse(firstSubmitted);
+                      }
+                    }}
+                    size="md"
+                    isFullWidth
+                    variant="outline"
+                  >
+                    Record Response
+                  </Button>
+                )}
               </VStack>
             </Flex>
           </CardBody>
@@ -1228,11 +1273,23 @@ const LenderDetails = () => {
 
             {/* Agreements Tab - Simplified and clearer */}
             <TabPanel p={6}>
-              <Flex justify="space-between" align="center" mb={6}>
+              <Flex 
+                direction={{ base: 'column', md: 'row' }} 
+                justify={{ base: 'flex-start', md: 'space-between' }} 
+                align={{ base: 'stretch', md: 'center' }} 
+                mb={6} 
+                gap={4}
+              >
                 <Heading size="md">All Agreements</Heading>
-                <HStack>
+                <HStack spacing={3} width={{ base: 'full', md: 'auto' }}>
                   <Menu closeOnSelect={false}>
-                    <MenuButton as={Button} rightIcon={<FiFilter />} size="sm" variant="outline">
+                    <MenuButton 
+                      as={Button} 
+                      rightIcon={<FiFilter />} 
+                      size="sm"
+                      variant="outline"
+                      width={{ base: 'full', md: 'auto' }}
+                    >
                       Filter
                     </MenuButton>
                     <MenuList minWidth="240px">
@@ -1261,7 +1318,13 @@ const LenderDetails = () => {
                       </MenuOptionGroup>
                     </MenuList>
                   </Menu>
-                  <Button leftIcon={<FiPlus />} colorScheme="blue" onClick={onAddAgreementOpen} size="sm">
+                  <Button 
+                    leftIcon={<FiPlus />} 
+                    colorScheme="blue" 
+                    onClick={onAddAgreementOpen} 
+                    size="sm"
+                    width={{ base: 'full', md: 'auto' }}
+                  >
                     Add Agreement
                   </Button>
                 </HStack>

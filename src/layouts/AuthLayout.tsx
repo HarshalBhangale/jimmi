@@ -20,7 +20,7 @@ const AuthLayout = () => {
       if (currentPath === "/auth/login") {
         return;
       } else {
-        navigate('/auth/signup/step-2');
+        navigate('/auth/signup/step-1');
       }
     } else {
        if (user.userStatus==="Paid"){
@@ -68,7 +68,7 @@ const AuthLayout = () => {
       >
         <Box textAlign="center" maxW="400px">
           <Image
-            src="/signup-icon.jpg"
+            src="/jimmi.png"
             alt="My Claim Buddy"
             mx="auto"
             h="320px"
@@ -100,9 +100,9 @@ const AuthLayout = () => {
             variant="ghost"
             color={useColorModeValue('gray.600', 'gray.400')}
             fontWeight="medium"
-            size="md"
+            size="sm"  // Changed from "md" to "sm"
             borderRadius="md"
-            px={4}
+            px={3}     // Reduced padding
             _hover={{
               bg: useColorModeValue('blue.50', 'blue.900'),
               color: useColorModeValue('blue.600', 'blue.300'),
@@ -117,10 +117,11 @@ const AuthLayout = () => {
         <Flex
           h="100%"
           w="100%"
-          alignItems="center"
+          alignItems="flex-start" // Changed from "center" to push content to the top
           justifyContent="center"
+          pt={12} // Add padding top instead of relying on vertical centering
         >
-          <Box w="100%" maxW="480px">
+          <Box w="100%" maxW={{ base: "480px", lg: "1200px" }} >
             <Outlet />
           </Box>
         </Flex>
@@ -129,4 +130,4 @@ const AuthLayout = () => {
   );
 };
 
-export default AuthLayout; 
+export default AuthLayout;

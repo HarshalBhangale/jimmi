@@ -260,356 +260,555 @@ const Mailbox: React.FC = () => {
   const starHoverColor = useColorModeValue('yellow.500', 'yellow.400');
   
   return (
-    <Container maxW="container.xl" py={8}>
-      <Flex justify="space-between" align="center" mb={6}>
-        <Heading size="xl" bgGradient="linear(to-r, blue.400, blue.600)" bgClip="text">
-          Lender Communications
-        </Heading>
-        <Button 
-          leftIcon={<Icon as={FiChevronLeft} />} 
-          onClick={handleBackToDashboard}
-          variant="ghost"
-          colorScheme="blue"
-        >
-          Back to Dashboard
-        </Button>
-      </Flex>
-      
-      {/* Mail Interface */}
-      <Box
-        bg={bgColor} 
-        borderRadius="xl" 
-        boxShadow="lg" 
-        overflow="hidden"
-        borderWidth="1px" 
-        borderColor={borderColor}
-        h={{ base: "auto", md: "calc(100vh - 200px)" }}
-      >
-        {/* Email Header/Search */}
-        <Flex p={4} borderBottomWidth="1px" borderColor={borderColor} align="center" justify="space-between">
-          <InputGroup maxW="400px">
-            <InputLeftElement pointerEvents="none">
-              <Icon as={FiSearch} color="gray.400" />
-            </InputLeftElement>
-            <Input 
-              placeholder="Search in messages" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              borderRadius="full"
-            />
-          </InputGroup>
-          
-          <HStack spacing={2}>
-            <Button 
-              leftIcon={<Icon as={FiEye} />} 
-              variant="ghost" 
-              size="sm"
-              onClick={markAllAsRead}
-            >
-              Mark all as read
-            </Button>
-            <Button 
-              leftIcon={<Icon as={FiEyeOff} />} 
-              variant="ghost" 
-              size="sm"
-              onClick={markAllAsUnread}
-            >
-              Mark all as unread
-            </Button>
-            <Button leftIcon={<Icon as={FiRefreshCw} />} variant="ghost" size="sm" onClick={fetchMails}>
-              Refresh
-            </Button>
-          </HStack>
-        </Flex>
-        
-        {/* Email List */}
-        <Box flex="1" overflow="auto" maxH="calc(100vh - 280px)">
-          {isLoading ? (
-            <Center h="200px">
-              <VStack spacing={4}>
-                <Spinner size="xl" color="blue.500" thickness="4px" />
-                <Text color={secondaryTextColor}>Loading messages...</Text>
-              </VStack>
-            </Center>
-          ) : (
-            <VStack spacing={0} align="stretch" divider={<Divider />}>
-              {filteredEmails.length === 0 ? (
-                <Flex justify="center" align="center" p={10} direction="column">
-                  <Icon as={FiMail} fontSize="5xl" color="gray.300" mb={4} />
-                  <Text color={secondaryTextColor}>No messages found</Text>
-                </Flex>
-              ) : (
-                filteredEmails.map((email) => (
-                  <Box 
-                    key={email._id}
-                    p={4}
-                    cursor="pointer"
-                    bg={email.status === 'read' ? bgColor : useColorModeValue('blue.50', 'blue.900')}
-                    _hover={{ bg: hoverBgColor }}
-                    onClick={() => handleEmailClick(email)}
-                    transition="all 0.2s"
-                    position="relative"
-                    borderLeft="4px solid"
-                    borderLeftColor={email.starred ?starColor : "blue.500" }
-                  >
-                    <Flex justify="space-between" align="flex-start">
-                      <HStack spacing={3} flex="1" overflow="hidden">
-                        <IconButton
-                          aria-label={email.starred ? "Unstar message" : "Star message"}
-                          icon={<Icon as={FiStar} />}
-                          size="sm"
-                          variant="ghost"
-                          color={email.starred ? starColor : "gray.400"}
-                          _hover={{ color: starHoverColor, bg: "transparent" }}
-                          onClick={(e) => toggleStar(email._id, e)}
-                        />
-                        <Avatar 
-                          size="md" 
-                          name={email.sender} 
-                          bgGradient="linear(to-r, blue.400, blue.600)"
-                        />
-                        <Box overflow="hidden">
-                          <Text 
-                            fontWeight={email.status === 'read' ? "normal" : "bold"}
-                            noOfLines={1}
-                            mb={1}
-                          >
-                            {email.sender}
-                          </Text>
-                          <Text 
-                            fontWeight={email.status === 'read' ? "normal" : "bold"} 
-                            fontSize="md" 
-                            mb={1}
-                            noOfLines={1}
-                          >
-                            {email.subject}
-                          </Text>
-                          <Text 
-                            fontSize="sm" 
-                            color={secondaryTextColor}
-                            noOfLines={1}
-                          >
-                            {email.body}
-                          </Text>
-                          {email.attachments.length > 0 && (
-                            <HStack mt={1} spacing={1}>
-                              <Icon as={FiPaperclip} fontSize="xs" color="gray.500" />
-                              <Text fontSize="xs" color="gray.500">
-                                {email.attachments.length} {email.attachments.length === 1 ? 'attachment' : 'attachments'}
-                              </Text>
-                            </HStack>
-                          )}
-                        </Box>
-                      </HStack>
-                      
-                      <Box textAlign="right" minW="100px">
-                        <Flex justify="flex-end" align="center">
-                          <Text fontSize="sm" color={secondaryTextColor} mr={2}>
-                            {formatDate(email.timestamp)}
-                          </Text>
-                          <Menu>
-                            <MenuButton
-                              as={IconButton}
-                              icon={<FiMoreVertical />}
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <MenuList>
-                              {email.status === 'read' ? (
-                                <MenuItem 
-                                  icon={<Icon as={FiEyeOff} />} 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    markAsUnread(email._id);
-                                  }}
-                                >
-                                  Mark as unread
-                                </MenuItem>
-                              ) : (
-                                <MenuItem 
-                                  icon={<Icon as={FiEye} />} 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    markAsRead(email._id);
-                                  }}
-                                >
-                                  Mark as read
-                                </MenuItem>
-                              )}
-                              <MenuItem 
-                                icon={<Icon as={FiStar} color={email.starred ? starColor : undefined} />} 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleStar(email._id, e);
-                                }}
-                              >
-                                {email.starred ? 'Remove star' : 'Add star'}
-                              </MenuItem>
-                              <MenuItem icon={<Icon as={FiArchive} />}>Archive</MenuItem>
-                              <MenuItem icon={<Icon as={FiTrash2} />}>Delete</MenuItem>
-                            </MenuList>
-                          </Menu>
-                        </Flex>
-                        <Tag 
-                          size="sm" 
-                          mt={2}
-                          colorScheme="blue"
-                          borderRadius="full"
-                        >
-                          {email.status}
-                        </Tag>
-                      </Box>
-                    </Flex>
-                  </Box>
-                ))
-              )}
+    <Box 
+      bg={useColorModeValue('gray.50', 'gray.900')} 
+      minH="100vh" 
+      py={{ base: 2, md: 8 }}
+      px={{ base: 0, md: 4 }}
+    >
+      <Container maxW="container.xl" px={{ base: 0, md: 4 }}>
+        {/* Enhanced Header - Better Mobile Optimization */}
+        <Box mb={{ base: 2, md: 6 }}>
+          <Flex 
+            justify="space-between" 
+            align="center" 
+            bg={useColorModeValue('white', 'gray.800')}
+            p={{ base: 4, md: 6 }}
+            borderRadius={{ base: 0, md: "xl" }}
+            boxShadow={{ base: "none", md: "sm" }}
+            borderWidth={{ base: 0, md: "1px" }}
+            borderBottomWidth="1px"
+            borderColor={useColorModeValue('gray.200', 'gray.700')}
+          >
+            <VStack align="flex-start" spacing={0}>
+              <Heading 
+                size={{ base: "md", md: "lg" }}
+                bgGradient="linear(to-r, blue.500, purple.500)"
+                bgClip="text"
+                fontWeight="bold"
+              >
+                Inbox
+              </Heading>
+              <Text color="gray.500" fontSize={{ base: "xs", md: "sm" }}>
+                Lender communications
+              </Text>
             </VStack>
-          )}
+            <Button 
+              leftIcon={<Icon as={FiChevronLeft} boxSize={{ base: 4, md: 5 }} />} 
+              onClick={handleBackToDashboard}
+              variant="ghost"
+              colorScheme="blue"
+              size="sm"
+              px={{ base: 2, md: 4 }}
+              _hover={{ transform: 'translateX(-2px)' }}
+              transition="all 0.2s"
+            >
+              Back
+            </Button>
+          </Flex>
         </Box>
-      </Box>
-      
-      {/* Email Detail Modal */}
+
+        {/* Optimized Mail Interface - Better for Mobile */}
+        <Box
+          bg={useColorModeValue('white', 'gray.800')}
+          borderRadius={{ base: 0, md: "xl" }}
+          boxShadow={{ base: "none", md: "md" }}
+          overflow="hidden"
+          borderWidth={{ base: 0, md: "1px" }}
+          borderColor={useColorModeValue('gray.200', 'gray.700')}
+          h={{ base: "calc(100vh - 100px)", md: "calc(100vh - 180px)" }}
+          display="flex"
+          flexDirection="column"
+        >
+          {/* Streamlined Search/Actions Bar - Better Mobile Alignment */}
+          <Flex 
+            p={{ base: 3, md: 4 }} 
+            borderBottomWidth="1px" 
+            borderColor={useColorModeValue('gray.200', 'gray.700')}
+            bg={useColorModeValue('gray.50', 'gray.750')}
+            align="center"
+            gap={2}
+          >
+            <InputGroup size={{ base: "sm", md: "md" }} flex="1">
+              <InputLeftElement pointerEvents="none" pl={{ base: 2, md: 3 }}>
+                <Icon as={FiSearch} color="gray.400" boxSize={{ base: 3, md: 4 }} />
+              </InputLeftElement>
+              <Input 
+                placeholder="Search..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                borderRadius="full"
+                bg={useColorModeValue('white', 'gray.700')}
+                _placeholder={{ color: 'gray.400' }}
+                fontSize={{ base: "sm", md: "md" }}
+                pl={{ base: 8, md: 10 }}
+              />
+            </InputGroup>
+
+            <IconButton
+              aria-label="Refresh messages"
+              icon={<Icon as={FiRefreshCw} boxSize={{ base: 3.5, md: 4 }} />}
+              variant="ghost"
+              size={{ base: "sm", md: "md" }}
+              onClick={fetchMails}
+              colorScheme="blue"
+              isRound
+            />
+          </Flex>
+
+          {/* Enhanced Email List with Better Mobile Layout */}
+          <Box 
+            flex="1" 
+            overflow="auto" 
+            className="hide-scrollbar"
+            position="relative"
+          >
+            {isLoading ? (
+              <Center h="100%" w="full">
+                <VStack spacing={3}>
+                  <Spinner 
+                    size={{ base: "md", md: "xl" }} 
+                    color="blue.500" 
+                    thickness="4px"
+                    speed="0.65s"
+                    emptyColor={useColorModeValue("gray.200", "gray.700")}
+                  />
+                  <Text color="gray.500" fontSize={{ base: "sm", md: "md" }}>
+                    Loading messages...
+                  </Text>
+                </VStack>
+              </Center>
+            ) : (
+              <>
+                {filteredEmails.length === 0 ? (
+                  <Flex 
+                    justify="center" 
+                    align="center" 
+                    p={{ base: 6, md: 10 }}
+                    direction="column"
+                    h="full"
+                    textAlign="center"
+                  >
+                    <Box 
+                      bg={useColorModeValue("gray.50", "gray.700")}
+                      p={5}
+                      borderRadius="full"
+                      mb={4}
+                    >
+                      <Icon 
+                        as={FiMail} 
+                        boxSize={{ base: 8, md: 12 }}
+                        color={useColorModeValue("gray.300", "gray.500")}
+                      />
+                    </Box>
+                    <Text 
+                      color={useColorModeValue("gray.600", "gray.400")}
+                      fontSize={{ base: "md", md: "lg" }}
+                      fontWeight="medium"
+                    >
+                      {searchQuery ? 'No matching messages' : 'Your inbox is empty'}
+                    </Text>
+                    <Text 
+                      color={useColorModeValue("gray.500", "gray.500")} 
+                      fontSize={{ base: "xs", md: "sm" }}
+                      mt={2}
+                      maxW="xs"
+                    >
+                      {searchQuery 
+                        ? 'Try adjusting your search terms or clear the search' 
+                        : 'New messages from lenders will appear here'}
+                    </Text>
+                  </Flex>
+                ) : (
+                  // Improved Email Items with Better Mobile Layout and Fixed Star Alignment
+                  <VStack spacing={0} align="stretch" divider={
+                    <Divider borderColor={useColorModeValue("gray.100", "gray.700")} />
+                  }>
+                    {filteredEmails.map((email) => (
+                      <Box 
+                        key={email._id}
+                        onClick={() => handleEmailClick(email)}
+                        cursor="pointer"
+                        transition="all 0.2s"
+                        bg={email.status === 'read' 
+                          ? useColorModeValue("white", "gray.800") 
+                          : useColorModeValue("blue.50", "blue.900")
+                        }
+                        px={{ base: 3, md: 5 }}
+                        py={{ base: 3, md: 4 }}
+                        _hover={{ 
+                          bg: useColorModeValue("gray.50", "gray.750"),
+                        }}
+                        position="relative"
+                        borderLeft="3px solid"
+                        borderLeftColor={email.starred 
+                          ? useColorModeValue("yellow.400", "yellow.500") 
+                          : (email.status === 'unread' 
+                              ? useColorModeValue("blue.400", "blue.500") 
+                              : "transparent")
+                        }
+                      >
+                        <Flex gap={3} align="flex-start">
+                          {/* Left side - Avatar */}
+                          <Avatar 
+                            size={{ base: "sm", md: "md" }}
+                            name={email.sender}
+                            bgGradient="linear(to-r, blue.400, purple.500)"
+                            border="2px solid"
+                            borderColor={useColorModeValue("white", "gray.700")}
+                            boxShadow="sm"
+                          />
+                          
+                          {/* Center - Message content with improved mobile layout */}
+                          <Box flex="1" minW="0" mr={{ base: 6, md: 10 }}>
+                            {/* Header with better alignment */}
+                            <Flex 
+                              justify="space-between" 
+                              align="center"
+                              mb={1}
+                              wrap="nowrap"
+                              gap={2}
+                            >
+                              <Text 
+                                fontWeight={email.status === 'read' ? "medium" : "bold"} 
+                                fontSize={{ base: "xs", md: "sm" }}
+                                noOfLines={1}
+                                flex="1"
+                                color={useColorModeValue("gray.800", "white")}
+                                maxW="70%"
+                              >
+                                {email.sender}
+                              </Text>
+                              <Text 
+                                fontSize={{ base: "2xs", md: "xs" }}
+                                color="gray.500"
+                                flexShrink={0}
+                                whiteSpace="nowrap"
+                              >
+                                {formatDate(email.timestamp)}
+                              </Text>
+                            </Flex>
+                            
+                            {/* Subject with proper spacing */}
+                            <Text 
+                              fontSize={{ base: "sm", md: "md" }}
+                              fontWeight={email.status === 'read' ? "normal" : "medium"}
+                              mb={1}
+                              noOfLines={1}
+                              color={email.status === 'read' 
+                                ? useColorModeValue("gray.700", "gray.300")
+                                : useColorModeValue("gray.800", "white")
+                              }
+                              pr={{ base: 1, md: 2 }}
+                            >
+                              {email.subject}
+                            </Text>
+                            
+                            {/* Body preview with better spacing */}
+                            <Text 
+                              fontSize={{ base: "xs", md: "sm" }}
+                              color={useColorModeValue("gray.600", "gray.400")}
+                              noOfLines={{ base: 1, md: 2 }}
+                              mb={{ base: 1, md: 2 }}
+                              pr={{ base: 0, md: 2 }}
+                            >
+                              {email.body}
+                            </Text>
+                            
+                            {/* Footer with improved mobile layout */}
+                            <Flex justify="flex-start" align="center">
+                              {/* Attachment indicator */}
+                              {email.attachments.length > 0 && (
+                                <HStack spacing={1} mr={2}>
+                                  <Icon 
+                                    as={FiPaperclip} 
+                                    boxSize={{ base: 3, md: 3.5 }} 
+                                    color={useColorModeValue("blue.500", "blue.300")}
+                                  />
+                                  <Text 
+                                    fontSize={{ base: "2xs", md: "xs" }}
+                                    color={useColorModeValue("blue.600", "blue.300")}
+                                  >
+                                    {email.attachments.length}
+                                  </Text>
+                                </HStack>
+                              )}
+                            </Flex>
+                          </Box>
+                        </Flex>
+                      </Box>
+                    ))}
+                  </VStack>
+                )}
+              </>
+            )}
+          </Box>
+        </Box>
+      </Container>
+
+      {/* Redesigned Email Detail Modal - Enhanced for Mobile */}
       {selectedMail && (
-        <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
-          <ModalOverlay />
-          <ModalContent borderRadius="xl">
-            <ModalHeader borderBottomWidth="1px" borderColor={borderColor}>
-              <Flex justify="space-between" align="center">
-                <Text>{selectedMail.subject}</Text>
-                <IconButton
-                  aria-label={selectedMail.starred ? "Unstar message" : "Star message"}
-                  icon={<Icon as={FiStar} />}
-                  size="sm"
-                  variant="ghost"
-                  color={selectedMail.starred ? starColor : "gray.400"}
-                  _hover={{ color: starHoverColor, bg: "transparent" }}
-                  onClick={(e) => toggleStar(selectedMail._id, e)}
-                />
-              </Flex>
-              <Flex align="center" mt={1}>
-                <Tag 
-                  size="sm" 
-                  colorScheme="blue"
-                  borderRadius="full"
-                  mr={2}
+        <Modal 
+          isOpen={isOpen} 
+          onClose={onClose} 
+          size={{ base: "full", md: "2xl" }}
+          motionPreset="slideInBottom"
+          scrollBehavior="inside"
+        >
+          <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
+          <ModalContent 
+            borderRadius={{ base: 0, md: "2xl" }}
+            my={{ base: 0, md: 4 }}
+            maxH={{ base: "100vh", md: "85vh" }}
+            overflow="hidden" // Ensure content doesn't overflow
+          >
+            <ModalHeader 
+              borderBottomWidth="1px" 
+              borderColor={borderColor}
+              bg={useColorModeValue("gray.50", "gray.750")}
+              px={{ base: 4, md: 6 }}
+              py={{ base: 3, md: 4 }}
+              position="relative" // For absolute positioning of star
+            >
+              <Flex direction="column">
+                <Text 
+                  fontSize={{ base: "md", md: "lg" }} 
+                  fontWeight="bold"
+                  noOfLines={1}
+                  pr={{ base: 10, md: 12 }} // Space for star button
+                  mb={1}
                 >
-                  {selectedMail.status}
-                </Tag>
-                <Text fontSize="sm" color={secondaryTextColor}>
-                  {formatDate(selectedMail.timestamp)}
+                  {selectedMail.subject}
                 </Text>
+                <HStack spacing={2}>
+                  <Badge 
+                    colorScheme={selectedMail.status === 'unread' ? "blue" : "gray"}
+                    variant="subtle"
+                    fontSize="xs"
+                    borderRadius="full"
+                    px={2}
+                  >
+                    {selectedMail.status}
+                  </Badge>
+                  <Text fontSize="xs" color="gray.500">
+                    {formatDate(selectedMail.timestamp)}
+                  </Text>
+                </HStack>
               </Flex>
             </ModalHeader>
-            <ModalCloseButton />
+            <ModalCloseButton size="md" top={3} right={3} zIndex="1" />
             
-            <ModalBody pt={4}>
-              <Flex align="flex-start" mb={6}>
+            <ModalBody pt={5} px={{ base: 4, md: 6 }}>
+              {/* Sender info - Better mobile layout */}
+              <Flex 
+                align="flex-start" 
+                mb={{ base: 4, md: 6 }}
+                gap={{ base: 3, md: 4 }}
+              >
                 <Avatar 
-                  size="lg" 
+                  size={{ base: "sm", md: "md" }}
                   name={selectedMail.sender} 
-                  bgGradient="linear(to-r, blue.400, blue.600)"
-                  mr={4}
+                  bgGradient="linear(to-r, blue.400, purple.500)"
+                  border="2px solid"
+                  borderColor={useColorModeValue("white", "gray.700")}
                 />
-                <Box>
-                  <Text fontWeight="bold" fontSize="lg">{selectedMail.sender}</Text>
-                  <Text fontSize="sm" color={secondaryTextColor}>
+                <Box flex="1" minW="0">
+                  <Text 
+                    fontWeight="bold" 
+                    fontSize={{ base: "md", md: "lg" }}
+                    noOfLines={1}
+                  >
+                    {selectedMail.sender}
+                  </Text>
+                  <Text 
+                    fontSize={{ base: "xs", md: "sm" }} 
+                    color="gray.500"
+                    display="flex"
+                    alignItems="center"
+                  >
                     <Icon as={FiCalendar} mr={1} />
-                    {formatDate(selectedMail.timestamp)}
+                    <span>{formatDate(selectedMail.timestamp)}</span>
                   </Text>
                 </Box>
               </Flex>
               
-              <Divider mb={6} />
+              <Divider mb={{ base: 4, md: 6 }} />
               
-              <Text mb={8} fontSize="md" lineHeight="tall">
+              {/* Email body with improved mobile display */}
+              <Box 
+                fontSize={{ base: "sm", md: "md" }}
+                lineHeight="tall"
+                mb={{ base: 6, md: 8 }}
+                color={useColorModeValue("gray.700", "gray.200")}
+                whiteSpace="pre-line"
+                sx={{
+                  wordBreak: "break-word", // Better text wrapping
+                  "& a": {
+                    color: "blue.500",
+                    textDecoration: "underline"
+                  }
+                }}
+              >
                 {selectedMail.body}
-              </Text>
+              </Box>
               
+              {/* Enhanced attachment display - Better mobile layout */}
               {selectedMail.attachments.length > 0 && (
                 <Box
-                  p={4}
-                  bg={useColorModeValue('gray.50', 'gray.700')}
-                  borderRadius="md"
+                  p={{ base: 3, md: 5 }}
+                  bg={useColorModeValue('gray.50', 'gray.750')}
+                  borderRadius="xl"
                   mb={4}
+                  border="1px solid"
+                  borderColor={useColorModeValue("gray.100", "gray.700")}
                 >
-                  <Text fontWeight="medium" mb={3}>
-                    Attachments ({selectedMail.attachments.length})
-                  </Text>
-                  <VStack align="stretch" spacing={2}>
+                  <Flex align="center" mb={{ base: 2, md: 3 }}>
+                    <Icon 
+                      as={FiPaperclip} 
+                      mr={2}
+                      color={useColorModeValue("blue.500", "blue.300")}
+                    />
+                    <Text fontWeight="medium">
+                      Attachments ({selectedMail.attachments.length})
+                    </Text>
+                  </Flex>
+                  
+                  <SimpleGrid 
+                    columns={{ base: 1, md: 2 }}
+                    spacing={{ base: 2, md: 3 }}
+                  >
                     {selectedMail.attachments.map((attachment) => (
                       <Flex 
                         key={attachment._id}
-                        p={3}
+                        p={{ base: 2, md: 3 }}
+                        borderRadius="lg"
+                        bg={useColorModeValue("white", "gray.800")}
                         borderWidth="1px"
-                        borderRadius="md"
-                        borderColor={borderColor}
-                        bg={bgColor}
-                        justify="space-between"
+                        borderColor={useColorModeValue("gray.200", "gray.600")}
                         align="center"
+                        justify="space-between"
+                        transition="all 0.2s"
+                        _hover={{
+                          bg: useColorModeValue("gray.50", "gray.700"),
+                          borderColor: useColorModeValue("blue.100", "blue.700"),
+                        }}
+                        gap={2}
                       >
-                        <HStack>
-                          <Icon as={FiFileText} color="blue.500" />
-                          <Box>
-                            <Text>{attachment.filename}</Text>
-                            <Text fontSize="xs" color={secondaryTextColor}>
+                        <HStack flex="1" minWidth="0" spacing={2}>
+                          <Icon 
+                            as={FiFileText} 
+                            color="blue.500"
+                            boxSize={{ base: 4, md: 5 }}
+                            flexShrink={0}
+                          />
+                          <Box flex="1" minWidth="0">
+                            <Text 
+                              fontWeight="medium" 
+                              fontSize={{ base: "xs", md: "sm" }}
+                              noOfLines={1}
+                            >
+                              {attachment.filename}
+                            </Text>
+                            <Text 
+                              fontSize={{ base: "2xs", md: "xs" }}
+                              color="gray.500"
+                            >
                               {(attachment.size / 1024).toFixed(1)} KB
                             </Text>
                           </Box>
                         </HStack>
-                        <Button 
-                          size="sm" 
-                          leftIcon={<Icon as={FiDownload} />}
+                        
+                        <IconButton
+                          icon={<Icon as={FiDownload} boxSize={{ base: 3.5, md: 4 }} />}
+                          aria-label="Download attachment"
+                          size="sm"
                           colorScheme="blue"
                           variant="ghost"
                           as="a"
                           href={attachment.signedUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                        >
-                          Download
-                        </Button>
+                          flexShrink={0}
+                          minW={{ base: "28px", md: "32px" }}
+                          h={{ base: "28px", md: "32px" }}
+                          p={0}
+                        />
                       </Flex>
                     ))}
-                  </VStack>
+                  </SimpleGrid>
                 </Box>
               )}
             </ModalBody>
             
-            <ModalFooter borderTopWidth="1px" borderColor={borderColor}>
-              <HStack spacing={3}>
-                <Button leftIcon={<Icon as={FiArrowRight} />} colorScheme="blue">
-                  Reply
-                </Button>
-                {selectedMail.status === 'read' ? (
-                  <Button 
-                    leftIcon={<Icon as={FiEyeOff} />} 
-                    variant="ghost"
-                    onClick={() => markAsUnread(selectedMail._id)}
-                  >
-                    Mark as unread
-                  </Button>
-                ) : (
-                  <Button 
-                    leftIcon={<Icon as={FiEye} />} 
-                    variant="ghost"
-                    onClick={() => markAsRead(selectedMail._id)}
-                  >
-                    Mark as read
-                  </Button>
-                )}
-                <Button leftIcon={<Icon as={FiTrash2} />} variant="ghost">
-                  Delete
-                </Button>
-                <Button leftIcon={<Icon as={FiArchive} />} variant="ghost">
-                  Archive
-                </Button>
-              </HStack>
+            <ModalFooter 
+              borderTopWidth="1px" 
+              borderColor={borderColor}
+              justifyContent="center"
+              p={{ base: 3, md: 4 }}
+            >
+              <Button 
+                leftIcon={<Icon as={selectedMail.status === 'read' ? FiEyeOff : FiEye} />}
+                onClick={() => {
+                  if (selectedMail.status === 'read') {
+                    markAsUnread(selectedMail._id);
+                    onClose();
+                  } else {
+                    markAsRead(selectedMail._id);
+                  }
+                }}
+                colorScheme="blue"
+                size={{ base: "md", md: "md" }}
+                w={{ base: "full", md: "auto" }}
+                minW={{ base: "auto", md: "200px" }}
+                borderRadius="lg"
+              >
+                Mark as {selectedMail.status === 'read' ? 'unread' : 'read'}
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
       )}
-    </Container>
+
+      {/* Fixed FAB Action Button - Mobile optimization */}
+      <Box
+        display={{ base: "block", md: "none" }}
+        position="fixed"
+        bottom={4}
+        right={4}
+        zIndex={10}
+      >
+        <Tooltip label="Mark all as read" placement="left">
+          <IconButton
+            aria-label="Mark all as read"
+            icon={<Icon as={FiEye} boxSize={5} />}
+            onClick={markAllAsRead}
+            colorScheme="blue"
+            isRound
+            size="lg"
+            boxShadow="xl"
+            width="50px"
+            height="50px"
+          />
+        </Tooltip>
+      </Box>
+
+      {/* Add optimized styles for touch interfaces */}
+      <style jsx global>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        /* Improve touch targets for mobile */
+        @media (max-width: 768px) {
+          button, a {
+            cursor: default !important;
+          }
+        }
+      `}</style>
+    </Box>
   );
 };
 

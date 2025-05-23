@@ -26,37 +26,16 @@ import {
   Tag,
   TagLabel,
   TagCloseButton,
+  useToast,
 } from '@chakra-ui/react';
 import { FiX, FiPlus, FiSearch } from 'react-icons/fi';
-
-// Mock API call, replace with actual API call
-const getLenders = async () => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Mock data
-  return {
-    success: true,
-    data: [
-      { _id: '1', name: 'Black Horse' },
-      { _id: '2', name: 'Barclays Partner Finance' },
-      { _id: '3', name: 'Santander Consumer Finance' },
-      { _id: '4', name: 'Motonovo Finance' },
-      { _id: '5', name: 'Close Brothers' },
-      { _id: '6', name: 'BMW Financial Services' },
-      { _id: '7', name: 'Mercedes-Benz Financial Services' },
-      { _id: '8', name: 'Volkswagen Financial Services' },
-      { _id: '9', name: 'Toyota Financial Services' },
-      { _id: '10', name: 'Ford Credit' },
-      { _id: '11', name: 'Honda Finance' },
-      { _id: '12', name: 'Nissan Finance' },
-    ]
-  };
-};
+import { getLenders, addLenders } from '@api/services/lender';
 
 interface Lender {
   _id: string;
   name: string;
+  subLenders?: string[];
+  major?: boolean;
 }
 
 interface AddLenderModalProps {
@@ -78,6 +57,7 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
   const [error, setError] = useState('');
   const [lenders, setLenders] = useState<Lender[]>([]);
   const [isLoadingLenders, setIsLoadingLenders] = useState(true);
+  const toast = useToast();
 
   // Fetch lenders on modal open
   useEffect(() => {
@@ -94,10 +74,24 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
         setLenders(response.data);
       } else {
         setError('Failed to load lenders');
+        toast({
+          title: "Error loading lenders",
+          description: "Please try refreshing the page",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       }
     } catch (err) {
       console.error(err);
       setError('Failed to load lenders');
+      toast({
+        title: "Error loading lenders",
+        description: "Please try refreshing the page",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     } finally {
       setIsLoadingLenders(false);
     }
@@ -106,7 +100,10 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
   // Filter lenders based on search query
   const filteredLenders = searchQuery
     ? lenders.filter((lender) => 
-        lender.name.toLowerCase().includes(searchQuery.toLowerCase())
+        lender.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        lender.subLenders?.some(sub => 
+          sub.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       )
     : lenders;
 
@@ -131,11 +128,26 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
     setIsLoading(true);
     
     try {
-      await onAddLenders(selectedLenders);
-      onClose();
+      // Call the backend API to add lenders
+      const response = await addLenders(selectedLenders.map(lender => lender._id));
+      
+      if (response?.success) {
+        // Call the parent component's onAddLenders callback
+        await onAddLenders(selectedLenders);
+        onClose();
+      } else {
+        throw new Error(response?.message || 'Failed to add lenders');
+      }
     } catch (err) {
       console.error(err);
       setError('Failed to add lenders');
+      toast({
+        title: "Error adding lenders",
+        description: "Please try again",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -250,6 +262,16 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
                         mr={3}
                       />
                       <Text>{lender.name}</Text>
+                      {lender.major && (
+                        <Tag 
+                          size="sm" 
+                          colorScheme="blue" 
+                          borderRadius="full" 
+                          ml="auto"
+                        >
+                          Popular
+                        </Tag>
+                      )}
                     </Flex>
                   ))}
                 </SimpleGrid>

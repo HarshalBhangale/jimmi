@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -30,7 +30,7 @@ interface AddAgreementModalProps {
 const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
   isOpen,
   onClose,
-  lenderName = 'Black Horse',
+  lenderName,
   lenderId,
   onAddAgreement,
 }) => {
@@ -39,6 +39,17 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
     agreementNumber: '',
     carRegistration: '',
   });
+
+  // Reset state when modal opens or closes
+  useEffect(() => {
+    if (!isOpen) {
+      setAgreementData({
+        agreementNumber: '',
+        carRegistration: '',
+      });
+      setIsLoading(false);
+    }
+  }, [isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -118,8 +129,8 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
                   />
                 </FormControl>
                 
-                <FormControl>
-                  <FormLabel>Car Registration (Optional)</FormLabel>
+                <FormControl isRequired>
+                  <FormLabel>Car Registration</FormLabel>
                   <Input 
                     placeholder="e.g. AB12 CDE"
                     name="carRegistration"
@@ -143,7 +154,7 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
             onClick={handleSubmit} 
             isLoading={isLoading}
             loadingText="Saving"
-            isDisabled={!agreementData.agreementNumber}
+            isDisabled={!agreementData.agreementNumber || !agreementData.carRegistration}
           >
             Save Agreement
           </Button>

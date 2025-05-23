@@ -36,6 +36,12 @@ import {
   useSteps,
   Progress,
   Center,
+  Spinner,
+  CardHeader,
+  Skeleton,
+  SkeletonText,
+  Avatar,
+  AvatarGroup,
 } from '@chakra-ui/react';
 import {
   FiPlus,
@@ -46,6 +52,9 @@ import {
   FiDollarSign,
   FiMail,
   FiCheck,
+  FiClock,
+  FiActivity,
+  FiTarget,
 } from 'react-icons/fi';
 import AddLenderModal from '../components/modals/AddLenderModal';
 import AddAgreementModal from '../components/modals/AddAgreementModal';
@@ -53,6 +62,8 @@ import SubmitClaimModal from '../components/modals/SubmitClaimModal';
 import { userAtom } from '@/jotai/atoms';
 import { useAtomValue } from 'jotai';
 import { getClaims, createClaim } from '@/api/services/claims';
+
+const CLAIM_RESPONSE_STATUSES =  ['Offer Made', 'Accepted', 'Rejected', 'Declined', 'Escalated', 'FCA Pause']
 
 interface Agreement {
   agreementNumber: string;
@@ -100,76 +111,216 @@ interface DashboardLender {
   agreements: DashboardAgreement[];
 }
 
-// Agreement card component
+// Enhanced Statistics Cards Component
+const StatisticsCards = ({ statistics, isLoading }: { statistics: any, isLoading: boolean }) => {
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const iconBg = useColorModeValue('blue.50', 'blue.900');
+  
+  const stats = [
+    {
+      label: 'Total Lenders',
+      value: statistics.totalLenders,
+      icon: FiUsers,
+      color: 'blue',
+      change: '+12%',
+      changeType: 'increase'
+    },
+    {
+      label: 'Active Claims',
+      value: statistics.activeLenders,
+      icon: FiActivity,
+      color: 'green',
+      change: '+8%',
+      changeType: 'increase'
+    },
+    {
+      label: 'Total Agreements',
+      value: statistics.totalAgreements,
+      icon: FiFileText,
+      color: 'purple',
+      change: '+23%',
+      changeType: 'increase'
+    },
+    {
+      label: 'Potential Refund',
+      value: `£${statistics.potentialRefund.toLocaleString()}`,
+      icon: FiDollarSign,
+      color: 'orange',
+      change: '+15%',
+      changeType: 'increase'
+    }
+  ];
+
+  return (
+    <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={{ base: 4, md: 6 }} mb={{ base: 6, md: 8 }}>
+      {stats.map((stat, index) => (
+        <Card
+          key={index}
+          bg={cardBg}
+          borderWidth="1px"
+          borderColor={borderColor}
+          borderRadius="xl"
+          overflow="hidden"
+          transition="all 0.3s ease"
+          _hover={{
+            transform: 'translateY(-2px)',
+            boxShadow: 'xl',
+            borderColor: `${stat.color}.200`
+          }}
+          cursor="pointer"
+        >
+          <CardBody p={{ base: 4, md: 6 }}>
+            {isLoading ? (
+              <VStack spacing={3} align="stretch">
+                <Skeleton height="40px" borderRadius="lg" />
+                <Skeleton height="20px" borderRadius="md" />
+                <Skeleton height="16px" borderRadius="md" width="60%" />
+              </VStack>
+            ) : (
+              <>
+                <Flex justify="space-between" align="flex-start" mb={4}>
+                  <Box>
+                    <Stat>
+                      <StatLabel fontSize={{ base: "sm", md: "md" }} color="gray.600" fontWeight="medium">
+                        {stat.label}
+                      </StatLabel>
+                      <StatNumber fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={`${stat.color}.600`}>
+                        {stat.value}
+                      </StatNumber>
+                      <StatHelpText fontSize="xs" mb={0}>
+                        <StatArrow type={stat.changeType as any} />
+                        {stat.change} from last month
+                      </StatHelpText>
+                    </Stat>
+                  </Box>
+                  <Flex
+                    w={{ base: "40px", md: "48px" }}
+                    h={{ base: "40px", md: "48px" }}
+                    borderRadius="xl"
+                    bg={`${stat.color}.50`}
+                    align="center"
+                    justify="center"
+                    flexShrink={0}
+                  >
+                    <Icon as={stat.icon} w={{ base: 5, md: 6 }} h={{ base: 5, md: 6 }} color={`${stat.color}.600`} />
+                  </Flex>
+                </Flex>
+              </>
+            )}
+          </CardBody>
+        </Card>
+      ))}
+    </SimpleGrid>
+  );
+};
+
+// Enhanced Agreement card component
 const AgreementCard = ({ id = '001', status = 'Pending', carRegistration = '', createdAt = '', onClick }: { id?: string, status?: string, carRegistration?: string, createdAt?: string, onClick?: () => void }) => {
   const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const cardBg = useColorModeValue('white', 'gray.700');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
 
-  // Status badge colors
+  // Enhanced status badge colors with better visual hierarchy
   const statusColors = {
-    Pending: { bg: 'yellow.100', color: 'yellow.800', text: 'Pending' },
-    Submitted: { bg: 'blue.100', color: 'blue.800', text: 'Submitted' },
-    'Offer Made': { bg: 'green.100', color: 'green.800', text: 'Offer Made' },
-    Rejected: { bg: 'red.100', color: 'red.800', text: 'Rejected' },
-    'FCA Pause': { bg: 'purple.100', color: 'purple.800', text: 'FCA Pause' },
-    Accepted: { bg: 'green.100', color: 'green.800', text: 'Accepted' },
-    Declined: { bg: 'orange.100', color: 'orange.800', text: 'Declined' },
-    Escalated: { bg: 'red.100', color: 'red.800', text: 'Escalated' }
+    Pending: { bg: 'yellow.100', color: 'yellow.800', text: 'Pending', borderColor: 'yellow.200' },
+    Submitted: { bg: 'blue.100', color: 'blue.800', text: 'Submitted', borderColor: 'blue.200' },
+    'Offer Made': { bg: 'green.100', color: 'green.800', text: 'Offer Made', borderColor: 'green.200' },
+    Rejected: { bg: 'red.100', color: 'red.800', text: 'Rejected', borderColor: 'red.200' },
+    'FCA Pause': { bg: 'purple.100', color: 'purple.800', text: 'FCA Pause', borderColor: 'purple.200' },
+    Accepted: { bg: 'green.100', color: 'green.800', text: 'Accepted', borderColor: 'green.200' },
+    Declined: { bg: 'orange.100', color: 'orange.800', text: 'Declined', borderColor: 'orange.200' },
+    Escalated: { bg: 'red.100', color: 'red.800', text: 'Escalated', borderColor: 'red.200' }
   };
 
   const statusColor = statusColors[status as keyof typeof statusColors] ||
-    { bg: 'gray.100', color: 'gray.800', text: status };
+    { bg: 'gray.100', color: 'gray.800', text: status, borderColor: 'gray.200' };
 
   return (
     <Card
       variant="outline"
-      my={3}
+      my={{ base: 2, md: 3 }}
       borderWidth="1px"
       borderColor={borderColor}
-      borderRadius="lg"
+      borderRadius="xl"
       boxShadow="sm"
       bg={cardBg}
       onClick={onClick}
       cursor={onClick ? "pointer" : "default"}
       _hover={onClick ? {
-        boxShadow: 'md',
-        borderColor: 'blue.200',
+        boxShadow: 'lg',
+        borderColor: 'blue.300',
+        bg: hoverBg,
+        transform: 'translateY(-1px)',
       } : {}}
-      transition="all 0.2s"
+      transition="all 0.2s ease"
+      overflow="hidden"
     >
-      <CardBody>
-        <Flex justify="space-between" align="center" mb={3}>
-          <Text fontWeight="bold">Agreement # {id}</Text>
+      <CardBody py={{ base: 4, md: 5 }} px={{ base: 4, md: 5 }}>
+        <Flex 
+          justify="space-between" 
+          align={{ base: "flex-start", sm: "center" }}
+          mb={4}
+          direction={{ base: "column", sm: "row" }}
+          gap={{ base: 3, sm: 2 }}
+        >
+          <VStack align="flex-start" spacing={1}>
+            <Text fontWeight="bold" fontSize={{ base: "md", md: "lg" }} color="gray.800">
+              Agreement #{id}
+            </Text>
+            <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500">
+              {new Date(createdAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+            </Text>
+          </VStack>
           <Badge
-            px={2}
-            py={1}
-            borderRadius="full"
+            px={{ base: 3, md: 4 }}
+            py={2}
+            borderRadius="lg"
             bg={statusColor.bg}
             color={statusColor.color}
+            fontSize={{ base: "xs", md: "sm" }}
+            fontWeight="semibold"
+            borderWidth="1px"
+            borderColor={statusColor.borderColor}
+            whiteSpace="nowrap"
+            boxShadow="sm"
           >
             {statusColor.text}
           </Badge>
         </Flex>
-        <VStack spacing={2} align="stretch">
-          <HStack>
-            <Icon as={FiChevronRight} color="blue.500" />
-            <Text fontSize="sm">Car Registration: {carRegistration}</Text>
-          </HStack>
-          <HStack>
-            <Icon as={FiChevronRight} color="blue.500" />
-            <Text fontSize="sm">Added at: {new Date(createdAt).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric'
-            })}</Text>
-          </HStack>
+        
+        <VStack spacing={3} align="stretch">
+          <Flex align="center" gap={3} p={3} bg={useColorModeValue('gray.50', 'gray.700')} borderRadius="lg">
+            <Flex 
+              w={8} h={8} 
+              borderRadius="md" 
+              bg="blue.100" 
+              align="center" 
+              justify="center"
+              flexShrink={0}
+            >
+              <Icon as={FiChevronRight} color="blue.600" w={4} h={4} />
+            </Flex>
+            <Box flex="1" minW="0">
+              <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600" mb={1}>
+                Car Registration
+              </Text>
+              <Text fontSize={{ base: "sm", md: "md" }} fontWeight="medium" wordBreak="break-word">
+                {carRegistration}
+              </Text>
+            </Box>
+          </Flex>
         </VStack>
       </CardBody>
     </Card>
   );
 };
 
-// Lender section component with improved timeline
+// Enhanced Lender section component
 const LenderSection = ({
   lender,
   onAddAgreement,
@@ -184,101 +335,151 @@ const LenderSection = ({
   const statusBgColor = useColorModeValue('blue.50', 'blue.900');
   const sectionBgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const headerBg = useColorModeValue('gray.50', 'gray.700');
 
-  // Determine active step based on lender status
-  let activeStep = 0; // Default to first step
-  if (lender.agreementsCount > 0) activeStep = 1;
-  if (lender.claimSubmitted) activeStep = 2;
-  if (lender.lenderResponded) activeStep = 3;
+  // Enhanced active step logic based on lender status and agreements
+  let activeStep = 0;
+  
+  // Step 1: Document Requested (initial state)
+  if (lender.status === 'Document Requested') {
+    activeStep = 0;
+  }
+  
+  // Step 2: Agreement Added (if there are any agreements)
+  if (lender.agreementsCount > 0) {
+    activeStep = 1;
+  }
+  
+  // Step 3: Submit Claim (if any agreement has been submitted or lender status is Claim Submitted)
+  if (lender.status === 'Claim Submitted' || lender.agreements.some(agreement => agreement.status === 'Submitted')) {
+    activeStep = 2;
+  }
+  
+  // Step 4: Lender Responded (if any agreement has a response status)
+  if (lender.status === 'Lender Responded' || lender.agreements.some(agreement => 
+    CLAIM_RESPONSE_STATUSES.includes(agreement.status)
+  )) {
+    activeStep = 4;
+  }
 
-  // Define color schemes for different steps
-  const stepColorSchemes = ['green', 'yellow', 'blue', 'purple'];
+  const stepColorSchemes = ['blue', 'green', 'purple', 'orange'];
 
-  // Timeline steps configuration
   const steps = [
-    { title: "Document requested", description: "Documents requested from lender" },
-    { title: "Agreement added", description: "Agreement details added" },
-    { title: "Submit claim", description: "Claim submitted to lender" },
-    { title: "Lender Responded", description: "Response received from lender" }
+    { title: "Document requested", description: "Documents requested from lender", icon: FiFileText },
+    { title: "Agreement added", description: "Agreement details added", icon: FiPlus },
+    { title: "Submit claim", description: "Claim submitted to lender", icon: FiTarget },
+    { title: "Lender Responded", description: "Response received from lender", icon: FiCheck }
   ];
 
   return (
-    <Box
+    <Card
       mb={8}
       borderWidth="1px"
       borderColor={borderColor}
-      borderRadius="xl"
+      borderRadius="2xl"
       overflow="hidden"
       bg={sectionBgColor}
-      boxShadow="sm"
-      transition="all 0.2s ease"
-      _hover={{ boxShadow: "md", cursor: "pointer" }}
+      boxShadow="md"
+      transition="all 0.3s ease"
+      _hover={{ 
+        boxShadow: "xl", 
+        transform: "translateY(-2px)",
+        cursor: "pointer" 
+      }}
       onClick={() => onViewDetails(lender.id)}
     >
-      <Flex
-        justify="space-between"
-        align="center"
-        px={6}
-        py={4}
+      {/* Enhanced Header */}
+      <CardHeader
+        px={{ base: 5, md: 8 }}
+        py={{ base: 5, md: 6 }}
         borderBottomWidth="1px"
         borderColor={borderColor}
-        bg={useColorModeValue('gray.50', 'gray.700')}
+        bg={headerBg}
       >
-        <Heading as="h3" size="md" fontWeight="bold" fontFamily="body">
-          {lender.name}
-        </Heading>
-        <Badge
-          px={3}
-          py={1.5}
-          borderRadius="full"
-          bg={statusBgColor}
-          color="blue.600"
-          fontWeight="medium"
-          fontSize="xs"
-          boxShadow="sm"
-          borderWidth="1px"
-          borderColor="blue.200"
+        <Flex
+          justify="space-between"
+          align={{ base: "flex-start", md: "center" }}
+          direction={{ base: "column", md: "row" }}
+          gap={{ base: 4, md: 0 }}
         >
-          Status: {lender.status}
-        </Badge>
-        <Button
-          size="sm"
-          variant="outline"
-          color="green.500"
-          borderColor="gray.300"
-          _hover={{ bg: 'blue.50', borderColor: 'blue.400' }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onSubmitClaim(lender.id);
-          }}
-          isDisabled={lender.agreementsCount === 0 || lender.claimSubmitted}
-        >
-          Submit Claim
-        </Button>
-      </Flex>
+          <VStack align="flex-start" spacing={2}>
+            <Flex align="center" gap={3}>
+              <Avatar 
+                name={lender.name} 
+                size={{ base: "sm", md: "md" }}
+                bg="blue.500"
+                color="white"
+                fontWeight="bold"
+              />
+              <Box>
+                <Heading as="h3" size={{ base: "md", md: "lg" }} fontWeight="bold" color="gray.800">
+                  {lender.name}
+                </Heading>
+                <Text fontSize={{ base: "sm", md: "md" }} color="gray.600">
+                  {lender.agreementsCount} agreement{lender.agreementsCount !== 1 ? 's' : ''}
+                </Text>
+              </Box>
+            </Flex>
+          </VStack>
+          
+          <VStack align={{ base: "stretch", md: "flex-end" }} spacing={3}>
+            <Badge
+              px={4}
+              py={2}
+              borderRadius="xl"
+              bg={statusBgColor}
+              color="blue.700"
+              fontWeight="semibold"
+              fontSize={{ base: "sm", md: "md" }}
+              boxShadow="sm"
+              borderWidth="1px"
+              borderColor="blue.200"
+              textAlign="center"
+            >
+              {lender.status}
+            </Badge>
+            {/* <Button
+              size={{ base: "sm", md: "md" }}
+              colorScheme="green"
+              variant={lender.claimSubmitted ? "outline" : "solid"}
+              leftIcon={<Icon as={lender.claimSubmitted ? FiCheck : FiTarget} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSubmitClaim(lender.id);
+              }}
+              isDisabled={lender.agreementsCount === 0 || lender.claimSubmitted}
+              fontSize={{ base: "sm", md: "md" }}
+              px={{ base: 4, md: 6 }}
+              minW={{ base: "auto", md: "140px" }}
+            >
+              {lender.claimSubmitted ? 'Claim Submitted' : 'Submit Claim'}
+            </Button> */}
+          </VStack>
+        </Flex>
+      </CardHeader>
 
-      {/* Improved Progress Tracker */}
-      <Box position="relative" px={{ base: 2, md: 6 }} py={{ base: 4, md: 6 }} borderBottomWidth="1px" borderColor={borderColor}>
-        {/* Desktop view - Horizontal stepper (hidden on mobile) */}
-        <Box display={{ base: 'none', md: 'block' }}>
+      {/* Enhanced Progress Tracker */}
+      <Box px={{ base: 5, md: 8 }} py={{ base: 6, md: 8 }} borderBottomWidth="1px" borderColor={borderColor}>
+        {/* Desktop view - Horizontal stepper */}
+        <Box display={{ base: 'none', lg: 'block' }}>
           <Stepper 
             index={activeStep} 
-            colorScheme={stepColorSchemes[activeStep]} 
-            size="sm"
+            colorScheme={stepColorSchemes[Math.min(activeStep, stepColorSchemes.length - 1)]} 
+            size="lg"
           >
             {steps.map((step, index) => (
               <Step key={index}>
                 <StepIndicator>
                   <StepStatus
                     complete={<StepIcon as={FiCheck} />}
-                    incomplete={<StepNumber />}
-                    active={<StepNumber />}
+                    incomplete={<Icon as={step.icon} />}
+                    active={<Icon as={step.icon} />}
                   />
                 </StepIndicator>
                 
-                <Box flexShrink="0">
-                  <StepTitle>{step.title}</StepTitle>
-                  <StepDescription>{step.description}</StepDescription>
+                <Box flexShrink="0" ml={4}>
+                  <StepTitle fontSize="md" fontWeight="semibold">{step.title}</StepTitle>
+                  <StepDescription fontSize="sm" color="gray.600">{step.description}</StepDescription>
                 </Box>
                 
                 <StepSeparator />
@@ -287,31 +488,32 @@ const LenderSection = ({
           </Stepper>
         </Box>
         
-        {/* Mobile view - Vertical stepper (hidden on desktop) */}
-        <Box display={{ base: 'block', md: 'none' }}>
-          <VStack spacing={0} align="stretch">
+        {/* Mobile/Tablet view - Enhanced vertical stepper */}
+        <Box display={{ base: 'block', lg: 'none' }}>
+          <VStack spacing={4} align="stretch">
             {steps.map((step, index) => (
-              <Flex key={index} mb={index < steps.length - 1 ? 3 : 0} align="center">
+              <Flex key={index} align="center" gap={4}>
                 <Flex
-                  w="40px"
-                  h="40px"
-                  borderRadius="full"
-                  bg={index <= activeStep ? `${stepColorSchemes[activeStep]}.100` : 'gray.100'}
-                  color={index <= activeStep ? `${stepColorSchemes[activeStep]}.600` : 'gray.400'}
+                  w={{ base: "48px", md: "56px" }}
+                  h={{ base: "48px", md: "56px" }}
+                  borderRadius="xl"
+                  bg={index <= activeStep ? `${stepColorSchemes[Math.min(activeStep, stepColorSchemes.length - 1)]}.100` : 'gray.100'}
+                  color={index <= activeStep ? `${stepColorSchemes[Math.min(activeStep, stepColorSchemes.length - 1)]}.600` : 'gray.400'}
                   justify="center"
                   align="center"
                   fontWeight="bold"
-                  fontSize="md"
-                  border="2px solid"
-                  borderColor={index <= activeStep ? `${stepColorSchemes[activeStep]}.500` : 'gray.200'}
-                  boxShadow={index <= activeStep ? "0 2px 4px rgba(0,0,0,0.05)" : "none"}
-                  mr={3}
+                  fontSize={{ base: "lg", md: "xl" }}
+                  border="3px solid"
+                  borderColor={index <= activeStep ? `${stepColorSchemes[Math.min(activeStep, stepColorSchemes.length - 1)]}.500` : 'gray.200'}
+                  boxShadow={index <= activeStep ? "lg" : "sm"}
+                  flexShrink={0}
+                  transition="all 0.2s ease"
                 >
-                  {index < activeStep ? <Icon as={FiCheck} /> : index + 1}
+                  {index < activeStep ? <Icon as={FiCheck} /> : <Icon as={step.icon} />}
                 </Flex>
-                <Box>
-                  <Text fontWeight="medium" fontSize="sm">{step.title}</Text>
-                  <Text fontSize="xs" color="gray.500">{step.description}</Text>
+                <Box flex="1" minW="0">
+                  <Text fontWeight="semibold" fontSize={{ base: "md", md: "lg" }} mb={1}>{step.title}</Text>
+                  <Text fontSize={{ base: "sm", md: "md" }} color="gray.600" lineHeight="short">{step.description}</Text>
                 </Box>
               </Flex>
             ))}
@@ -319,10 +521,10 @@ const LenderSection = ({
         </Box>
       </Box>
 
-      {/* Agreement cards */}
-      <Box p={6}>
+      {/* Enhanced Agreement cards section */}
+      <CardBody p={{ base: 5, md: 8 }}>
         {lender.agreementsCount > 0 ? (
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+          <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={{ base: 4, md: 6 }}>
             {lender.agreements.map((agreement) => (
               <AgreementCard
                 key={agreement.id}
@@ -334,30 +536,105 @@ const LenderSection = ({
             ))}
           </SimpleGrid>
         ) : (
-          <Center w="100%" p={4}>
-            <Text color="gray.500">No agreements added yet.</Text>
+          <Center w="100%" p={{ base: 6, md: 8 }} borderRadius="xl" bg={useColorModeValue('gray.50', 'gray.700')}>
+            <VStack spacing={4}>
+              <Icon as={FiFileText} w={12} h={12} color="gray.400" />
+              <Text color="gray.500" fontSize={{ base: "md", md: "lg" }} textAlign="center">
+                No agreements added yet
+              </Text>
+              <Text color="gray.400" fontSize={{ base: "sm", md: "md" }} textAlign="center">
+                Start by adding your first agreement to proceed with the claim
+              </Text>
+            </VStack>
           </Center>
         )}
 
-        {/* Add Agreement button */}
-        <Flex justify="center" mt={6}>
+        {/* Enhanced Add Agreement button */}
+        <Flex justify="center" mt={{ base: 6, md: 8 }}>
           <Button
             variant="outline"
             borderStyle="dashed"
+            borderWidth="2px"
             leftIcon={<FiPlus />}
-            color="blue.500"
+            colorScheme="blue"
             borderColor="blue.300"
-            _hover={{ bg: 'blue.50', borderColor: 'blue.400' }}
+            _hover={{ 
+              bg: 'blue.50', 
+              borderColor: 'blue.400',
+              transform: 'translateY(-1px)',
+              boxShadow: 'md'
+            }}
             onClick={(e) => {
               e.stopPropagation();
               onAddAgreement(lender.id);
             }}
+            size={{ base: "md", md: "lg" }}
+            fontSize={{ base: "md", md: "lg" }}
+            px={{ base: 6, md: 8 }}
+            py={{ base: 6, md: 7 }}
+            borderRadius="xl"
+            transition="all 0.2s ease"
           >
             Add Agreement
           </Button>
         </Flex>
-      </Box>
-    </Box>
+      </CardBody>
+    </Card>
+  );
+};
+
+// Enhanced Loading Component
+const DashboardSkeleton = () => {
+  const cardBg = useColorModeValue('white', 'gray.800');
+  
+  return (
+    <VStack spacing={8} align="stretch">
+      {/* Header skeleton */}
+      <Card bg={cardBg} p={6} borderRadius="xl">
+        <Flex justify="space-between" align="center">
+          <VStack align="flex-start" spacing={2}>
+            <Skeleton height="32px" width="200px" />
+            <Skeleton height="20px" width="300px" />
+          </VStack>
+          <HStack spacing={4}>
+            <Skeleton height="40px" width="120px" borderRadius="md" />
+            <Skeleton height="40px" width="120px" borderRadius="md" />
+          </HStack>
+        </Flex>
+      </Card>
+      
+      {/* Stats skeleton */}
+      <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} bg={cardBg} p={6} borderRadius="xl">
+            <VStack spacing={3} align="stretch">
+              <Skeleton height="60px" />
+              <Skeleton height="20px" />
+              <Skeleton height="16px" width="60%" />
+            </VStack>
+          </Card>
+        ))}
+      </SimpleGrid>
+      
+      {/* Lender sections skeleton */}
+      {[1, 2].map((i) => (
+        <Card key={i} bg={cardBg} borderRadius="2xl" overflow="hidden">
+          <Box p={6}>
+            <Flex justify="space-between" align="center" mb={6}>
+              <HStack spacing={3}>
+                <Skeleton w={12} h={12} borderRadius="full" />
+                <VStack align="flex-start" spacing={2}>
+                  <Skeleton height="24px" width="150px" />
+                  <Skeleton height="16px" width="100px" />
+                </VStack>
+              </HStack>
+              <Skeleton height="40px" width="120px" borderRadius="md" />
+            </Flex>
+            <SkeletonText noOfLines={3} spacing={4} />
+          </Box>
+        </Card>
+      ))}
+    </VStack>
   );
 };
 
@@ -411,17 +688,22 @@ const Dashboard = () => {
       const updatedLenders: DashboardLender[] = claimsData.data.map((lenderData: LenderWithClaims) => {
         // Check if any agreement in the claims has a status of "Submitted"
         const hasSubmittedClaim = lenderData.claims.some(claim => 
-          claim.agreement.status === 'Submitted'
+          claim.agreement.status === 'Submitted' 
+        );
+        
+        // Check if any agreement has a response status
+        const hasLenderResponse = lenderData.claims.some(claim => 
+          CLAIM_RESPONSE_STATUSES.includes(claim.agreement.status)
         );
         
         return {
           id: lenderData.lender.id,
           name: lenderData.lender.name,
-          status: hasSubmittedClaim ? 'Claim Submitted' : 'Document Requested',
+          status: hasLenderResponse ? 'Lender Responded' : (hasSubmittedClaim ? 'Claim Submitted' : 'Document Requested'),
           agreementsCount: lenderData.claims.length,
           prefix: lenderData.lender.name.substring(0, 2).toUpperCase() + '00',
           claimSubmitted: hasSubmittedClaim,
-          lenderResponded: false,
+          lenderResponded: hasLenderResponse,
           potentialRefund: 0,
           agreements: lenderData.claims.map(claim => ({
             id: claim.agreement.agreementNumber,
@@ -531,47 +813,66 @@ const Dashboard = () => {
   const handleProcessClaimSubmission = async (
     templateType: string,
     customText?: string,
-    selectedAgreements?: string[]
+    selectedAgreements?: string[],
+    mail?: {
+      subject: string,
+      body: string
+    }
   ) => {
-    if (selectedLenderId) {
-      // Update lender status to indicate claim submission and update agreement statuses
-      const updatedLenders = lenders.map(lender => {
-        if (lender.id === selectedLenderId) {
-          // Update the status of submitted agreements
-          const updatedAgreements = lender.agreements.map(agreement => {
-            // Check if this agreement's ID is in the selectedAgreements array
-            if (selectedAgreements?.includes(agreement.id)) {
-              return { 
-                ...agreement, 
-                status: 'Submitted' 
-              };
-            }
-            return agreement;
-          });
-
-          // Check if any agreement has status 'Submitted'
-          const hasSubmittedAgreement = updatedAgreements.some(agreement => 
-            agreement.status === 'Submitted'
-          );
-
-          return {
-            ...lender,
-            status: hasSubmittedAgreement ? 'Claim Submitted' : 'Document Requested',
-            claimSubmitted: hasSubmittedAgreement,
-            agreements: updatedAgreements
-          };
-        }
-        return lender;
+    const actionTimestamp = new Date().toISOString();
+    
+    try {
+      console.log(mail, "mail");
+      const response = await submitClaim({
+        lenderId: selectedLenderId,
+        templateType,
+        customText,
+        agreementIds: selectedAgreements || [],
+        mail
       });
 
-      setLenders(updatedLenders);
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to submit claim');
+      }
+      
+      if (selectedAgreements && selectedAgreements.length > 0) {
+        const updatedLenders = lenders.map(lender => {
+          if (lender.id === selectedLenderId) {
+            // Update the status of submitted agreements
+            const updatedAgreements = lender.agreements.map(agreement => {
+              // Check if this agreement's ID is in the selectedAgreements array
+              if (selectedAgreements.includes(agreement.id)) {
+                return { 
+                  ...agreement, 
+                  status: 'Submitted',
+                  updated: actionTimestamp,
+                  timestamp: actionTimestamp
+                };
+              }
+              return agreement;
+            });
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+            return {
+              ...lender,
+              status: 'Claim Submitted',
+              claimType: templateType,
+              claimText: customText || (templateType === 'dca' ? 'DCA Claim' : 'DCA + Hidden Commissions Claim'),
+              claimDate: actionTimestamp,
+              submittedAgreements: selectedAgreements,
+              agreements: updatedAgreements
+            };
+          }
+          return lender;
+        });
+        
+        setLenders(updatedLenders);
+      }
+      
       return true;
+    } catch (error) {
+      console.error('Error submitting claim:', error);
+      throw error;
     }
-    return false;
   };
 
   // Add a function to navigate to mailbox
@@ -580,77 +881,166 @@ const Dashboard = () => {
   };
 
   return (
-    <Box bg={bgColor} minH="100vh" py={8}>
-      <Container maxW="container.xl">
-        <Flex
-          justify="space-between"
-          align="center"
-          mb={8}
-          bg={cardBg}
-          p={6}
-          borderRadius="xl"
-          boxShadow="sm"
-          borderWidth="1px"
-          borderColor={borderColor}
-        >
-          <Box>
-            <Heading size="lg" fontWeight="bold">Welcome back</Heading>
-            <Text color="gray.600" mt={1}>Manage your lenders and agreements</Text>
-          </Box>
-          <HStack spacing={4}>
-            <Button
-              leftIcon={<Icon as={FiMail} />}
-              colorScheme="blue"
-              variant="outline"
-              onClick={handleNavigateToMailbox}
+    <Box bg={bgColor} minH="100vh" py={{ base: 6, md: 10 }}>
+      <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
+        {isLoading ? (
+          <DashboardSkeleton />
+        ) : (
+          <>
+            {/* Enhanced Header */}
+            <Card
+              mb={{ base: 8, md: 10 }}
+              bg={cardBg}
+              borderRadius="2xl"
+              overflow="hidden"
+              boxShadow="xl"
+              borderWidth="1px"
+              borderColor={borderColor}
             >
-              Check Messages
-            </Button>
-            <Button
-              leftIcon={<FiPlus />}
-              colorScheme="blue"
-              onClick={onAddLenderOpen}
-            >
-              Add Lender
-            </Button>
-          </HStack>
-        </Flex>
+              <Box
+                bgGradient="linear(135deg, blue.500, purple.600)"
+                px={{ base: 6, md: 10 }}
+                py={{ base: 8, md: 12 }}
+                color="white"
+                position="relative"
+                overflow="hidden"
+              >
+                <Box position="relative" zIndex={1}>
+                  <Flex
+                    justify="space-between"
+                    align={{ base: "flex-start", md: "center" }}
+                    direction={{ base: "column", md: "row" }}
+                    gap={{ base: 6, md: 0 }}
+                  >
+                    <VStack align="flex-start" spacing={3}>
+                      <Heading size={{ base: "lg", md: "xl" }} fontWeight="bold">
+                        Welcome back, {user?.name || 'User'}! 👋
+                      </Heading>
+                      <Text fontSize={{ base: "md", md: "lg" }} opacity={0.9}>
+                        Manage your lenders, track claims, and monitor your progress
+                      </Text>
+                    </VStack>
+                    <HStack spacing={{ base: 3, md: 4 }} flexWrap="wrap">
+                      <Button
+                        leftIcon={<Icon as={FiMail} />}
+                        colorScheme="whiteAlpha"
+                        variant="outline"
+                        onClick={handleNavigateToMailbox}
+                        size={{ base: "md", md: "lg" }}
+                        borderColor="whiteAlpha.300"
+                        _hover={{ bg: 'whiteAlpha.200', borderColor: 'whiteAlpha.400' }}
+                      >
+                        Messages
+                      </Button>
+                      <Button
+                        leftIcon={<FiPlus />}
+                        bg="white"
+                        color="blue.600"
+                        onClick={onAddLenderOpen}
+                        size={{ base: "md", md: "lg" }}
+                        _hover={{ bg: 'gray.100', transform: 'translateY(-1px)' }}
+                        boxShadow="lg"
+                      >
+                        Add Lender
+                      </Button>
+                    </HStack>
+                  </Flex>
+                </Box>
+                
+                {/* Decorative elements */}
+                <Box
+                  position="absolute"
+                  top="-50%"
+                  right="-10%"
+                  w="300px"
+                  h="300px"
+                  borderRadius="full"
+                  bg="whiteAlpha.100"
+                  filter="blur(100px)"
+                />
+              </Box>
+            </Card>
 
-        {/* My Lenders section */}
-        <Box mb={10}>
-          <Flex
-            justify="space-between"
-            align="center"
-            mb={6}
-            p={5}
-          >
-            <Heading as="h2" size="lg" fontWeight="bold" >
-              My Lenders
-            </Heading>
-          </Flex>
+            {/* Statistics Cards */}
+            {/* <StatisticsCards statistics={statistics} isLoading={false} /> */}
 
-          {isLoading ? (
-            <Text>Loading...</Text>
-          ) : lenders.length === 0 ? (
-            <Box p={10} textAlign="center" borderWidth="1px" borderColor={borderColor} borderRadius="xl">
-              <Heading size="md" mb={4}>No lenders added yet</Heading>
-              <Text mb={6}>Start by adding your first lender to begin the claims process.</Text>
-              <Button colorScheme="blue" leftIcon={<FiPlus />} onClick={onAddLenderOpen}>
-                Add Your First Lender
-              </Button>
+            {/* My Lenders section */}
+            <Box mb={10}>
+              <Flex
+                justify="space-between"
+                align="center"
+                mb={{ base: 6, md: 8 }}
+                px={2}
+              >
+                <VStack align="flex-start" spacing={2}>
+                  <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="bold">
+                    My Lenders
+                  </Heading>
+                  <Text color="gray.600" fontSize={{ base: "sm", md: "md" }}>
+                    Track and manage all your lender relationships
+                  </Text>
+                </VStack>
+              </Flex>
+
+              {lenders.length === 0 ? (
+                <Card 
+                  p={{ base: 8, md: 12 }} 
+                  textAlign="center" 
+                  borderWidth="2px" 
+                  borderStyle="dashed"
+                  borderColor={borderColor} 
+                  borderRadius="2xl"
+                  bg={cardBg}
+                >
+                  <VStack spacing={6}>
+                    <Box
+                      w={{ base: "80px", md: "100px" }}
+                      h={{ base: "80px", md: "100px" }}
+                      borderRadius="full"
+                      bg="blue.50"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Icon as={FiUsers} w={{ base: 8, md: 10 }} h={{ base: 8, md: 10 }} color="blue.500" />
+                    </Box>
+                    <VStack spacing={3}>
+                      <Heading size={{ base: "md", md: "lg" }} color="gray.800">No lenders added yet</Heading>
+                      <Text color="gray.600" fontSize={{ base: "md", md: "lg" }} maxW="md" lineHeight="relaxed">
+                        Start your journey by adding your first lender. We'll help you through every step of the claims process.
+                      </Text>
+                    </VStack>
+                    <Button 
+                      colorScheme="blue" 
+                      leftIcon={<FiPlus />} 
+                      onClick={onAddLenderOpen}
+                      size={{ base: "lg", md: "xl" }}
+                      px={{ base: 8, md: 12 }}
+                      py={{ base: 6, md: 8 }}
+                      borderRadius="xl"
+                      boxShadow="lg"
+                      _hover={{ transform: 'translateY(-2px)', boxShadow: 'xl' }}
+                    >
+                      Add Your First Lender
+                    </Button>
+                  </VStack>
+                </Card>
+              ) : (
+                <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+                  {lenders.map(lender => (
+                    <LenderSection
+                      key={lender.id}
+                      lender={lender}
+                      onAddAgreement={handleAddAgreement}
+                      onViewDetails={handleViewLenderDetails}
+                      onSubmitClaim={handleSubmitClaim}
+                    />
+                  ))}
+                </VStack>
+              )}
             </Box>
-          ) : (
-            lenders.map(lender => (
-              <LenderSection
-                key={lender.id}
-                lender={lender}
-                onAddAgreement={handleAddAgreement}
-                onViewDetails={handleViewLenderDetails}
-                onSubmitClaim={handleSubmitClaim}
-              />
-            ))
-          )}
-        </Box>
+          </>
+        )}
       </Container>
 
       {/* Add Lender Modal */}
@@ -678,14 +1068,9 @@ const Dashboard = () => {
           isOpen={isSubmitClaimOpen}
           onClose={onSubmitClaimClose}
           lenderName={lenders.find(l => l.id === selectedLenderId)?.name || ''}
-          agreements={lenders.find(l => l.id === selectedLenderId)?.agreements.map(a => ({
-            agreementNumber: a.id,
-            status: a.status,
-            carRegistration: a.carRegistration,
-            startDate: a.startDate
-          })) || []}
-          onSubmitClaim={async (templateType: string, customText?: string, selectedAgreements?: string[]) => {
-            await handleProcessClaimSubmission(templateType, customText, selectedAgreements);
+          agreements={lenders.find(l => l.id === selectedLenderId)?.agreements.filter(agreement => agreement.status !== 'Submitted') || []}
+          onSubmitClaim={async (templateType: string, customText?: string, selectedAgreements?: string[], mail?: { subject: string, body: string }) => {
+            await handleProcessClaimSubmission(templateType, customText, selectedAgreements, mail);
           }}
         />
       )}
@@ -693,4 +1078,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

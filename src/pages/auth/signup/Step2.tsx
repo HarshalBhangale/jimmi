@@ -21,12 +21,29 @@ import {
   useColorModeValue,
   useToast,
   Select,
+  useBreakpointValue,
+  Circle,
+  Icon,
+  Image,
+  InputLeftAddon,
+  ScaleFade,
+  SlideFade,
+  chakra,
+  shouldForwardProp,
+  Flex,
+  Divider,
 } from '@chakra-ui/react';
-import { FiSend, FiShield } from 'react-icons/fi';
+import { FiCheck, FiSend, FiShield, FiSmartphone } from 'react-icons/fi';
+import { isValidMotionProp, motion } from 'framer-motion';
 import { generateOtp, verifyOtp } from '../../../api/services/auth';
 import { AxiosError } from 'axios';
 import { refetchUserAtom } from '@/jotai/atoms';
 import { useAtom } from 'jotai';
+
+// Create animated components
+const ChakraBox = chakra(motion.div, {
+  shouldForwardProp: (prop) => isValidMotionProp(prop) || shouldForwardProp(prop),
+});
 
 // List of common country codes with ISO country codes
 const countryCodes = [
@@ -203,183 +220,443 @@ const Step2: React.FC = () => {
     }
   };
 
-  // Card background and border colors for dark/light modes
-  const cardBg = useColorModeValue('white', 'gray.700');
+  // Enhanced visual elements
+  const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const labelColor = useColorModeValue('gray.600', 'gray.400');
+  const bgColor = useColorModeValue(
+    'linear(to-b, white, gray.50)', 
+    'linear(to-b, gray.900, gray.800)'
+  );
+  const fieldBg = useColorModeValue('gray.50', 'gray.700');
+  
+  const headingSize = useBreakpointValue({ base: "lg", md: "xl" });
+  const textSize = useBreakpointValue({ base: "sm", md: "md" });
 
   return (
-    <Container maxW="container.md" py={8}>
-      <Stack spacing={8}>
-        {/* Progress indicator */}
-        <Box>
-          <HStack justify="space-between" mb={1}>
-            <Text fontSize="sm" fontWeight="medium">
-              Step 2 of 5
-            </Text>
-            <Text fontSize="sm" color={labelColor}>
-              Mobile Verification
-            </Text>
-          </HStack>
-          <Progress value={40} size="sm" colorScheme="blue" borderRadius="full" />
-        </Box>
-
-        {/* Header */}
-        <Box textAlign="center">
-          <Heading as="h1" size="xl" mb={2}>
-          Let's get your account set up! 
-          </Heading>
-          <Text color={labelColor} fontSize="lg">
-            We'll send a verification code to confirm your mobile number
-          </Text>
-        </Box>
-
-        {/* Verification Form */}
-        <Box
-          bg={cardBg}
-          borderRadius="xl"
-          boxShadow="md"
-          p={{ base: 6, md: 8 }}
-          borderWidth="1px"
-          borderColor={borderColor}
-        >
-          <VStack spacing={8} align="stretch">
-            <FormControl isInvalid={!!error}>
-              <FormLabel fontWeight="medium">Mobile Number</FormLabel>
-              <HStack spacing={4}>
-                <Text fontSize="lg" fontWeight="medium">+44</Text>
-                <InputGroup size="lg" flex={1}>
-                  <Input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
-                      if (value.length <= 11) {
-                        setPhoneNumber(value);
-                      }
-                      if (error) {
-                        setError('');
-                      }
-                    }}
-                    placeholder="Enter your phone number"
-                    isDisabled={isOtpSent}
-                  />
-                </InputGroup>
+    <Box 
+      bgGradient={bgColor}
+      minH="100vh" 
+      py={{ base: 6, md: 12 }}
+      px={{ base: 4, md: 6 }}
+    >
+      <Container maxW="container.md" px={{ base: 0, md: 4 }}>
+        <Stack spacing={{ base: 6, md: 8 }}>
+          {/* Enhanced Progress indicator */}
+          <Box px={{ base: 2, md: 4 }} mt={8}>
+            <HStack justify="space-between" mb={2}>
+              <HStack>
+                <Text fontSize={textSize} fontWeight="semibold" color="blue.600">
+                  Step 2 of 5
+                </Text>
               </HStack>
-              {error && (
-                <FormErrorMessage>{error}</FormErrorMessage>
-              )}
-            </FormControl>
+              <Text fontSize={textSize} color={labelColor}>
+                Mobile Verification
+              </Text>
+            </HStack>
+            <Progress 
+              value={40} 
+              size="md" 
+              colorScheme="blue" 
+              borderRadius="full" 
+              bg={useColorModeValue('gray.100', 'gray.700')}
+              sx={{
+                '& > div': {
+                  transition: 'width 0.5s ease-in-out'
+                }
+              }}
+              mb={1}
+            />
+          </Box>
 
-            {!isOtpSent ? (
-              <Button
-                size="lg"
-                colorScheme="blue"
-                isLoading={isSendingOtp}
-                loadingText="Sending..."
-                onClick={handleSendOtp}
-                width="full"
-                rightIcon={<FiSend />}
-                bgGradient="linear(to-r, blue.400, blue.600)"
-                _hover={{
-                  bgGradient: "linear(to-r, blue.500, blue.700)",
-                  transform: "translateY(-2px)",
-                  boxShadow: "lg",
-                }}
+          {/* Enhanced Header */}
+          <Box 
+            textAlign="center" 
+            py={8} 
+            px={{ base: 4, md: 6 }}
+            borderRadius="2xl" 
+            boxShadow="xl"
+            bgGradient={useColorModeValue(
+              'linear(to-br, blue.50, purple.50)', 
+              'linear(to-br, blue.900, purple.800)'
+            )}
+            borderWidth="1px"
+            borderColor={useColorModeValue('blue.100', 'purple.700')}
+            position="relative"
+            overflow="hidden"
+            _before={{
+              content: '""',
+              position: 'absolute',
+              top: '-50%',
+              left: '-50%',
+              width: '200%',
+              height: '200%',
+              backgroundImage: 
+                'radial-gradient(circle, rgba(255,255,255,0.1) 8%, transparent 8%), ' +
+                'radial-gradient(circle, rgba(255,255,255,0.1) 8%, transparent 8%)',
+              backgroundSize: '30px 30px',
+              backgroundPosition: '0 0, 15px 15px',
+              opacity: 0.5,
+              pointerEvents: 'none',
+            }}
+          >
+            <Box position="relative">
+              <Heading
+                as="h1" 
+                size={headingSize}
+                mb={3} 
+                bgGradient="linear(to-r, blue.400, purple.500)"
+                bgClip="text"
+                textTransform="capitalize"
+                letterSpacing="tight"
               >
-                Send Code
-              </Button>
-            ) : (
-              <VStack spacing={6} align="stretch">
-                <Box textAlign="center">
-                  <Text mb={2} fontWeight="medium">
-                    Enter the 6-digit code sent to
-                  </Text>
-                  <Text fontWeight="bold" fontSize="lg">
-                    {countryCode} {phoneNumber}
-                  </Text>
-                </Box>
-                
-                <FormControl isInvalid={!!error}>
-                  <HStack justify="center" spacing={4}>
-                    <PinInput
-                      size="lg"
-                      otp
-                      value={otp}
-                      onChange={(value) => {
-                        setOtp(value);
-                        if (error) {
-                          setError('');
-                        }
-                      }}
-                    >
-                      <PinInputField />
-                      <PinInputField />
-                      <PinInputField />
-                      <PinInputField />
-                      <PinInputField />
-                      <PinInputField />
-                    </PinInput>
-                  </HStack>
-                  {error && <FormErrorMessage textAlign="center" mt={2}>{error}</FormErrorMessage>}
-                </FormControl>
-                
-                <Button
-                  size="lg"
-                  colorScheme="blue"
-                  isLoading={isVerifying}
-                  loadingText="Verifying..."
-                  onClick={handleVerifyOtp}
-                  rightIcon={<FiShield />}
-                  bgGradient="linear(to-r, blue.400, blue.600)"
-                  _hover={{
-                    bgGradient: "linear(to-r, blue.500, blue.700)",
-                    transform: "translateY(-2px)",
-                    boxShadow: "lg",
-                  }}
-                >
-                  Verify Code
-                </Button>
-                
-                <HStack justify="center">
-                  <Text fontSize="sm" color={labelColor}>
-                    Didn't receive the code?
-                  </Text>
-                  {countdown > 0 ? (
-                    <Text fontSize="sm" fontWeight="medium">
-                      Resend in {countdown}s
-                    </Text>
-                  ) : (
+                Let's get your account set up!
+              </Heading>
+              <Text 
+                color={labelColor} 
+                fontSize={textSize}
+                maxW="md" 
+                mx="auto"
+              >
+                We'll send a verification code to confirm your mobile number
+              </Text>
+            </Box>
+          </Box>
+
+          {/* Verification Form with enhanced layout */}
+          <Box
+            bg={cardBg}
+            borderRadius="2xl"
+            boxShadow="2xl"
+            p={{ base: 6, md: 8 }}
+            borderWidth="1px"
+            borderColor={borderColor}
+            position="relative"
+            overflow="hidden"
+            _hover={{
+              boxShadow: "2xl",
+              transform: "translateY(-4px)",
+            }}
+            transition="all 0.3s ease"
+          >
+            {/* Decorative background elements */}
+            <Box 
+              position="absolute" 
+              top="-50px" 
+              right="-50px" 
+              w="200px" 
+              h="200px" 
+              bg={useColorModeValue('blue.50', 'blue.800')} 
+              borderRadius="full" 
+              opacity="0.3" 
+              zIndex={0} 
+            />
+            <Box 
+              position="absolute" 
+              bottom="-30px" 
+              left="-30px" 
+              w="150px" 
+              h="150px" 
+              bg={useColorModeValue('purple.50', 'purple.800')} 
+              borderRadius="full" 
+              opacity="0.2" 
+              zIndex={0} 
+            />
+
+            <Stack spacing={8} position="relative" zIndex={1}>
+              {!isOtpSent ? (
+                <ScaleFade initialScale={0.9} in={true}>
+                  <VStack spacing={8} align="stretch">
+                    <Flex direction={{ base: "column", md: "row" }} align="center" mb={4}>
+                      <Circle size="60px" bg="blue.500" color="white" mr={{ base: 0, md: 4 }} mb={{ base: 4, md: 0 }}>
+                        <Icon as={FiSmartphone} boxSize={6} />
+                      </Circle>
+                      <Box>
+                        <Text fontWeight="bold" fontSize="lg" mb={1}>Enter Your Mobile Number</Text>
+                        <Text color={labelColor}>We'll send a verification code to this number</Text>
+                      </Box>
+                    </Flex>
+                    
+                    <FormControl isInvalid={!!error}>
+                      <FormLabel fontWeight="medium">Mobile Number</FormLabel>
+                      <InputGroup size="lg">
+                        <InputLeftAddon 
+                          bg={useColorModeValue('blue.50', 'blue.800')}
+                          color={useColorModeValue('blue.600', 'blue.300')}
+                          px={4}
+                          borderLeftRadius="xl"
+                          borderColor={useColorModeValue('blue.200', 'blue.600')}
+                          fontWeight="bold"
+                        >
+                          +44
+                        </InputLeftAddon>
+                        <Input
+                          type="tel"
+                          value={phoneNumber}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            if (value.length <= 11) {
+                              setPhoneNumber(value);
+                            }
+                            if (error) {
+                              setError('');
+                            }
+                          }}
+                          placeholder="7xxx xxxxxx"
+                          borderLeftRadius="0"
+                          borderRightRadius="xl"
+                          fontSize="lg"
+                          bg={fieldBg}
+                          _focus={{
+                            borderColor: "blue.400",
+                            boxShadow: "0 0 0 1px blue.400",
+                          }}
+                        />
+                      </InputGroup>
+                      {error && (
+                        <FormErrorMessage>{error}</FormErrorMessage>
+                      )}
+                    </FormControl>
+
                     <Button
-                      variant="link"
-                      size="sm"
+                      size="lg"
                       colorScheme="blue"
                       isLoading={isSendingOtp}
+                      loadingText="Sending..."
                       onClick={handleSendOtp}
+                      width="full"
+                      rightIcon={<FiSend />}
+                      bgGradient="linear(to-r, blue.400, blue.600)"
+                      py={7}
+                      borderRadius="xl"
+                      fontWeight="bold"
+                      boxShadow="xl"
+                      _hover={{
+                        bgGradient: "linear(to-r, blue.500, blue.700)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "2xl",
+                      }}
+                      _active={{
+                        bgGradient: "linear(to-r, blue.600, blue.800)",
+                        transform: "translateY(0)",
+                        boxShadow: "md",
+                      }}
+                      transition="all 0.3s"
                     >
-                      Resend Code
+                      Send Code
                     </Button>
-                  )}
-                </HStack>
-                
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setIsOtpSent(false);
-                    setOtp('');
-                    setError('');
-                  }}
-                  size="sm"
-                >
-                  Change phone number
-                </Button>
-              </VStack>
-            )}
-          </VStack>
-        </Box>
-      </Stack>
-    </Container>
+                  </VStack>
+                </ScaleFade>
+              ) : (
+                <SlideFade in={isOtpSent} offsetY="20px">
+                  <VStack spacing={8} align="stretch">
+                    <Box 
+                      textAlign="center" 
+                      bg={useColorModeValue('blue.50', 'blue.900')} 
+                      p={{ base: 4, md: 6 }} 
+                      borderRadius="xl"
+                      borderWidth="1px"
+                      borderColor={useColorModeValue('blue.100', 'blue.700')}
+                    >
+                      <Circle 
+                        size="60px" 
+                        bg={useColorModeValue('blue.100', 'blue.800')} 
+                        color="blue.500" 
+                        mx="auto" 
+                        mb={3}
+                      >
+                        <Icon as={FiShield} boxSize={6} />
+                      </Circle>
+                      <Text fontWeight="bold" fontSize="lg" mb={1}>
+                        Enter the 6-digit code sent to
+                      </Text>
+                      <Text 
+                        fontWeight="bold" 
+                        fontSize="xl" 
+                        color={useColorModeValue('blue.600', 'blue.300')}
+                      >
+                        +44 {phoneNumber}
+                      </Text>
+                    </Box>
+                    
+                    <FormControl isInvalid={!!error} textAlign="center">
+                      <ChakraBox
+                        animate={{
+                          scale: [1, 1.02, 1],
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                        }}
+                      >
+                        <HStack justify="center" spacing={{ base: 2, md: 4 }}>
+                          <PinInput
+                            size="lg"
+                            otp
+                            value={otp}
+                            onChange={(value) => {
+                              setOtp(value);
+                              if (error) {
+                                setError('');
+                              }
+                            }}
+                          >
+                            <PinInputField 
+                              bg={fieldBg}
+                              borderColor={borderColor}
+                              h={{ base: "50px", md: "60px" }}
+                              w={{ base: "40px", md: "50px" }}
+                              fontSize="xl"
+                              _focus={{
+                                borderColor: "blue.400",
+                                boxShadow: "0 0 0 1px blue.400",
+                              }}
+                            />
+                            <PinInputField 
+                              bg={fieldBg}
+                              borderColor={borderColor}
+                              h={{ base: "50px", md: "60px" }}
+                              w={{ base: "40px", md: "50px" }}
+                              fontSize="xl"
+                              _focus={{
+                                borderColor: "blue.400",
+                                boxShadow: "0 0 0 1px blue.400",
+                              }}
+                            />
+                            <PinInputField 
+                              bg={fieldBg}
+                              borderColor={borderColor}
+                              h={{ base: "50px", md: "60px" }}
+                              w={{ base: "40px", md: "50px" }}
+                              fontSize="xl"
+                              _focus={{
+                                borderColor: "blue.400",
+                                boxShadow: "0 0 0 1px blue.400",
+                              }}
+                            />
+                            <PinInputField 
+                              bg={fieldBg}
+                              borderColor={borderColor}
+                              h={{ base: "50px", md: "60px" }}
+                              w={{ base: "40px", md: "50px" }}
+                              fontSize="xl"
+                              _focus={{
+                                borderColor: "blue.400",
+                                boxShadow: "0 0 0 1px blue.400",
+                              }}
+                            />
+                            <PinInputField 
+                              bg={fieldBg}
+                              borderColor={borderColor}
+                              h={{ base: "50px", md: "60px" }}
+                              w={{ base: "40px", md: "50px" }}
+                              fontSize="xl"
+                              _focus={{
+                                borderColor: "blue.400",
+                                boxShadow: "0 0 0 1px blue.400",
+                              }}
+                            />
+                            <PinInputField 
+                              bg={fieldBg}
+                              borderColor={borderColor}
+                              h={{ base: "50px", md: "60px" }}
+                              w={{ base: "40px", md: "50px" }}
+                              fontSize="xl"
+                              _focus={{
+                                borderColor: "blue.400",
+                                boxShadow: "0 0 0 1px blue.400",
+                              }}
+                            />
+                          </PinInput>
+                        </HStack>
+                      </ChakraBox>
+                      {error && <FormErrorMessage textAlign="center" mt={2}>{error}</FormErrorMessage>}
+                    </FormControl>
+                    
+                    {/* Verification button */}
+                    <Button
+                      size="lg"
+                      colorScheme="blue"
+                      isLoading={isVerifying}
+                      loadingText="Verifying..."
+                      onClick={handleVerifyOtp}
+                      rightIcon={<FiCheck />}
+                      bgGradient="linear(to-r, blue.400, blue.600)"
+                      py={7}
+                      borderRadius="xl"
+                      fontWeight="bold"
+                      boxShadow="xl"
+                      _hover={{
+                        bgGradient: "linear(to-r, blue.500, blue.700)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "2xl",
+                      }}
+                      _active={{
+                        bgGradient: "linear(to-r, blue.600, blue.800)",
+                        transform: "translateY(0)",
+                        boxShadow: "md",
+                      }}
+                      transition="all 0.3s"
+                    >
+                      Verify Code
+                    </Button>
+                    
+                    {/* Enhanced resend options */}
+                    <Box 
+                      p={4} 
+                      borderRadius="xl" 
+                      bg={useColorModeValue('gray.50', 'gray.750')} 
+                      borderWidth="1px"
+                      borderColor={borderColor}
+                      textAlign="center"
+                    >
+                      <Text fontSize="sm" color={labelColor} mb={2}>
+                        Didn't receive the code?
+                      </Text>
+                      {countdown > 0 ? (
+                        <HStack justify="center" spacing={1}>
+                          <Text fontSize="sm" color={labelColor}>
+                            Resend code in
+                          </Text>
+                          <Text fontSize="sm" fontWeight="bold" color="blue.500">
+                            {countdown}s
+                          </Text>
+                        </HStack>
+                      ) : (
+                        <Button
+                          variant="link"
+                          colorScheme="blue"
+                          isLoading={isSendingOtp}
+                          onClick={handleSendOtp}
+                          fontWeight="semibold"
+                        >
+                          Resend Code
+                        </Button>
+                      )}
+                      <Divider my={3} />
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setIsOtpSent(false);
+                          setOtp('');
+                          setError('');
+                        }}
+                        size="sm"
+                        colorScheme="gray"
+                      >
+                        Change phone number
+                      </Button>
+                    </Box>
+                  </VStack>
+                </SlideFade>
+              )}
+            </Stack>
+          </Box>
+        </Stack>
+      </Container>
+    </Box>
   );
 };
 
-export default Step2; 
+export default Step2;

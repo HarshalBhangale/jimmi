@@ -1,16 +1,33 @@
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { userAtom } from '@/jotai/atoms';
+
 import { isAuthenticatedAtom } from '@/jotai/atoms';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated] = useAtom(isAuthenticatedAtom);
+  const user = useAtomValue(userAtom);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/auth/signup/step-2');
+      navigate('/auth/signup/step-1');
+    } else {
+      if (user.userStatus === "Paid") {
+        navigate('/dashboard');
+      }
+      else if (user.stage === "lenders") {
+        navigate('/auth/signup/step-4');
+      } else if (user.stage === "profile") {
+        navigate('/auth/signup/step-5');
+      } else if (user.stage === "identity") {
+        navigate('/auth/signup/step-6');
+      } else {
+        navigate('/auth/signup/step-3');
+      }
     }
+
   }, [isAuthenticated, navigate]);
 
   return children;

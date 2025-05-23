@@ -65,16 +65,26 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [claimType, setClaimType] = useState('dca');
-  const [customText, setCustomText] = useState('');
-  const [customSubject, setCustomSubject] = useState('');
   const [selectedAgreements, setSelectedAgreements] = useState<string[]>([]);
   const [detailedTemplates, setDetailedTemplates] = useState<any[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [mail, setMail] = useState({ subject: '', body: '' });
 
   const user = useAtomValue(userAtom);
-
   const toast = useToast();
+
+  // Reset all state when modal opens or closes
+  useEffect(() => {
+    if (!isOpen) {
+      setStep(1);
+      setIsLoading(false);
+      setClaimType('dca');
+      setSelectedAgreements([]);
+      setDetailedTemplates([]);
+      setIsExpanded(false);
+      setMail({ subject: '', body: '' });
+    }
+  }, [isOpen]);
 
   // UI Colors
   const bgColor = useColorModeValue('white', 'gray.800');
@@ -119,7 +129,7 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
     try {
       await onSubmitClaim(
         claimType,
-        claimType === 'custom' ? customText : undefined,
+        claimType === 'custom' ? mail.body : undefined,
         selectedAgreements,
         mail
       );
@@ -370,20 +380,19 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                           {claimType === 'custom' && (
                             <>
                               <Input
-                                value={customSubject}
-                                onChange={(e) => setCustomSubject(e.target.value)}
+                                value={mail.subject}
+                                onChange={(e) => setMail(prev => ({ ...prev, subject: e.target.value }))}
                                 placeholder="Enter Mail Subject here..."
                                 mt={2}
                                 w="100%"
                               />
                               <Textarea
-                                value={customText}
-                                onChange={(e) => setCustomText(e.target.value)}
+                                value={mail.body}
+                                onChange={(e) => setMail(prev => ({ ...prev, body: e.target.value }))}
                                 placeholder="Enter Mail Body here..."
                                 mt={2}
                                 w="100%"
                               />
-
                             </>
                           )}
                         </Box>
