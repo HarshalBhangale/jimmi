@@ -168,7 +168,7 @@ const Navbar = () => {
                 fontWeight="bold"
                 color="yellow.200"
               >
-                {timeRemaining.days} day{timeRemaining.days !== 1 ? 's' : ''},
+                {timeRemaining.days} day{timeRemaining.days !== 1 ? 's' : ''} -
               </Text>
               
               <HStack spacing={0}>
