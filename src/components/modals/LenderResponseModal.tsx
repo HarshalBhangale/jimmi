@@ -283,25 +283,25 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
 
       switch (responseType) {
         case 'offer':
-          newStatus = 'OfferMade';
+          newStatus = 'Offer Made';
           details = {
             offerAmount,
             responseAction: 'offer'
           };
           break;
         case 'rejected':
-          newStatus = rejectedAction === 'fosEscalation' ? 'FOSEscalation' : 'Rejected';
+          newStatus = rejectedAction === 'fos Escalation' ? 'FOS Escalation' : 'Rejected';
           details = { 
             escalateToFCA: rejectedAction === 'fosEscalation',
             responseAction: rejectedAction
           };
           break;
         case 'fcaPause':
-          newStatus = 'FCAPause';
+          newStatus = 'FCA Pause';
           details = { responseAction: 'fcaPause' };
           break;
         case 'alreadySubmitted':
-          newStatus = 'ClaimAlreadySubmitted';
+          newStatus = 'Claim Already Submitted';
           details = {
             wantToTakeOver,
             responseAction: wantToTakeOver ? 'takeOver' : 'close'
