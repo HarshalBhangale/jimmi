@@ -69,6 +69,7 @@ import SubmitClaimModal from '../components/modals/SubmitClaimModal';
 import { userAtom } from '@/jotai/atoms';
 import { useAtomValue } from 'jotai';
 import { getClaims, createClaim } from '@/api/services/claims';
+import { formatStatusText, statusColors } from '@/utils/statusFormat';
 
 const CLAIM_RESPONSE_STATUSES =  ['OfferMade', 'Accepted', 'Rejected', 'Declined', 'Escalated', 'FCA Pause']
 
@@ -228,20 +229,8 @@ const AgreementCard = ({ id = '001', status = 'Pending', carRegistration = '', c
   const cardBg = useColorModeValue('white', 'gray.800');
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
 
-  // Enhanced status badge colors with better visual hierarchy
-  const statusColors = {
-    Pending: { bg: 'yellow.100', color: 'yellow.800', text: 'Pending', borderColor: 'yellow.200' },
-    Submitted: { bg: 'blue.100', color: 'blue.800', text: 'Submitted', borderColor: 'blue.200' },
-    OfferMade: { bg: 'green.100', color: 'green.800', text: 'OfferMade', borderColor: 'green.200' },
-    Rejected: { bg: 'red.100', color: 'red.800', text: 'Rejected', borderColor: 'red.200' },
-    FCAPause: { bg: 'purple.100', color: 'purple.800', text: 'FCAPause', borderColor: 'purple.200' },
-    Accepted: { bg: 'green.100', color: 'green.800', text: 'Accepted', borderColor: 'green.200' },
-    Declined: { bg: 'orange.100', color: 'orange.800', text: 'Declined', borderColor: 'orange.200' },
-    Escalated: { bg: 'red.100', color: 'red.800', text: 'Escalated', borderColor: 'red.200' }
-  };
-
   const statusColor = statusColors[status as keyof typeof statusColors] ||
-    { bg: 'gray.100', color: 'gray.800', text: status, borderColor: 'gray.200' };
+    { bg: 'gray.100', color: 'gray.800', text: formatStatusText(status), borderColor: 'gray.200' };
 
   return (
     <Card
@@ -296,7 +285,7 @@ const AgreementCard = ({ id = '001', status = 'Pending', carRegistration = '', c
             whiteSpace="nowrap"
             boxShadow="sm"
           >
-            {statusColor.text}
+            {formatStatusText(status)}
           </Badge>
         </Flex>
         

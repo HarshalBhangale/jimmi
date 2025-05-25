@@ -213,6 +213,21 @@ const statusColors = {
   'Completed': { bg: 'green.50', color: 'green.600', text: 'COMPLETED' }
 };
 
+// Function to format status text for display
+const formatStatusText = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    'ClaimAlreadySubmitted': 'Already Submitted',
+    'FOSEscalation': 'FOS Escalation',
+    'OfferMade': 'Offer Made',
+    'Pending': 'Pending',
+    'Submitted': 'Submitted',
+    'Rejected': 'Rejected',
+    'Completed': 'Completed'
+  };
+  
+  return statusMap[status] || status;
+};
+
 // Status badge component for consistent styling
 const StatusBadge = ({ status }: { status: string }) => {
   const statusBadgeColors = {
@@ -235,7 +250,7 @@ const StatusBadge = ({ status }: { status: string }) => {
       fontWeight="medium"
       fontSize="xs"
     >
-      STATUS: {status.toUpperCase()}
+      STATUS: {formatStatusText(status).toUpperCase()}
     </Badge>
   );
 };
@@ -817,7 +832,7 @@ const LenderDetails = () => {
           color={colorInfo.color}
         >
           <Text fontSize="sm">
-            <Text as="span" fontWeight="bold">{String(count)}</Text> {status}
+            <Text as="span" fontWeight="bold">{String(count)}</Text> {formatStatusText(status)}
           </Text>
         </Box>
       );
@@ -1305,16 +1320,16 @@ const LenderDetails = () => {
                           Submitted
                         </MenuItemOption>
                         <MenuItemOption value="OfferMade" onClick={() => toggleStatusFilter('OfferMade')}>
-                          OfferMade
+                          Offer Made
                         </MenuItemOption>
                         <MenuItemOption value="Rejected" onClick={() => toggleStatusFilter('Rejected')}>
                           Rejected
                         </MenuItemOption>
                         <MenuItemOption value="ClaimAlreadySubmitted" onClick={() => toggleStatusFilter('ClaimAlreadySubmitted')}>
-                          AlreadySubmitted
+                          Already Submitted
                         </MenuItemOption>
                         <MenuItemOption value="FOSEscalation" onClick={() => toggleStatusFilter('FOSEscalation')}>
-                          FOSEscalation
+                          FOS Escalation
                         </MenuItemOption>
                         <MenuItemOption value="Completed" onClick={() => toggleStatusFilter('Completed')}>
                           Completed

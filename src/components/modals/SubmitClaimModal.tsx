@@ -169,11 +169,15 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
 
   const handleTemplateChange = (templateName: string) => {
     setClaimType(templateName);
-    const selectedTemplate = detailedTemplates.find(template => template.templateName === templateName);
-    if (selectedTemplate) {
-      console.log(selectedTemplate, "selectedTemplate");
-      setMail({ subject: selectedTemplate.subject, body: selectedTemplate.text });
-      console.log(mail, "mail");
+    if (templateName === 'custom') {
+      setMail({ subject: '', body: '' });
+    } else {
+      const selectedTemplate = detailedTemplates.find(template => template.templateName === templateName);
+      if (selectedTemplate) {
+        console.log(selectedTemplate, "selectedTemplate");
+        setMail({ subject: selectedTemplate.subject, body: selectedTemplate.text });
+        console.log(mail, "mail");
+      }
     }
   };
 
@@ -214,7 +218,6 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
             return { ...claimTemplates[templateKey], text: interpolatedText, subject: templateData.subject };
           })
         );
-        console.log(fetchedTemplates, "templates");
         setDetailedTemplates(fetchedTemplates);
       } catch (error) {
         console.error('Error fetching templates:', error);
@@ -238,28 +241,28 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
       size={useBreakpointValue({ base: "full", md: "xl" })}
       scrollBehavior="inside"
     >
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
-      <ModalContent 
-        borderRadius={{ base: "0", md: "xl" }} 
+      <ModalContent
+        borderRadius={{ base: "0", md: "xl" }}
         bg={bgColor}
         mx={{ base: 0, md: "auto" }}
         my={{ base: 0, md: "1.75rem" }}
         maxH={{ base: "100vh", md: "calc(100vh - 3.5rem)" }}
       >
-        <ModalHeader 
-          borderBottomWidth="1px" 
-          borderColor={borderColor} 
+        <ModalHeader
+          borderBottomWidth="1px"
+          borderColor={borderColor}
           py={{ base: 3, md: 4 }}
           px={{ base: 4, md: 6 }}
         >
-          <Text 
-            fontSize={{ base: "lg", md: "xl" }} 
+          <Text
+            fontSize={{ base: "lg", md: "xl" }}
             fontWeight="bold"
             lineHeight="short"
           >
@@ -279,22 +282,22 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
           {step === 1 ? (
             <Stack spacing={{ base: 4, md: 6 }}>
               <Box>
-                <Flex 
-                  justify="space-between" 
-                  align={{ base: "flex-start", md: "center" }} 
+                <Flex
+                  justify="space-between"
+                  align={{ base: "flex-start", md: "center" }}
                   mb={3}
                   direction={{ base: "column", sm: "row" }}
                   gap={{ base: 2, sm: 0 }}
                 >
-                  <Text 
-                    fontSize={{ base: "md", md: "lg" }} 
+                  <Text
+                    fontSize={{ base: "md", md: "lg" }}
                     fontWeight="semibold"
                     mb={{ base: 1, sm: 0 }}
                   >
                     Selected Agreements
                   </Text>
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     size={{ base: "xs", md: "sm" }}
                     onClick={handleSelectAll}
                     alignSelf={{ base: "flex-start", sm: "auto" }}
@@ -305,8 +308,8 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                   </Button>
                 </Flex>
 
-                <Text 
-                  mb={4} 
+                <Text
+                  mb={4}
                   color="blue.500"
                   fontSize={{ base: "sm", md: "md" }}
                   lineHeight="tall"
@@ -329,22 +332,22 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                       transition="all 0.2s"
                     >
                       <CardBody py={{ base: 3, md: 4 }} px={{ base: 3, md: 4 }}>
-                        <Flex 
-                          justify="space-between" 
+                        <Flex
+                          justify="space-between"
                           align="center"
                           direction={{ base: "column", sm: "row" }}
                           gap={{ base: 2, sm: 0 }}
                         >
                           <Box flex="1" mr={{ base: 0, sm: 3 }}>
-                            <Text 
+                            <Text
                               fontWeight="bold"
                               fontSize={{ base: "sm", md: "md" }}
                               mb={{ base: 1, sm: 0 }}
                             >
                               Agreement #{agreement.agreementNumber}
                             </Text>
-                            <VStack 
-                              spacing={1} 
+                            <VStack
+                              spacing={1}
                               align={{ base: "center", sm: "flex-start" }}
                               mt={1}
                             >
@@ -382,8 +385,8 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                   ))}
                 </Stack>
 
-                <Flex 
-                  justify="space-between" 
+                <Flex
+                  justify="space-between"
                   mt={{ base: 4, md: 6 }}
                   direction={{ base: "column-reverse", sm: "row" }}
                   gap={{ base: 3, sm: 0 }}
@@ -413,9 +416,9 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
           ) : (
             <Stack spacing={{ base: 4, md: 6 }}>
               <Box>
-                <Text 
-                  fontSize={{ base: "md", md: "lg" }} 
-                  fontWeight="semibold" 
+                <Text
+                  fontSize={{ base: "md", md: "lg" }}
+                  fontWeight="semibold"
                   mb={3}
                 >
                   Choose Claim Template
@@ -435,21 +438,21 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                         transition="all 0.2s"
                       >
                         <Flex align="flex-start" direction={{ base: "column", sm: "row" }}>
-                          <Radio 
-                            value={template.templateName} 
-                            colorScheme="blue" 
-                            mr={{ base: 0, sm: 2 }} 
+                          <Radio
+                            value={template.templateName}
+                            colorScheme="blue"
+                            mr={{ base: 0, sm: 2 }}
                             mb={{ base: 2, sm: 0 }}
                             mt={1}
                             size={{ base: "md", md: "lg" }}
                           />
                           <Box flex="1">
-                            <Flex 
-                              align="center" 
+                            <Flex
+                              align="center"
                               direction={{ base: "column", sm: "row" }}
                               mb={{ base: 2, sm: 0 }}
                             >
-                              <Text 
+                              <Text
                                 fontWeight="bold"
                                 fontSize={{ base: "sm", md: "md" }}
                                 mb={{ base: 1, sm: 0 }}
@@ -467,8 +470,8 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                               </Tooltip>
                             </Flex>
                             <Box fontSize={{ base: "xs", md: "sm" }} color="gray.600" mt={1}>
-                              <Text 
-                                fontWeight="semibold" 
+                              <Text
+                                fontWeight="semibold"
                                 color="blue.600"
                                 fontSize={{ base: "xs", md: "sm" }}
                                 mb={1}
@@ -477,17 +480,17 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                               </Text>
                               {claimType === template.templateName && (
                                 <Box>
-                                  <Text 
+                                  <Text
                                     whiteSpace="pre-line"
                                     fontSize={{ base: "xs", md: "sm" }}
                                     lineHeight="tall"
                                   >
                                     {isExpanded ? template.text : `${template.text?.substring(0, 100)}...`}
                                   </Text>
-                                  <Button 
-                                    variant="link" 
+                                  <Button
+                                    variant="link"
                                     size={{ base: "xs", md: "sm" }}
-                                    onClick={toggleReadMore} 
+                                    onClick={toggleReadMore}
                                     mt={1}
                                   >
                                     {isExpanded ? "Read Less" : "Read More"}
@@ -510,16 +513,16 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                       transition="all 0.2s"
                     >
                       <Flex align="flex-start" direction={{ base: "column", sm: "row" }}>
-                        <Radio 
-                          value="custom" 
-                          colorScheme="blue" 
-                          mr={{ base: 0, sm: 2 }} 
+                        <Radio
+                          value="custom"
+                          colorScheme="blue"
+                          mr={{ base: 0, sm: 2 }}
                           mb={{ base: 2, sm: 0 }}
                           mt={1}
                           size={{ base: "md", md: "lg" }}
                         />
-                        <Box flex="1">
-                          <Text 
+                        <Box flex="1" w="full">
+                          <Text
                             fontWeight="bold"
                             fontSize={{ base: "sm", md: "md" }}
                             mb={2}
@@ -529,6 +532,7 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                           {claimType === 'custom' && (
                             <VStack spacing={3} align="stretch">
                               <Input
+                                w="100%"
                                 value={mail.subject}
                                 onChange={(e) => setMail(prev => ({ ...prev, subject: e.target.value }))}
                                 placeholder="Enter Mail Subject here..."
@@ -536,6 +540,7 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                                 fontSize={{ base: "sm", md: "md" }}
                               />
                               <Textarea
+                                w="100%"
                                 value={mail.body}
                                 onChange={(e) => setMail(prev => ({ ...prev, body: e.target.value }))}
                                 placeholder="Enter Mail Body here..."
@@ -554,8 +559,8 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                 <Divider my={{ base: 4, md: 5 }} />
 
                 <Box>
-                  <Text 
-                    fontWeight="semibold" 
+                  <Text
+                    fontWeight="semibold"
                     mb={2}
                     fontSize={{ base: "sm", md: "md" }}
                   >
@@ -566,7 +571,7 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                       const agreement = agreements.find(a => a.id === id);
                       return (
                         <ListItem key={id}>
-                          <HStack 
+                          <HStack
                             spacing={2}
                             align="center"
                             flexWrap={{ base: "wrap", sm: "nowrap" }}
@@ -576,8 +581,8 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                               Agreement #{agreement?.agreementNumber || id}
                             </Text>
                             {agreement?.startDate && (
-                              <Text 
-                                fontSize={{ base: "xs", md: "sm" }} 
+                              <Text
+                                fontSize={{ base: "xs", md: "sm" }}
                                 color="gray.500"
                                 display={{ base: "block", sm: "inline" }}
                                 w={{ base: "full", sm: "auto" }}
@@ -598,16 +603,16 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
         </ModalBody>
 
         {step === 2 && (
-          <ModalFooter 
-            borderTopWidth="1px" 
+          <ModalFooter
+            borderTopWidth="1px"
             borderColor={borderColor}
             py={{ base: 3, md: 4 }}
             px={{ base: 4, md: 6 }}
             flexDirection={{ base: "column-reverse", sm: "row" }}
             gap={{ base: 3, sm: 0 }}
           >
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               mr={{ base: 0, sm: 3 }}
               onClick={() => setStep(1)}
               size={{ base: "md", md: "md" }}
