@@ -23,6 +23,7 @@ import {
   useToast,
   Spinner,
   Badge,
+  Icon,
 } from '@chakra-ui/react';
 import { FiArrowRight, FiArrowLeft } from 'react-icons/fi';
 import { userAtom, refetchUserAtom } from '@/jotai/atoms';
@@ -31,39 +32,23 @@ import { updateProfile } from '@/api/services/profile';
 
 // Template texts for different request types
 const requestTemplates = {
-  full_dsar: `Dear [Lender],
+  full_dsar: `Hi [Lender],
 
-I am writing to make a Subject Access Request under Article 15 of the General Data Protection Regulation.
+I am writing to formally request information regarding all agreements I have held with your organisation. Specifically, I would like the following:
 
-I request copies of all personal data you hold about me, including but not limited to:
-1. All finance/loan agreements I have held with you
-2. All personal information you hold about me
-3. All credit checks, scoring, and decisioning information
-4. Details of all payments made and charges applied
-5. Any call recordings, correspondence, or notes related to my agreements
-6. Information about how my data has been processed and shared
+- A copy of all credit agreements associated with my name
+- Full details of any commission paid in relation to those agreements, including:
+    - The amount of commission paid
+    - The commission model used to calculate it
 
-Please provide this information in an electronic format.
+Please treat this as a Subject Access Request under the Data Protection Act 2018. I expect a response within one calendar month of receipt, in line with statutory obligations.
 
-Yours faithfully,
-[Full Name]`,
+To assist you in locating my records, please find my personal details below along with a copy of my [docType]:
 
-  key_info: `Dear [Lender],
+[personalDetails]
 
-I am writing to request key information about all finance agreements I have held with you.
-
-Please provide the following details:
-1. Agreement/contract numbers
-2. Start and end dates of each agreement
-3. Initial loan amounts
-4. Interest rates applied
-5. Total amount repaid
-6. Status of the agreements (active/settled)
-
-Thank you for your assistance.
-
-Yours faithfully,
-[Full Name]`,
+Kind regards,
+[fullName]`,
 
   custom: '',
 };
@@ -86,6 +71,7 @@ const Step6 = () => {
       setSelectedLenders(user.lenders.map((l: any) => l.id));
     }
   }, [user.lenders]);
+  
 
   const handleToggleLender = (lenderId: string) => {
     if (selectedLenders.includes(lenderId)) {
@@ -166,10 +152,22 @@ const getPreviewText = () => {
   // Get user's full name
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
   
+  // Format personal details
+  const personalDetails = `
+    Name: ${user.firstName} ${user.lastName}
+    Date of Birth: ${user.dob}
+    Email: ${user.email}
+    Phone: ${user.phone}
+    Address: ${user.address?.address1}, ${user.address?.address2}, ${user.address?.city}, ${user.address?.postcode}
+    `;
+
+  const docType = `${user.identityDoc}`;
+  
   // Replace placeholders for the current lender
   template = template.replace('[Lender]', currentLender ? currentLender.name : '');
-  template = template.replace('[Full Name]', fullName);
-
+  template = template.replace('[fullName]', fullName);
+  template = template.replace('[personalDetails]', personalDetails);
+  template = template.replace('[docType]', docType);
   return template;
 };
 
@@ -428,37 +426,7 @@ const getPreviewText = () => {
                       <Box ml={2.5}>
                         <Text fontWeight="medium" fontSize="sm">Request all your documents</Text>
                         <Text fontSize="xs" color={labelColor} mt={0.5}>
-                          Complete Subject Access Request for all personal data and agreements
-                        </Text>
-                      </Box>
-                    </Flex>
-                  </Box>
-                  
-                  <Box
-                    p={3}
-                    borderWidth="1px"
-                    borderRadius="md"
-                    borderColor={selectedOption === 'key_info' ? selectedBorderColor : borderColor}
-                    bg={selectedOption === 'key_info' ? selectedBg : 'transparent'}
-                    cursor="pointer"
-                    onClick={() => setSelectedOption('key_info')}
-                    transition="all 0.2s"
-                    _hover={{
-                      borderColor: selectedBorderColor,
-                      shadow: "sm"
-                    }}
-                  >
-                    <Flex alignItems="flex-start">
-                      <Radio 
-                        value="key_info" 
-                        colorScheme="blue" 
-                        mt={0.5}
-                        size="md"
-                      />
-                      <Box ml={2.5}>
-                        <Text fontWeight="medium" fontSize="sm">Request key information</Text>
-                        <Text fontSize="xs" color={labelColor} mt={0.5}>
-                          Only essential agreement details like numbers, dates, and amounts
+                          Complete Subject Access Request for all agreements and commission details
                         </Text>
                       </Box>
                     </Flex>
