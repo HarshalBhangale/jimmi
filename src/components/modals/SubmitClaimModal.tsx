@@ -30,6 +30,8 @@ import {
   IconButton,
   Checkbox,
   Input,
+  useBreakpointValue,
+  VStack,
 } from '@chakra-ui/react';
 import { FiInfo, FiCheckCircle, FiArrowRight } from 'react-icons/fi';
 import { getTemplates } from '@/api/services/templates';
@@ -226,11 +228,33 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      size={useBreakpointValue({ base: "full", md: "xl" })}
+      scrollBehavior="inside"
+    >
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
-      <ModalContent borderRadius="xl" bg={bgColor}>
-        <ModalHeader borderBottomWidth="1px" borderColor={borderColor} py={4}>
-          <Text fontSize="xl" fontWeight="bold">Submit Claim for {lenderName}</Text>
+      <ModalContent 
+        borderRadius={{ base: "0", md: "xl" }} 
+        bg={bgColor}
+        mx={{ base: 0, md: "auto" }}
+        my={{ base: 0, md: "1.75rem" }}
+        maxH={{ base: "100vh", md: "calc(100vh - 3.5rem)" }}
+      >
+        <ModalHeader 
+          borderBottomWidth="1px" 
+          borderColor={borderColor} 
+          py={{ base: 3, md: 4 }}
+          px={{ base: 4, md: 6 }}
+        >
+          <Text 
+            fontSize={{ base: "lg", md: "xl" }} 
+            fontWeight="bold"
+            lineHeight="short"
+          >
+            Submit Claim for {lenderName}
+          </Text>
           <Progress
             value={step === 1 ? 50 : 100}
             size="sm"
@@ -239,29 +263,49 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
             mt={2}
           />
         </ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton top={{ base: 2, md: 4 }} right={{ base: 2, md: 4 }} />
 
-        <ModalBody py={6}>
+        <ModalBody py={{ base: 4, md: 6 }} px={{ base: 4, md: 6 }}>
           {step === 1 ? (
-            <Stack spacing={6}>
+            <Stack spacing={{ base: 4, md: 6 }}>
               <Box>
-                <Flex justify="space-between" align="center" mb={3}>
-                  <Text fontSize="lg" fontWeight="semibold">
+                <Flex 
+                  justify="space-between" 
+                  align={{ base: "flex-start", md: "center" }} 
+                  mb={3}
+                  direction={{ base: "column", sm: "row" }}
+                  gap={{ base: 2, sm: 0 }}
+                >
+                  <Text 
+                    fontSize={{ base: "md", md: "lg" }} 
+                    fontWeight="semibold"
+                    mb={{ base: 1, sm: 0 }}
+                  >
                     Selected Agreements
                   </Text>
-                  <Button variant="link" size="sm" onClick={handleSelectAll}>
+                  <Button 
+                    variant="link" 
+                    size={{ base: "xs", md: "sm" }}
+                    onClick={handleSelectAll}
+                    alignSelf={{ base: "flex-start", sm: "auto" }}
+                  >
                     {selectedAgreements.length === agreements.length
                       ? "Deselect All"
                       : "Select All"}
                   </Button>
                 </Flex>
 
-                <Text mb={4} color="blue.500">
+                <Text 
+                  mb={4} 
+                  color="blue.500"
+                  fontSize={{ base: "sm", md: "md" }}
+                  lineHeight="tall"
+                >
                   You currently have {agreements.length} agreements to submit.
                   Do you want to add any more agreements?
                 </Text>
 
-                <Stack spacing={3}>
+                <Stack spacing={{ base: 2, md: 3 }}>
                   {agreements.map((agreement) => (
                     <Card
                       key={agreement.agreementNumber}
@@ -271,21 +315,52 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                       cursor="pointer"
                       onClick={() => setSelectedAgreements([agreement.id])}
                       _hover={{ boxShadow: 'md' }}
-                      mb={2}
+                      _active={{ transform: 'scale(0.98)' }}
+                      transition="all 0.2s"
                     >
-                      <CardBody py={3}>
-                        <Flex justify="space-between" align="center">
-                          <Box>
-                            <Text fontWeight="bold">Agreement #{agreement.agreementNumber}</Text>
-                            <HStack spacing={2} mt={1}>
-                              {agreement.startDate && <Text fontSize="sm">{agreement.startDate}</Text>}
-                              {agreement.amount && <Text fontSize="sm">• £{agreement.amount}</Text>}
-                              {agreement.startDate && <Text fontSize="sm">• 12 months</Text>}
-                            </HStack>
+                      <CardBody py={{ base: 3, md: 4 }} px={{ base: 3, md: 4 }}>
+                        <Flex 
+                          justify="space-between" 
+                          align="center"
+                          direction={{ base: "column", sm: "row" }}
+                          gap={{ base: 2, sm: 0 }}
+                        >
+                          <Box flex="1" mr={{ base: 0, sm: 3 }}>
+                            <Text 
+                              fontWeight="bold"
+                              fontSize={{ base: "sm", md: "md" }}
+                              mb={{ base: 1, sm: 0 }}
+                            >
+                              Agreement #{agreement.agreementNumber}
+                            </Text>
+                            <VStack 
+                              spacing={1} 
+                              align={{ base: "center", sm: "flex-start" }}
+                              mt={1}
+                            >
+                              {agreement.startDate && (
+                                <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600">
+                                  {agreement.startDate}
+                                </Text>
+                              )}
+                              <HStack spacing={2} flexWrap="wrap" justify={{ base: "center", sm: "flex-start" }}>
+                                {agreement.amount && (
+                                  <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600">
+                                    £{agreement.amount}
+                                  </Text>
+                                )}
+                                {agreement.startDate && (
+                                  <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600">
+                                    • 12 months
+                                  </Text>
+                                )}
+                              </HStack>
+                            </VStack>
                           </Box>
                           <Radio
                             isChecked={selectedAgreements.includes(agreement.id)}
                             colorScheme="blue"
+                            size={{ base: "md", md: "lg" }}
                             onChange={(e) => {
                               e.stopPropagation();
                               setSelectedAgreements([agreement.id]);
@@ -297,10 +372,17 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                   ))}
                 </Stack>
 
-                <Flex justify="space-between" mt={6}>
+                <Flex 
+                  justify="space-between" 
+                  mt={{ base: 4, md: 6 }}
+                  direction={{ base: "column-reverse", sm: "row" }}
+                  gap={{ base: 3, sm: 0 }}
+                >
                   <Button
                     variant="outline"
                     onClick={onClose}
+                    size={{ base: "md", md: "md" }}
+                    w={{ base: "full", sm: "auto" }}
                   >
                     Cancel
                   </Button>
@@ -310,6 +392,8 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                     onClick={handleNextStep}
                     isDisabled={selectedAgreements.length === 0}
                     rightIcon={<FiArrowRight />}
+                    size={{ base: "md", md: "md" }}
+                    w={{ base: "full", sm: "auto" }}
                   >
                     Continue
                   </Button>
@@ -317,50 +401,90 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
               </Box>
             </Stack>
           ) : (
-            <Stack spacing={6}>
+            <Stack spacing={{ base: 4, md: 6 }}>
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={3}>
+                <Text 
+                  fontSize={{ base: "md", md: "lg" }} 
+                  fontWeight="semibold" 
+                  mb={3}
+                >
                   Choose Claim Template
                 </Text>
 
                 <RadioGroup value={claimType} onChange={handleTemplateChange} mb={5}>
-                  <Stack spacing={4}>
+                  <Stack spacing={{ base: 3, md: 4 }}>
                     {detailedTemplates.map((template) => (
                       <Card
                         key={template.templateName}
                         variant="outline"
-                        p={3}
+                        p={{ base: 2, md: 3 }}
                         borderColor={claimType === template.templateName ? 'blue.300' : borderColor}
                         bg={claimType === template.templateName ? 'blue.50' : bgColor}
                         _hover={{ boxShadow: 'md' }}
+                        _active={{ transform: 'scale(0.98)' }}
+                        transition="all 0.2s"
                       >
-                        <Flex align="flex-start">
-                          <Radio value={template.templateName} colorScheme="blue" mr={2} mt={1} />
-                          <Box>
-                            <Flex align="center">
-                              <Text fontWeight="bold">{template.title}</Text>
+                        <Flex align="flex-start" direction={{ base: "column", sm: "row" }}>
+                          <Radio 
+                            value={template.templateName} 
+                            colorScheme="blue" 
+                            mr={{ base: 0, sm: 2 }} 
+                            mb={{ base: 2, sm: 0 }}
+                            mt={1}
+                            size={{ base: "md", md: "lg" }}
+                          />
+                          <Box flex="1">
+                            <Flex 
+                              align="center" 
+                              direction={{ base: "column", sm: "row" }}
+                              mb={{ base: 2, sm: 0 }}
+                            >
+                              <Text 
+                                fontWeight="bold"
+                                fontSize={{ base: "sm", md: "md" }}
+                                mb={{ base: 1, sm: 0 }}
+                              >
+                                {template.title}
+                              </Text>
                               <Tooltip label={template.tooltip} placement="top">
                                 <IconButton
                                   icon={<Icon as={FiInfo} />}
                                   aria-label="More information"
                                   variant="ghost"
-                                  size="sm"
-                                  ml={1}
+                                  size={{ base: "xs", md: "sm" }}
+                                  ml={{ base: 0, sm: 1 }}
                                 />
                               </Tooltip>
                             </Flex>
-                            <Text fontSize="sm" color="gray.600" mt={1} whiteSpace="pre-line">
-                              <Text fontWeight="semibold" color="blue.600">{template.subject}</Text>
+                            <Box fontSize={{ base: "xs", md: "sm" }} color="gray.600" mt={1}>
+                              <Text 
+                                fontWeight="semibold" 
+                                color="blue.600"
+                                fontSize={{ base: "xs", md: "sm" }}
+                                mb={1}
+                              >
+                                {template.subject}
+                              </Text>
                               {claimType === template.templateName && (
-                                <>
-                                  {isExpanded ? template.text : `${template.text?.substring(0, 100)}...`}
-                                  <br />
-                                  <Button variant="link" size="sm" onClick={toggleReadMore} ml={1}>
+                                <Box>
+                                  <Text 
+                                    whiteSpace="pre-line"
+                                    fontSize={{ base: "xs", md: "sm" }}
+                                    lineHeight="tall"
+                                  >
+                                    {isExpanded ? template.text : `${template.text?.substring(0, 100)}...`}
+                                  </Text>
+                                  <Button 
+                                    variant="link" 
+                                    size={{ base: "xs", md: "sm" }}
+                                    onClick={toggleReadMore} 
+                                    mt={1}
+                                  >
                                     {isExpanded ? "Read Less" : "Read More"}
                                   </Button>
-                                </>
+                                </Box>
                               )}
-                            </Text>
+                            </Box>
                           </Box>
                         </Flex>
                       </Card>
@@ -368,32 +492,48 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                     <Card
                       key="customClaim"
                       variant="outline"
-                      p={3}
+                      p={{ base: 2, md: 3 }}
                       borderColor={claimType === 'custom' ? 'blue.300' : borderColor}
                       bg={claimType === 'custom' ? 'blue.50' : bgColor}
                       _hover={{ boxShadow: 'md' }}
+                      _active={{ transform: 'scale(0.98)' }}
+                      transition="all 0.2s"
                     >
-                      <Flex align="flex-start">
-                        <Radio value="custom" colorScheme="blue" mr={2} mt={1} />
-                        <Box>
-                          <Text fontWeight="bold">Custom Claim</Text>
+                      <Flex align="flex-start" direction={{ base: "column", sm: "row" }}>
+                        <Radio 
+                          value="custom" 
+                          colorScheme="blue" 
+                          mr={{ base: 0, sm: 2 }} 
+                          mb={{ base: 2, sm: 0 }}
+                          mt={1}
+                          size={{ base: "md", md: "lg" }}
+                        />
+                        <Box flex="1">
+                          <Text 
+                            fontWeight="bold"
+                            fontSize={{ base: "sm", md: "md" }}
+                            mb={2}
+                          >
+                            Custom Claim
+                          </Text>
                           {claimType === 'custom' && (
-                            <>
+                            <VStack spacing={3} align="stretch">
                               <Input
                                 value={mail.subject}
                                 onChange={(e) => setMail(prev => ({ ...prev, subject: e.target.value }))}
                                 placeholder="Enter Mail Subject here..."
-                                mt={2}
-                                w="100%"
+                                size={{ base: "md", md: "md" }}
+                                fontSize={{ base: "sm", md: "md" }}
                               />
                               <Textarea
                                 value={mail.body}
                                 onChange={(e) => setMail(prev => ({ ...prev, body: e.target.value }))}
                                 placeholder="Enter Mail Body here..."
-                                mt={2}
-                                w="100%"
+                                rows={{ base: 4, md: 6 }}
+                                fontSize={{ base: "sm", md: "md" }}
+                                resize="vertical"
                               />
-                            </>
+                            </VStack>
                           )}
                         </Box>
                       </Flex>
@@ -401,20 +541,40 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                   </Stack>
                 </RadioGroup>
 
-                <Divider my={5} />
+                <Divider my={{ base: 4, md: 5 }} />
 
                 <Box>
-                  <Text fontWeight="semibold" mb={2}>Selected Agreements ({selectedAgreements.length})</Text>
+                  <Text 
+                    fontWeight="semibold" 
+                    mb={2}
+                    fontSize={{ base: "sm", md: "md" }}
+                  >
+                    Selected Agreements ({selectedAgreements.length})
+                  </Text>
                   <List spacing={1}>
                     {selectedAgreements.map(id => {
                       const agreement = agreements.find(a => a.id === id);
                       return (
                         <ListItem key={id}>
-                          <HStack>
-                            <Icon as={FiCheckCircle} color="green.500" />
-                            <Text fontSize="sm">Agreement #{agreement?.agreementNumber || id}</Text>
+                          <HStack 
+                            spacing={2}
+                            align="center"
+                            flexWrap={{ base: "wrap", sm: "nowrap" }}
+                          >
+                            <Icon as={FiCheckCircle} color="green.500" minW="16px" />
+                            <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
+                              Agreement #{agreement?.agreementNumber || id}
+                            </Text>
                             {agreement?.startDate && (
-                              <Text fontSize="sm" color="gray.500">{agreement.startDate}</Text>
+                              <Text 
+                                fontSize={{ base: "xs", md: "sm" }} 
+                                color="gray.500"
+                                display={{ base: "block", sm: "inline" }}
+                                w={{ base: "full", sm: "auto" }}
+                                ml={{ base: 6, sm: 0 }}
+                              >
+                                {agreement.startDate}
+                              </Text>
                             )}
                           </HStack>
                         </ListItem>
@@ -428,8 +588,21 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
         </ModalBody>
 
         {step === 2 && (
-          <ModalFooter borderTopWidth="1px" borderColor={borderColor}>
-            <Button variant="outline" mr={3} onClick={() => setStep(1)}>
+          <ModalFooter 
+            borderTopWidth="1px" 
+            borderColor={borderColor}
+            py={{ base: 3, md: 4 }}
+            px={{ base: 4, md: 6 }}
+            flexDirection={{ base: "column-reverse", sm: "row" }}
+            gap={{ base: 3, sm: 0 }}
+          >
+            <Button 
+              variant="outline" 
+              mr={{ base: 0, sm: 3 }}
+              onClick={() => setStep(1)}
+              size={{ base: "md", md: "md" }}
+              w={{ base: "full", sm: "auto" }}
+            >
               Back
             </Button>
             <Button
@@ -438,6 +611,8 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
               isLoading={isLoading}
               loadingText="Submitting"
               leftIcon={<FiCheckCircle />}
+              size={{ base: "md", md: "md" }}
+              w={{ base: "full", sm: "auto" }}
             >
               Submit These Claims
             </Button>
