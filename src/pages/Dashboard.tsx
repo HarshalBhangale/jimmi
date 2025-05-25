@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { useState, useEffect, type Key } from 'react';
+import { useState, useEffect, type Key, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -42,6 +42,10 @@ import {
   SkeletonText,
   Avatar,
   AvatarGroup,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Spacer,
 } from '@chakra-ui/react';
 import {
   FiPlus,
@@ -55,6 +59,9 @@ import {
   FiClock,
   FiActivity,
   FiTarget,
+  FiSearch,
+  FiUser,
+  FiX,
 } from 'react-icons/fi';
 import AddLenderModal from '../components/modals/AddLenderModal';
 import AddAgreementModal from '../components/modals/AddAgreementModal';
@@ -63,7 +70,7 @@ import { userAtom } from '@/jotai/atoms';
 import { useAtomValue } from 'jotai';
 import { getClaims, createClaim } from '@/api/services/claims';
 
-const CLAIM_RESPONSE_STATUSES =  ['Offer Made', 'Accepted', 'Rejected', 'Declined', 'Escalated', 'FCA Pause']
+const CLAIM_RESPONSE_STATUSES =  ['OfferMade', 'Accepted', 'Rejected', 'Declined', 'Escalated', 'FCA Pause']
 
 interface Agreement {
   agreementNumber: string;
@@ -225,9 +232,9 @@ const AgreementCard = ({ id = '001', status = 'Pending', carRegistration = '', c
   const statusColors = {
     Pending: { bg: 'yellow.100', color: 'yellow.800', text: 'Pending', borderColor: 'yellow.200' },
     Submitted: { bg: 'blue.100', color: 'blue.800', text: 'Submitted', borderColor: 'blue.200' },
-    'Offer Made': { bg: 'green.100', color: 'green.800', text: 'Offer Made', borderColor: 'green.200' },
+    OfferMade: { bg: 'green.100', color: 'green.800', text: 'OfferMade', borderColor: 'green.200' },
     Rejected: { bg: 'red.100', color: 'red.800', text: 'Rejected', borderColor: 'red.200' },
-    'FCA Pause': { bg: 'purple.100', color: 'purple.800', text: 'FCA Pause', borderColor: 'purple.200' },
+    FCAPause: { bg: 'purple.100', color: 'purple.800', text: 'FCAPause', borderColor: 'purple.200' },
     Accepted: { bg: 'green.100', color: 'green.800', text: 'Accepted', borderColor: 'green.200' },
     Declined: { bg: 'orange.100', color: 'orange.800', text: 'Declined', borderColor: 'orange.200' },
     Escalated: { bg: 'red.100', color: 'red.800', text: 'Escalated', borderColor: 'red.200' }
@@ -645,6 +652,13 @@ const Dashboard = () => {
   const [lenders, setLenders] = useState<DashboardLender[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [claims, setClaims] = useState<LenderWithClaims[]>([]);
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredLenders, setFilteredLenders] = useState<DashboardLender[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
   const [statistics, setStatistics] = useState({
     totalLenders: 0,
     activeLenders: 0,
@@ -677,6 +691,10 @@ const Dashboard = () => {
   const bgColor = useColorModeValue('gray.50', 'gray.900');
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const searchBgColor = useColorModeValue('white', 'gray.700');
+  const dropdownBg = useColorModeValue('white', 'gray.800');
+  const dropdownBorder = useColorModeValue('gray.200', 'gray.600');
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
 
   const fetchData = async () => {
     try {
@@ -880,6 +898,92 @@ const Dashboard = () => {
     navigate('/dashboard/mailbox');
   };
 
+  // Search functionality
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setFilteredLenders(lenders);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // Filter lenders based on search query
+      const filtered = lenders.filter(lender => {
+        const lenderName = lender.name.toLowerCase();
+        const searchTerm = query.toLowerCase();
+        
+        // Search in lender name
+        const matchesLender = lenderName.includes(searchTerm);
+        
+        // Search in agreement numbers or car registrations
+        const matchesAgreement = lender.agreements.some(agreement => 
+          agreement.id.toLowerCase().includes(searchTerm) ||
+          agreement.carRegistration.toLowerCase().includes(searchTerm)
+        );
+        
+        return matchesLender || matchesAgreement;
+      });
+
+      setFilteredLenders(filtered);
+    } catch (error) {
+      console.error('Search error:', error);
+      setFilteredLenders(lenders);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Initialize filteredLenders with all lenders
+  useEffect(() => {
+    setFilteredLenders(lenders);
+  }, [lenders]);
+
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Handle search result click
+  const handleResultClick = (result: any) => {
+    if (result.type === 'lender') {
+      navigate(`/dashboard/lenders/${result.id}`);
+      setSearchQuery('');
+      searchInputRef.current?.blur();
+    }
+  };
+
+  // Handle escape key to close search
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSearchQuery('');
+        searchInputRef.current?.blur();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const searchContainer = searchInputRef.current?.parentElement?.parentElement;
+      if (searchContainer && !searchContainer.contains(event.target as Node)) {
+        setSearchQuery('');
+      }
+    };
+
+    if (isSearching) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isSearching]);
+
   return (
     <Box bg={bgColor} minH="100vh" py={{ base: 6, md: 10 }}>
       <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
@@ -969,7 +1073,7 @@ const Dashboard = () => {
               <Flex
                 justify="space-between"
                 align="center"
-                mb={{ base: 6, md: 8 }}
+                mb={{ base: 4, md: 6 }}
                 px={2}
               >
                 <VStack align="flex-start" spacing={2}>
@@ -981,6 +1085,79 @@ const Dashboard = () => {
                   </Text>
                 </VStack>
               </Flex>
+              
+              {/* Search Bar - Added here as requested */}
+              <Box 
+                mb={{ base: 6, md: 8 }} 
+                w="full" 
+                position="relative"
+                maxW="100%"
+              >
+                <Card
+                  bg={cardBg}
+                  borderRadius="xl"
+                  boxShadow="sm"
+                  p={{ base: 2, md: 3 }}
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <InputGroup size={{ base: "md", md: "lg" }}>
+                    <InputLeftElement pointerEvents="none" h="full">
+                      <Icon as={FiSearch} color={useColorModeValue('gray.400', 'gray.500')} boxSize={5} />
+                    </InputLeftElement>
+                    <Input 
+                      ref={searchInputRef}
+                      placeholder="Search lenders, agreements, or car registrations..." 
+                      bg={searchBgColor} 
+                      border="none"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      _placeholder={{ color: 'gray.400' }}
+                      _hover={{ bg: useColorModeValue('gray.50', 'gray.600') }}
+                      _focus={{ 
+                        bg: useColorModeValue('white', 'gray.700'),
+                        boxShadow: 'none',
+                      }}
+                      transition="all 0.2s"
+                      borderRadius="lg"
+                      fontSize={{ base: "md", md: "lg" }}
+                      h={{ base: "48px", md: "56px" }}
+                      pl={{ base: 10, md: 12 }}
+                    />
+                    {searchQuery.trim() && (
+                      <Box position="absolute" right={3} top="50%" transform="translateY(-50%)" zIndex={2}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          colorScheme="blue"
+                          onClick={() => setSearchQuery('')}
+                          p={1}
+                          minW={0}
+                          h={8}
+                        >
+                          <Icon as={FiX} boxSize={4} />
+                        </Button>
+                      </Box>
+                    )}
+                  </InputGroup>
+                </Card>
+                {searchQuery.trim() && filteredLenders.length > 0 && (
+                  <Flex mt={2} align="center">
+                    <Text fontSize="sm" color="gray.600">
+                      Found {filteredLenders.length} {filteredLenders.length === 1 ? 'result' : 'results'}
+                    </Text>
+                    <Spacer />
+                    <Button
+                      size="xs"
+                      variant="link"
+                      colorScheme="blue"
+                      onClick={() => setSearchQuery('')}
+                    >
+                      Clear
+                    </Button>
+                  </Flex>
+                )}
+              </Box>
 
               {lenders.length === 0 ? (
                 <Card 
@@ -1025,9 +1202,50 @@ const Dashboard = () => {
                     </Button>
                   </VStack>
                 </Card>
+              ) : filteredLenders.length === 0 && searchQuery.trim() ? (
+                <Card 
+                  p={{ base: 8, md: 12 }} 
+                  textAlign="center" 
+                  borderWidth="2px" 
+                  borderStyle="dashed"
+                  borderColor={borderColor} 
+                  borderRadius="2xl"
+                  bg={cardBg}
+                >
+                  <VStack spacing={6}>
+                    <Box
+                      w={{ base: "80px", md: "100px" }}
+                      h={{ base: "80px", md: "100px" }}
+                      borderRadius="full"
+                      bg="blue.50"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Icon as={FiFileText} w={{ base: 8, md: 10 }} h={{ base: 8, md: 10 }} color="blue.500" />
+                    </Box>
+                    <VStack spacing={3}>
+                      <Heading size={{ base: "md", md: "lg" }} color="gray.800">No results found</Heading>
+                      <Text color="gray.600" fontSize={{ base: "md", md: "lg" }} maxW="md" lineHeight="relaxed">
+                        No lenders match your search for "{searchQuery}". Try a different search term or clear your search.
+                      </Text>
+                    </VStack>
+                    <Button 
+                      variant="outline"
+                      colorScheme="blue" 
+                      onClick={() => setSearchQuery('')}
+                      size={{ base: "md", md: "lg" }}
+                      px={{ base: 6, md: 8 }}
+                      py={{ base: 4, md: 6 }}
+                      borderRadius="xl"
+                    >
+                      Clear Search
+                    </Button>
+                  </VStack>
+                </Card>
               ) : (
                 <VStack spacing={{ base: 6, md: 8 }} align="stretch">
-                  {lenders.map(lender => (
+                  {filteredLenders.map(lender => (
                     <LenderSection
                       key={lender.id}
                       lender={lender}

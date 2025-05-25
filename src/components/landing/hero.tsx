@@ -289,47 +289,51 @@ const Hero: React.FC = () => {
                 </Button>
               </Stack>
 
-              {/* Enhanced features with better styling */}
               {isMobile ? (
-                <Box mt={6} width="100%">
+                <Box mt={8} width="100%">
                   <SimpleGrid 
-                    columns={{ base: 3, lg: 3 }}
-                    spacing={{ base: 3, lg: 5 }}
+                    columns={{ base: 3 }}
+                    spacing={{ base: 3 }}
                     width="100%"
                   >
                     {[
-                      { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.300" },
-                      { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.300" },
-                      { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.300" }
+                      { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.400" },
+                      { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.400" },
+                      { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.400" }
                     ].map((feature, index) => (
                       <Box
                         key={index}
-                        bg="rgba(255, 255, 255, 0.1)"
-                        backdropFilter="blur(10px)"
+                        bg="rgba(20, 20, 20, 0.85)"
                         borderRadius="xl"
-                        p={{ base: 3, lg: 5 }}
-                        boxShadow="0 4px 6px rgba(0, 0, 0, 0.1)"
-                        border="1px solid rgba(255, 255, 255, 0.2)"
-                        transition="all 0.3s"
+                        p={4}
+                        boxShadow="0 8px 16px rgba(0, 0, 0, 0.3)"
+                        border="1px solid rgba(50, 50, 50, 0.8)"
+                        transition="all 0.3s ease"
                         _hover={{ 
                           transform: 'translateY(-2px)', 
-                          boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)',
-                          bg: "rgba(255, 255, 255, 0.15)"
+                          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.4)'
                         }}
+                        height="100%"
                       >
                         <Flex
-                          direction="row"
+                          direction="column"
                           align="center"
-                          justify="flex-start"
+                          justify="center"
+                          textAlign="center"
+                          height="100%"
                         >
-                          <Icon 
-                            as={feature.icon} 
-                            color={feature.color} 
-                            boxSize={{ base: 8, lg: 10 }} 
-                            mr={4}
-                          />
+                          <Box
+                            mb={3}
+                            p={2}
+                          >
+                            <Icon 
+                              as={feature.icon} 
+                              color={feature.color} 
+                              boxSize={{ base: 6, sm: 7 }}
+                            />
+                          </Box>
                           <Text 
-                            fontSize={{ base: "md", lg: "lg" }} 
+                            fontSize={{ base: "xs", sm: "sm" }}
                             fontWeight="semibold"
                             color="white"
                             lineHeight="tight"

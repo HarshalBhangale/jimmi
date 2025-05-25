@@ -206,10 +206,10 @@ const statusBadgeColors = {
 const statusColors = {
   'Pending': { bg: 'yellow.50', color: 'yellow.600', text: 'PENDING' },
   'Submitted': { bg: 'blue.50', color: 'blue.600', text: 'SUBMITTED' },
-  'Offer Made': { bg: 'green.50', color: 'green.600', text: 'OFFER MADE' },
+  'OfferMade': { bg: 'green.50', color: 'green.600', text: 'OFFERMADE' },
   'Rejected': { bg: 'red.50', color: 'red.600', text: 'REJECTED' },
-  'Claim Already Submitted': { bg: 'yellow.50', color: 'yellow.600', text: 'ALREADY SUBMITTED' },
-  'FOS Escalation': { bg: 'purple.50', color: 'purple.600', text: 'FOS ESCALATION' },
+  'ClaimAlreadySubmitted': { bg: 'yellow.50', color: 'yellow.600', text: 'ALREADY SUBMITTED' },
+  'FOSEscalation': { bg: 'purple.50', color: 'purple.600', text: 'FOS ESCALATION' },
   'Completed': { bg: 'green.50', color: 'green.600', text: 'COMPLETED' }
 };
 
@@ -1305,16 +1305,16 @@ const LenderDetails = () => {
                           Submitted
                         </MenuItemOption>
                         <MenuItemOption value="OfferMade" onClick={() => toggleStatusFilter('OfferMade')}>
-                          Offer Made
+                          OfferMade
                         </MenuItemOption>
                         <MenuItemOption value="Rejected" onClick={() => toggleStatusFilter('Rejected')}>
                           Rejected
                         </MenuItemOption>
                         <MenuItemOption value="ClaimAlreadySubmitted" onClick={() => toggleStatusFilter('ClaimAlreadySubmitted')}>
-                          Already Submitted
+                          AlreadySubmitted
                         </MenuItemOption>
                         <MenuItemOption value="FOSEscalation" onClick={() => toggleStatusFilter('FOSEscalation')}>
-                          FOS Escalation
+                          FOSEscalation
                         </MenuItemOption>
                         <MenuItemOption value="Completed" onClick={() => toggleStatusFilter('Completed')}>
                           Completed

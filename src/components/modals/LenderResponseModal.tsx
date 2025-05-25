@@ -283,7 +283,7 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
 
       switch (responseType) {
         case 'offer':
-          newStatus = 'Offer Made';
+          newStatus = 'OfferMade';
           details = {
             offerAmount,
             responseAction: 'offer'
@@ -297,11 +297,11 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
           };
           break;
         case 'fcaPause':
-          newStatus = 'FCA Pause';
+          newStatus = 'FCAPause';
           details = { responseAction: 'fcaPause' };
           break;
         case 'alreadySubmitted':
-          newStatus = 'Claim Already Submitted';
+          newStatus = 'ClaimAlreadySubmitted';
           details = {
             wantToTakeOver,
             responseAction: wantToTakeOver ? 'takeOver' : 'close'
