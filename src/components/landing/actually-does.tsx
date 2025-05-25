@@ -168,7 +168,7 @@ const ActuallyDoes: React.FC = () => {
           <Feature
             icon={<Icon as={FiMessageSquare} />}
             title="Step-by-Step Guidance"
-            text="From signing a letter to replying to your lender — Buddy walks you through it all like a real assistant."
+            text="From understanding your commission models to submitting your claims."
             delay="0s"
           />
           <Feature

@@ -564,6 +564,10 @@ const LenderDetails = () => {
     setIsLoading(false);
   }, [claims, id]);
 
+  useEffect(() => {
+    refetchClaims();
+  }, []);
+
   const handleAddAgreement = async (agreementData: { agreementNumber: string, carRegistration: string }) => {
     try {
       // Create claim in backend with the required format

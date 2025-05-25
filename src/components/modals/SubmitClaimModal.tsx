@@ -66,7 +66,7 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
 }) => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [claimType, setClaimType] = useState('dca');
+  const [claimType, setClaimType] = useState<string | null>(null);
   const [selectedAgreements, setSelectedAgreements] = useState<string[]>([]);
   const [detailedTemplates, setDetailedTemplates] = useState<any[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -126,6 +126,16 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    if (!claimType) {
+      toast({
+        title: "No template selected",
+        description: "Please select a template to proceed",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
     console.log(mail, "mail");
     setIsLoading(true);
     try {
@@ -613,6 +623,7 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
               leftIcon={<FiCheckCircle />}
               size={{ base: "md", md: "md" }}
               w={{ base: "full", sm: "auto" }}
+              isDisabled={!claimType}
             >
               Submit These Claims
             </Button>

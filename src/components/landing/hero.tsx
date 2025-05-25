@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
@@ -8,20 +8,14 @@ import {
   Flex,
   Heading,
   Text,
-  Stack,
   HStack,
   Icon,
-  useBreakpointValue,
-  Badge,
   Image,
-  useMediaQuery,
   VStack,
-  Grid,
-  GridItem,
   Link,
+  Stack,
 } from '@chakra-ui/react';
-import { FiArrowRight, FiBookOpen, FiCheckCircle, FiClock } from 'react-icons/fi';
-import { FaFire, FaRegClock } from 'react-icons/fa';
+import { FiArrowRight, FiBookOpen, FiCheckCircle } from 'react-icons/fi';
 import { keyframes } from '@emotion/react';
 
 // Enhanced animations
@@ -36,57 +30,23 @@ const shimmer = keyframes`
   100% { transform: translateX(100%); }
 `;
 
-const float = keyframes`
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-`;
-
 const glow = keyframes`
   0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 128, 0.3); }
   50% { box-shadow: 0 0 30px rgba(255, 0, 128, 0.6); }
 `;
 
-const countdownPulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-`;
-
-// Function to calculate time until next Sunday midnight
-const calculateTimeToNextSunday = () => {
-  const now = new Date();
-  const nextSunday = new Date();
-  
-  // Get days until next Sunday (0 is Sunday, so we add 7 if today is Sunday)
-  const daysToSunday = 7 - now.getDay();
-  nextSunday.setDate(now.getDate() + (daysToSunday === 0 ? 7 : daysToSunday));
-  
-  // Set to midnight (23:59:59)
-  nextSunday.setHours(23, 59, 59, 999);
-  
-  // Calculate difference in milliseconds
-  const diff = nextSunday.getTime() - now.getTime();
-  
-  // Convert to hours, minutes, seconds
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-  
-  return { hours, minutes, seconds };
-};
-
 const Hero: React.FC = () => {
-  const [isMobile] = useMediaQuery('(max-width: 768px)');
-  const [timeRemaining, setTimeRemaining] = useState(calculateTimeToNextSunday());
-  
-  // Enhanced timer countdown with real-time calculation
+  const [showRobot, setShowRobot] = useState(false);
+
+  // Scroll handler for robot visibility
   useEffect(() => {
-    const timer = setInterval(() => {
-      const newTime = calculateTimeToNextSunday();
-      setTimeRemaining(newTime);
-    }, 1000);
-    
-    return () => clearInterval(timer);
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setShowRobot(scrollPosition > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
   return (
@@ -99,7 +59,6 @@ const Hero: React.FC = () => {
       justifyContent="center"
       overflow="hidden"
       bg="black"
-      pt={{ base: "100px", md: "120px" }}
     >
       {/* Enhanced animated background with multiple layers */}
       <Box
@@ -125,131 +84,6 @@ const Hero: React.FC = () => {
         animation={`${pulse} 8s ease-in-out infinite`}
       />
       
-      {/* Enhanced limited-time offer banner - REDUCED HEIGHT */}
-      <Box 
-        position="fixed"
-        top={{ base: "60px", md: "70px" }}
-        left="0"
-        right="0"
-        bgGradient="linear(to-r, #FF0080, #FF6B35, #F7931E)"
-        color="white"
-        py={{ base: "2px", md: "6px" }}  // Significantly reduced padding
-        zIndex="banner"
-        boxShadow="0 8px 32px rgba(255, 0, 128, 0.3)"
-        backdropFilter="blur(10px)"
-        borderBottom="1px solid rgba(255, 255, 255, 0.1)"
-      >
-        <Container maxW="container.xl">
-          <Flex 
-            alignItems="center" 
-            justifyContent="center"
-            flexWrap="wrap"
-            gap={{ base: 2, md: 3 }}
-          >
-            <HStack spacing={1}>
-              <Icon as={FaFire} boxSize={{ base: 3, md: 4 }} animation={`${pulse} 1s infinite`} />
-              <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.3)">
-                LIMITED TIME OFFER
-              </Text>
-            </HStack>
-            
-            {/* Enhanced countdown display - REDUCED SIZE */}
-            <HStack 
-              spacing={2} 
-              bg="rgba(0,0,0,0.3)" 
-              px={3}  // Reduced padding
-              py={1}  // Reduced padding
-              borderRadius="full"
-              backdropFilter="blur(10px)"
-              border="1px solid rgba(255, 255, 255, 0.2)"
-            >
-              <Icon 
-                as={FiClock} 
-                boxSize={{ base: 3, md: 4 }} 
-                color="yellow.300" 
-                animation={`${pulse} 2s infinite`}
-              />
-              <Text 
-                fontSize={{ base: "2xs", md: "xs" }} 
-                fontWeight="bold"
-                color="yellow.100"
-              >
-                Offer ends in:
-              </Text>
-              <HStack spacing={1}>
-                <Box 
-                  bg="rgba(255,255,255,0.15)" 
-                  px={1.5}  // Reduced padding
-                  py={0.5}  // Reduced padding
-                  borderRadius="md" 
-                  minW={{ base: "24px", md: "28px" }}  // Reduced width
-                  textAlign="center"
-                  animation={timeRemaining.hours <= 24 ? `${glow} 2s infinite` : 'none'}
-                  border="1px solid rgba(255,255,255,0.1)"
-                >
-                  <Text 
-                    fontSize={{ base: "xs", md: "sm" }} 
-                    fontWeight="bold"
-                    color="yellow.100"
-                  >
-                    {String(timeRemaining.hours).padStart(2, '0')}
-                  </Text>
-                </Box>
-                <Text fontSize={{ base: "xs", md: "sm" }} color="yellow.100">:</Text>
-                <Box 
-                  bg="rgba(255,255,255,0.15)" 
-                  px={1.5}  // Reduced padding
-                  py={0.5}  // Reduced padding
-                  borderRadius="md" 
-                  minW={{ base: "24px", md: "28px" }}  // Reduced width
-                  textAlign="center"
-                  animation={timeRemaining.minutes === 0 ? `${countdownPulse} 0.5s` : 'none'}
-                  border="1px solid rgba(255,255,255,0.1)"
-                >
-                  <Text 
-                    fontSize={{ base: "xs", md: "sm" }} 
-                    fontWeight="bold"
-                    color="yellow.100"
-                  >
-                    {String(timeRemaining.minutes).padStart(2, '0')}
-                  </Text>
-                </Box>
-                <Text fontSize={{ base: "xs", md: "sm" }} color="yellow.100">:</Text>
-                <Box 
-                  bg="rgba(255,255,255,0.15)" 
-                  px={1.5}  // Reduced padding
-                  py={0.5}  // Reduced padding
-                  borderRadius="md" 
-                  minW={{ base: "24px", md: "28px" }}  // Reduced width
-                  textAlign="center"
-                  animation={`${countdownPulse} 1s infinite`}
-                  border="1px solid rgba(255,255,255,0.1)"
-                >
-                  <Text 
-                    fontSize={{ base: "2xs", md: "xs" }} 
-                    fontWeight="bold"
-                    color="yellow.100"
-                  >
-                    {String(timeRemaining.seconds).padStart(2, '0')}
-                  </Text>
-                </Box>
-              </HStack>
-            </HStack>
-                
-            <Text fontSize={{ base: "xs", md: "md" }} fontWeight="medium" textShadow="0 2px 4px rgba(0,0,0,0.3)">
-              Get full access for just{' '}
-              <Text as="span" fontWeight="extrabold" fontSize={{ base: "sm", md: "lg" }}>
-                £39.99
-              </Text>{' '}
-              instead of{' '}
-              <Text as="span" textDecoration="line-through" opacity={0.8}>
-                £79.99
-              </Text>
-            </Text>
-          </Flex>
-        </Container>
-      </Box>
-      
       {/* Enhanced floating decorative elements */}
       <Box
         position="absolute"
@@ -261,7 +95,6 @@ const Hero: React.FC = () => {
         bgGradient="radial(blue.400, purple.500, transparent 70%)"
         opacity={0.3}
         zIndex={0}
-        animation={`${float} 6s ease-in-out infinite`}
         filter="blur(1px)"
       />
       
@@ -275,7 +108,6 @@ const Hero: React.FC = () => {
         bgGradient="radial(pink.400, purple.500, transparent 70%)"
         opacity={0.3}
         zIndex={0}
-        animation={`${float} 8s ease-in-out infinite reverse`}
         filter="blur(1px)"
       />
       
@@ -288,7 +120,6 @@ const Hero: React.FC = () => {
         height="100px"
         borderRadius="full"
         bg="rgba(255, 255, 255, 0.1)"
-        animation={`${float} 4s ease-in-out infinite`}
         zIndex={0}
       />
       
@@ -300,23 +131,23 @@ const Hero: React.FC = () => {
         height="80px"
         borderRadius="full"
         bg="rgba(255, 0, 128, 0.2)"
-        animation={`${float} 5s ease-in-out infinite reverse`}
         zIndex={0}
       />
       
-      <Container maxW="container.xl" position="relative" zIndex={1} pt={{ base: 8, md: 12 }}>
+      <Container maxW="container.xl" position="relative" zIndex={1} pt={{ base: "140px", md: "160px" }}>
         <Flex
           direction={{ base: 'column', lg: 'row' }}
           align="center"
           justify="center"
-          gap={{ base: 8, md: 12, lg: 20 }}
+          gap={{ base: 6, md: 8, lg: 16 }}
           px={{ base: 4, md: 6 }}
         >
-          {/* Enhanced logo with glow effect */}
+          {/* Robot logo - Now appears only after scroll, no floating animation, reduced padding */}
           <Box 
-            maxW={{ base: '50%', md: '45%', lg: '40%' }}
-            mb={{ base: 4, md: 0 }}
-            animation={`${float} 3s ease-in-out infinite`}
+            maxW={{ base: '45%', md: '40%', lg: '35%' }}
+            mb={{ base: 2, md: 0 }}
+            opacity={showRobot ? 1 : 1}
+            transition="opacity 0.3s ease"
           >
             <Image
               src="/jimmi-logo.png"
@@ -325,21 +156,16 @@ const Hero: React.FC = () => {
               h="auto"
               objectFit="contain"
               filter="drop-shadow(0 0 40px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 80px rgba(255, 0, 128, 0.3))"
-              transition="all 0.3s ease"
-              _hover={{
-                filter: "drop-shadow(0 0 60px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 120px rgba(255, 0, 128, 0.5))",
-                transform: "scale(1.05)"
-              }}
             />
           </Box>
 
           {/* Enhanced hero text */}
           <Box 
-            maxW={{ base: 'full', lg: '60%' }} 
+            maxW={{ base: 'full', lg: '65%' }} 
             color="white"
             textAlign={{ base: 'center', lg: 'left' }}
           >
-            <Box width="100%" mb={8}>
+            <Box width="100%" mb={6}>
               <Heading
                 as="h1"
                 fontSize={{ base: '3xl', sm: '4xl', md: '5xl', lg: '6xl', xl: '7xl' }}
@@ -371,7 +197,7 @@ const Hero: React.FC = () => {
             <Text
               fontSize={{ base: 'lg', md: 'xl', lg: '2xl' }}
               lineHeight="tall"
-              mb={10}
+              mb={8}
               color="whiteAlpha.900"
               maxW={{ base: "100%", lg: "95%" }}
               textShadow="0 2px 4px rgba(0,0,0,0.3)"
@@ -390,99 +216,81 @@ const Hero: React.FC = () => {
             </Text>
             
             {/* Enhanced CTAs and Features Container */}
-            <VStack spacing={10} align={{ base: "stretch", lg: "flex-start" }} width="100%">
+            <VStack spacing={8} align={{ base: "stretch", lg: "flex-start" }} width="100%">
               {/* Enhanced CTAs */}
-              <Flex 
+              <Stack 
                 direction={{ base: "column", lg: "row" }} 
-                gap={{ base: 6, lg: 6 }} 
+                spacing={{ base: 4, lg: 6 }} 
                 width="100%"
                 maxW={{ base: "100%", lg: "95%" }}
+                align={{ base: "stretch", lg: "center" }}
               >
                 {/* Main CTA with enhanced effects */}
                 <Button
                   as={RouterLink}
                   to="/auth/signup/step-1"
                   size="lg"
-                  height={{ base: "64px", md: "72px" }}
+                  height={{ base: "64px", md: "70px" }}
                   fontSize={{ base: 'lg', md: 'xl' }}
                   fontWeight="bold"
-                  bgGradient="linear(135deg, #FF0080, #7928CA, #FF0080)"
-                  backgroundSize="200% 200%"
+                  bgGradient="linear(135deg, #FF0080, #7928CA)"
                   color="white"
                   rightIcon={<Icon as={FiArrowRight} boxSize={{ base: 5, md: 6 }} />}
                   _hover={{ 
-                    backgroundPosition: "right center",
-                    transform: 'translateY(-4px) scale(1.02)',
-                    boxShadow: '0 20px 40px rgba(255, 0, 128, 0.4)' 
+                    bgGradient: "linear(135deg, #FF1493, #9370DB)",
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 15px 30px rgba(255, 0, 128, 0.4)' 
                   }}
-                  transition="all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-                  flex={{ lg: "1.2" }}
+                  _active={{
+                    transform: 'translateY(1px)',
+                    boxShadow: '0 5px 15px rgba(255, 0, 128, 0.4)'
+                  }}
+                  transition="all 0.3s ease"
+                  flex={{ lg: "0.8" }}
                   borderRadius="full"
                   position="relative"
-                  overflow="hidden"
-                  boxShadow="0 15px 35px rgba(255, 0, 128, 0.3)"
-                  border="2px solid transparent"
-                  backgroundClip="padding-box"
-                  animation={`${glow} 3s ease-in-out infinite`}
-                  _before={{
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: '-100%',
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                    animation: `${shimmer} 3s infinite ease-out`,
-                  }}
+                  boxShadow="0 10px 25px rgba(255, 0, 128, 0.3)"
                 >
                   Start Your Claim Now
                 </Button>
 
-                {/* Enhanced secondary action */}
+                {/* Secondary CTA as button for better visibility */}
                 <Button
                   as="a"
                   href="#how-it-works"
                   size="lg"
+                  height={{ base: "64px", md: "70px" }}
+                  fontSize={{ base: 'lg', md: 'xl' }}
+                  fontWeight="semibold"
                   variant="outline"
                   color="white"
-                  borderColor="rgba(255, 255, 255, 0.3)"
+                  borderColor="rgba(255, 255, 255, 0.4)"
                   borderWidth="2px"
-                  leftIcon={<Icon as={FiBookOpen} boxSize={{ base: 5, md: 6 }} />}
                   _hover={{ 
-                    bg: 'rgba(255, 255, 255, 0.1)',
-                    borderColor: 'rgba(255, 255, 255, 0.8)',
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 15px 35px rgba(255, 255, 255, 0.2)'
+                    bg: "whiteAlpha.100",
+                    borderColor: "white",
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 10px 25px rgba(255, 255, 255, 0.2)' 
                   }}
+                  _active={{
+                    transform: 'translateY(1px)',
+                    boxShadow: '0 5px 15px rgba(255, 255, 255, 0.1)'
+                  }}
+                  transition="all 0.3s ease"
                   flex={{ lg: "0.8" }}
                   borderRadius="full"
-                  fontWeight="medium"
-                  height={{ base: "64px", md: "72px" }}
-                  fontSize={{ base: 'lg', md: 'xl' }}
-                  transition="all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-                  backdropFilter="blur(10px)"
-                  position="relative"
-                  _before={{
-                    content: '""',
-                    position: 'absolute',
-                    inset: 0,
-                    padding: '2px',
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05))',
-                    borderRadius: 'inherit',
-                    mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                    maskComposite: 'exclude',
-                  }}
+                  leftIcon={<Icon as={FiBookOpen} boxSize={{ base: 5, md: 6 }} />}
                 >
-                  Learn How It Works
+                  How It Works
                 </Button>
-              </Flex>
+              </Stack>
 
               {/* Enhanced features with better styling */}
               <Flex 
                 wrap="wrap" 
                 gap={{ base: 3, md: 4 }} 
                 justify={{ base: "center", lg: "flex-start" }}
-                mt={{ base: 4, lg: 6 }}
+                mt={{ base: 2, lg: 4 }}
               >
                 {[
                   { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.300" },
