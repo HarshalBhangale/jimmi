@@ -327,7 +327,7 @@ const Pricing: React.FC = () => {
                       textDecoration="line-through" 
                       color={useColorModeValue('gray.400', 'gray.500')}
                     >
-                      £69.99
+                      £79.99
                     </Text>
                     <Heading 
                       as="h4" 
