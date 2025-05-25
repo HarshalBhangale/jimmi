@@ -38,9 +38,9 @@ const Navbar = () => {
       right={0}
       zIndex={1000}
       transition="all 0.3s ease-in-out"
-      bg={scrolled ? 'rgba(255, 255, 255, 0.1)' : 'transparent'}
-      bgGradient={scrolled ? 'linear(to-r, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))' : 'none'}
-      boxShadow={scrolled ? 'sm' : 'none'}
+      bg={scrolled ? 'rgba(0, 0, 0, 0.8)' : 'transparent'}
+      color={useColorModeValue('gray.950', 'white')}
+      boxShadow={scrolled ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none'}
       backdropFilter={scrolled ? 'blur(10px)' : 'none'}
       borderBottom={scrolled ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'}
     >
@@ -75,10 +75,15 @@ const Navbar = () => {
             <Button
               as={RouterLink}
               to="/auth/login"
-              colorScheme="blue"
-              bgGradient="linear(to-r, blue.400, purple.500)"
+              variant="outline"
+              border="1px"
+              borderColor="yellow.400"
+              bg="blur(80px) rgba(255, 255, 255, 0.1)"
+              backdropFilter="blur(50px)"
+              color="yellow.400"
               _hover={{
-                bgGradient: "linear(to-r, blue.500, purple.600)",
+              bg: "rgba(92, 123, 94, 0.88)",
+              borderColor: "yellow.300"
               }}
             >
               Sign In

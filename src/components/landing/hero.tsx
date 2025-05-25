@@ -15,418 +15,505 @@ import {
   Badge,
   Image,
   useMediaQuery,
-  ScaleFade,
-  SlideFade,
   VStack,
-  Tooltip,
-  useDisclosure,
-  CloseButton,
-  Slide,
   Grid,
   GridItem,
+  Link,
 } from '@chakra-ui/react';
-import { FiArrowRight, FiBookOpen, FiCheckCircle, FiClock, FiAlertCircle, FiGift } from 'react-icons/fi';
-import { FaStar, FaBolt, FaTag, FaFire, FaStopwatch, FaRegClock } from 'react-icons/fa';
+import { FiArrowRight, FiBookOpen, FiCheckCircle, FiClock } from 'react-icons/fi';
+import { FaFire, FaRegClock } from 'react-icons/fa';
 import { keyframes } from '@emotion/react';
-// Define animations
+
+// Enhanced animations
 const pulse = keyframes`
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
 `;
 
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+const shimmer = keyframes`
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 `;
 
-const bounce = keyframes`
-  0%, 100% { transform: translateY(0); }
+const float = keyframes`
+  0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
 `;
 
-const flash = keyframes`
-  0%, 50%, 100% { opacity: 1; }
-  25%, 75% { opacity: 0.5; }
+const glow = keyframes`
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 128, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 0, 128, 0.6); }
 `;
 
+const countdownPulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+`;
+
+// Function to calculate time until next Sunday midnight
+const calculateTimeToNextSunday = () => {
+  const now = new Date();
+  const nextSunday = new Date();
+  
+  // Get days until next Sunday (0 is Sunday, so we add 7 if today is Sunday)
+  const daysToSunday = 7 - now.getDay();
+  nextSunday.setDate(now.getDate() + (daysToSunday === 0 ? 7 : daysToSunday));
+  
+  // Set to midnight (23:59:59)
+  nextSunday.setHours(23, 59, 59, 999);
+  
+  // Calculate difference in milliseconds
+  const diff = nextSunday.getTime() - now.getTime();
+  
+  // Convert to hours, minutes, seconds
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  
+  return { hours, minutes, seconds };
+};
+
 const Hero: React.FC = () => {
-  const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
   const [isMobile] = useMediaQuery('(max-width: 768px)');
+  const [timeRemaining, setTimeRemaining] = useState(calculateTimeToNextSunday());
+  
+  // Enhanced timer countdown with real-time calculation
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const newTime = calculateTimeToNextSunday();
+      setTimeRemaining(newTime);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
   
   return (
     <Box 
       as="section" 
       position="relative"
-      minH={{ base: 'calc(100vh - 30px)', md: '100vh' }}
+      minH="100vh"
       display="flex"
       alignItems="center"
       justifyContent="center"
       overflow="hidden"
       bg="black"
-      py={{ base: 8, md: 0 }}
+      pt={{ base: "100px", md: "120px" }}
     >
-      {/* Background gradient with animated effect */}
+      {/* Enhanced animated background with multiple layers */}
       <Box
         position="absolute"
         top={0}
         left={0}
         right={0}
         bottom={0}
-        bgGradient="linear(to-br, blue.900, purple.900, black)"
+        bgGradient="linear(45deg, #0a0015, #1a0033, #000428, #004e92)"
         opacity={0.9}
-        zIndex={-1}
+        zIndex={-2}
       />
       
-      {/* Decorative elements - optimized for mobile */}
+      {/* Animated mesh gradient overlay */}
       <Box
         position="absolute"
-        top="10%"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        background="radial-gradient(circle at 20% 80%, rgba(120, 40, 200, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 0, 128, 0.3) 0%, transparent 50%)"
+        zIndex={-1}
+        animation={`${pulse} 8s ease-in-out infinite`}
+      />
+      
+      {/* Enhanced limited-time offer banner */}
+      <Box 
+        position="fixed"
+        top={{ base: "60px", md: "70px" }}
+        left="0"
+        right="0"
+        bgGradient="linear(to-r, #FF0080, #FF6B35, #F7931E)"
+        color="white"
+        py={{ base: 1, md: 2 }}  // Reduced padding
+        zIndex="banner"
+        boxShadow="0 8px 32px rgba(255, 0, 128, 0.3)"
+        backdropFilter="blur(10px)"
+        borderBottom="1px solid rgba(255, 255, 255, 0.1)"
+      >
+        <Container maxW="container.xl">
+          <Flex 
+        alignItems="center" 
+        justifyContent="center"
+        flexWrap="wrap"
+        gap={{ base: 1, md: 3 }}  // Reduced gap
+          >
+        <HStack spacing={1}>  // Reduced spacing
+          <Icon as={FaFire} boxSize={{ base: 3, md: 4 }} animation={`${pulse} 1s infinite`} />  // Reduced icon size
+          <Text fontSize={{ base: "xs", md: "md" }} fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.3)">
+            LIMITED TIME OFFER
+          </Text>
+        </HStack>
+        
+        {/* Enhanced countdown display */}
+        <HStack 
+          spacing={2} 
+          bg="rgba(0,0,0,0.3)" 
+          px={4}
+          py={2}
+          borderRadius="full"
+          backdropFilter="blur(10px)"
+          border="1px solid rgba(255, 255, 255, 0.2)"
+        >
+          <Icon 
+            as={FiClock} 
+            boxSize={{ base: 4, md: 5 }} 
+            color="yellow.300" 
+            animation={`${pulse} 2s infinite`}
+          />
+          <Text 
+            fontSize={{ base: "xs", md: "sm" }} 
+            fontWeight="bold"
+            color="yellow.100"
+          >
+            Offer ends in:
+          </Text>
+          <HStack spacing={1}>
+            <Box 
+              bg="rgba(255,255,255,0.15)" 
+              px={2}
+              py={1}
+              borderRadius="md" 
+              minW={{ base: "28px", md: "32px" }}
+              textAlign="center"
+              animation={timeRemaining.hours <= 24 ? `${glow} 2s infinite` : 'none'}
+              border="1px solid rgba(255,255,255,0.1)"
+            >
+              <Text 
+                fontSize={{ base: "sm", md: "md" }} 
+                fontWeight="bold"
+                color="yellow.100"
+              >
+                {String(timeRemaining.hours).padStart(2, '0')}
+              </Text>
+            </Box>
+            <Text fontSize={{ base: "sm", md: "md" }} color="yellow.100">:</Text>
+            <Box 
+              bg="rgba(255,255,255,0.15)" 
+              px={2}
+              py={1}
+              borderRadius="md" 
+              minW={{ base: "28px", md: "32px" }}
+              textAlign="center"
+              animation={timeRemaining.minutes === 0 ? `${countdownPulse} 0.5s` : 'none'}
+              border="1px solid rgba(255,255,255,0.1)"
+            >
+              <Text 
+                fontSize={{ base: "sm", md: "md" }} 
+                fontWeight="bold"
+                color="yellow.100"
+              >
+                {String(timeRemaining.minutes).padStart(2, '0')}
+              </Text>
+            </Box>
+            <Text fontSize={{ base: "sm", md: "md" }} color="yellow.100">:</Text>
+            <Box 
+              bg="rgba(255,255,255,0.15)" 
+              px={2}
+              py={1}
+              borderRadius="md" 
+              minW={{ base: "28px", md: "32px" }}
+              textAlign="center"
+              animation={`${countdownPulse} 1s infinite`}
+              border="1px solid rgba(255,255,255,0.1)"
+            >
+          <Text fontSize={{ base: "2xs", md: "xs" }} fontWeight="bold">
+            {String(timeRemaining.seconds).padStart(2, '0')}
+          </Text>
+            </Box>
+          </HStack>
+        </HStack>
+            
+            <Text fontSize={{ base: "sm", md: "lg" }} fontWeight="medium" textShadow="0 2px 4px rgba(0,0,0,0.3)">
+              Get full access for just{' '}
+              <Text as="span" fontWeight="extrabold" fontSize={{ base: "md", md: "xl" }}>
+                £39.99
+              </Text>{' '}
+              instead of{' '}
+              <Text as="span" textDecoration="line-through" opacity={0.8}>
+                £79.99
+              </Text>
+            </Text>
+          </Flex>
+        </Container>
+      </Box>
+      
+      {/* Enhanced floating decorative elements */}
+      <Box
+        position="absolute"
+        top="15%"
         left="5%"
-        width={{ base: '150px', md: '300px' }}
-        height={{ base: '150px', md: '300px' }}
+        width={{ base: '200px', md: '400px' }}
+        height={{ base: '200px', md: '400px' }}
         borderRadius="full"
-        bgGradient="radial(blue.500, transparent 70%)"
-        opacity={0.2}
+        bgGradient="radial(blue.400, purple.500, transparent 70%)"
+        opacity={0.3}
         zIndex={0}
+        animation={`${float} 6s ease-in-out infinite`}
+        filter="blur(1px)"
       />
       
       <Box
         position="absolute"
         bottom="10%"
         right="5%"
-        width={{ base: '200px', md: '400px' }}
-        height={{ base: '200px', md: '400px' }}
+        width={{ base: '250px', md: '500px' }}
+        height={{ base: '250px', md: '500px' }}
         borderRadius="full"
-        bgGradient="radial(purple.500, transparent 70%)"
-        opacity={0.2}
+        bgGradient="radial(pink.400, purple.500, transparent 70%)"
+        opacity={0.3}
+        zIndex={0}
+        animation={`${float} 8s ease-in-out infinite reverse`}
+        filter="blur(1px)"
+      />
+      
+      {/* Additional floating particles */}
+      <Box
+        position="absolute"
+        top="30%"
+        right="10%"
+        width="100px"
+        height="100px"
+        borderRadius="full"
+        bg="rgba(255, 255, 255, 0.1)"
+        animation={`${float} 4s ease-in-out infinite`}
         zIndex={0}
       />
       
-      <Container maxW="container.xl" position="relative" zIndex={1}>
+      <Box
+        position="absolute"
+        bottom="30%"
+        left="10%"
+        width="80px"
+        height="80px"
+        borderRadius="full"
+        bg="rgba(255, 0, 128, 0.2)"
+        animation={`${float} 5s ease-in-out infinite reverse`}
+        zIndex={0}
+      />
+      
+      <Container maxW="container.xl" position="relative" zIndex={1} pt={{ base: 8, md: 12 }}>
         <Flex
           direction={{ base: 'column', lg: 'row' }}
           align="center"
           justify="center"
-          gap={{ base: 4, md: 8 }}
-          py={{ base: 6, md: 20, lg: 28 }}
-          px={{ base: 4, md: 8 }}
+          gap={{ base: 8, md: 12, lg: 20 }}
+          px={{ base: 4, md: 6 }}
         >
-          {/* Mobile Image - Reduced size and padding */}
+          {/* Enhanced logo with glow effect */}
           <Box 
-            maxW={{ base: '45%', md: 'none' }}
-            display={{ base: 'block', md: 'none' }}
-            mb={3}
+            maxW={{ base: '50%', md: '45%', lg: '40%' }}
+            mb={{ base: 4, md: 0 }}
+            animation={`${float} 3s ease-in-out infinite`}
           >
             <Image
               src="/jimmi-logo.png"
-              alt="Jimmi Logo"
+              alt="Buddy Logo"
               w="full"
               h="auto"
               objectFit="contain"
-              filter="drop-shadow(0 0 20px rgba(255, 255, 255, 0.2))"
+              filter="drop-shadow(0 0 40px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 80px rgba(255, 0, 128, 0.3))"
+              transition="all 0.3s ease"
+              _hover={{
+                filter: "drop-shadow(0 0 60px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 120px rgba(255, 0, 128, 0.5))",
+                transform: "scale(1.05)"
+              }}
             />
           </Box>
 
-          {/* Desktop Image */}
-          <Box 
-            maxW={{ base: '50%', md: '40%', lg: '40%' }}
-            display={{ base: 'none', lg: 'block' }}
-          >
-            <Image
-              src="/jimmi-logo.png"
-              alt="Jimmi Logo"
-              w="full"
-              h="auto"
-              objectFit="contain"
-              filter="drop-shadow(0 0 20px rgba(255, 255, 255, 0.2))"
-              transition="transform 0.3s ease"
-              _hover={{ transform: 'scale(1.05)' }}
-            />
-          </Box>
-
-          {/* Hero Text */}
+          {/* Enhanced hero text */}
           <Box 
             maxW={{ base: 'full', lg: '60%' }} 
             color="white"
-            position="relative"
             textAlign={{ base: 'center', lg: 'left' }}
           >
-            {/* <Flex 
-              wrap="wrap" 
-              justify={{ base: 'center', lg: 'flex-start' }}
-              mb={{ base: 4, md: 6 }}
-              gap={2}
-            >
-              <Badge 
-                colorScheme="purple" 
-                fontSize={{ base: 'xs', md: 'sm', lg: 'md' }} 
-                px={{ base: 2, md: 3 }} 
-                py={1} 
-                borderRadius="full"
-                textTransform="none"
-                fontWeight="medium"
+            <Box width="100%" mb={8}>
+              <Heading
+                as="h1"
+                fontSize={{ base: '3xl', sm: '4xl', md: '5xl', lg: '6xl', xl: '7xl' }}
+                fontWeight="900"
+                lineHeight={0.9}
+                bgGradient="linear(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)"
+                bgClip="text"
+                letterSpacing="tight"
+                textShadow="0 0 40px rgba(255, 255, 255, 0.3)"
+                mb={2}
               >
-                Car finance claims made easy
-              </Badge>
+                Take Control of Your Claim
+              </Heading>
               
-              <Badge 
-                colorScheme="yellow" 
-                fontSize={{ base: 'xs', md: 'sm', lg: 'md' }} 
-                px={{ base: 3, md: 4 }} 
-                py={1.5} 
-                borderRadius="full"
-                textTransform="none"
-                fontWeight="bold"
-                bg="yellow.400"
-                color="gray.800"
-                boxShadow="md"
-                display="inline-flex"
-                alignItems="center"
+              <Heading
+                as="h2"
+                fontSize={{ base: '2xl', sm: '3xl', md: '4xl', lg: '5xl', xl: '6xl' }}
+                fontWeight="700"
+                lineHeight={1.1}
+                bgGradient="linear(135deg, #f093fb 0%, #f5576c 25%, #4facfe 50%, #00f2fe 75%, #4facfe 100%)"
+                bgClip="text"
+                letterSpacing="tight"
+                textShadow="0 0 30px rgba(255, 255, 255, 0.2)"
               >
-                <Box as="span" mr={1}>🔥</Box> Special Offer: £39.99 <Box as="span" fontSize="xs" ml={1} textDecoration="line-through">£49.99</Box>
-              </Badge>
-            </Flex> */}
-            
-            <Heading
-              as="h1"
-              fontSize={{ base: '2xl', sm: '3xl', md: '5xl', lg: '6xl' }}
-              fontWeight="extrabold"
-              lineHeight={1.1}
-              mb={{ base: 3, md: 6 }}
-              bgGradient="linear(to-r, blue.300, purple.300, pink.300)"
-              bgClip="text"
-              letterSpacing="tight"
-            >
-              Take Control of Your Claim
-              <Box as="span" display="block" mt={2} fontSize={{ base: 'xl', sm: '2xl', md: '4xl', lg: '5xl' }}>
                 Without the Hassle, Fees, or Firms
-              </Box>
-            </Heading>
-            
-            <Text
-              fontSize={{ base: 'sm', sm: 'md', md: 'xl', lg: '2xl' }}
-              lineHeight="tall"
-              mb={{ base: 4, md: 6 }}
-              color="whiteAlpha.800"
-              maxW="3xl"
-            >
-              You don't need a solicitor to make a car finance claim. You just need the <Text as="span" fontWeight="bold" color="blue.200">right guide</Text>.
-              <Text 
-                as="span" 
-                display="block" 
-                fontSize={{ base: 'md', sm: 'lg', md: 'xl', lg: '2xl' }} 
-                mt={{ base: 2, md: 3 }} 
-                // color="blue.200"
-                lineHeight="tall"
-              >
-                Buddy makes it easy to reclaim what you're owed — step by step.
-              </Text>
-            </Text>
-            
-            <Box
-              bg="linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0.05) 100%)"
-              backdropFilter="blur(12px)"
-              borderRadius="2xl"
-              p={{ base: 4, md: 6 }}
-              mb={{ base: 4, md: 6 }}
-              border="2px solid"
-              borderColor="yellow.400"
-              boxShadow="0 8px 32px rgba(255,215,0,0.25)"
-              position="relative"
-              overflow="hidden"
-              maxW={{ base: "full", lg: "600px" }}
-              mx={{ base: "auto", lg: 0 }}
-              _before={{
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)',
-              animation: `shimmer 3s infinite ease-in-out`,
-              }}
-            >
-              <HStack spacing={4} align="center" justify={{ base: "center", lg: "flex-start" }}>
-              <Box fontSize={{ base: "2xl", md: "3xl" }}>🔥</Box>
-              <VStack spacing={1} align={{ base: "center", lg: "start" }}>
-                <Text 
-                fontWeight="black" 
-                color="yellow.300" 
-                fontSize={{ base: "lg", md: "xl" }}
-                textShadow="0 2px 4px rgba(0,0,0,0.3)"
-                letterSpacing="wide"
-                >
-                LIMITED TIME OFFER
-                </Text>
-                <Text 
-                color="white" 
-                fontSize={{ base: "md", md: "lg" }}
-                textAlign={{ base: "center", lg: "left" }}
-                lineHeight="short"
-                >
-                Get full access for just <Text as="span" fontWeight="bold" color="yellow.300">£39.99</Text> instead of <Text as="span" textDecoration="line-through" color="whiteAlpha.600">£79.99</Text>
-                </Text>
-                <Text 
-                color="yellow.200" 
-                fontSize={{ base: "sm", md: "md" }}
-                fontWeight="semibold"
-                >
-                Save 50% today!
-                </Text>
-              </VStack>
-              </HStack>
+              </Heading>
             </Box>
             
-            <Grid 
-              templateColumns={{ base: '1fr', md: '1fr 1fr' }}
-              gap={{ base: 3, md: 4 }}
-              mb={{ base: 4, md: 6 }}
-              w="full"
-              maxW={{ base: 'full', md: 'none' }}
-              mx={{ base: 'auto', lg: 0 }}
+            <Text
+              fontSize={{ base: 'lg', md: 'xl', lg: '2xl' }}
+              lineHeight="tall"
+              mb={10}
+              color="whiteAlpha.900"
+              maxW={{ base: "100%", lg: "95%" }}
+              textShadow="0 2px 4px rgba(0,0,0,0.3)"
+              fontWeight="400"
             >
-              {/* Primary CTA Button */}
-                <GridItem>
+              You don't need a solicitor to make a car finance claim. You just need the{' '}
+              <Text 
+                as="span" 
+                fontWeight="bold" 
+                bgGradient="linear(to-r, #4facfe, #00f2fe)"
+                bgClip="text"
+              >
+                right guide
+              </Text>. 
+              Buddy makes it easy to reclaim what you're owed — step by step.
+            </Text>
+            
+            {/* Enhanced CTAs and Features Container */}
+            <VStack spacing={10} align={{ base: "stretch", lg: "flex-start" }} width="100%">
+              {/* Enhanced CTAs */}
+              <Flex 
+                direction={{ base: "column", lg: "row" }} 
+                gap={{ base: 6, lg: 6 }} 
+                width="100%"
+                maxW={{ base: "100%", lg: "95%" }}
+              >
+                {/* Main CTA with enhanced effects */}
                 <Button
                   as={RouterLink}
                   to="/auth/signup/step-1"
-                  size={{ base: 'lg', md: 'xl' }}
-                  h={{ base: '56px', md: '64px' }}
-                  px={{ base: 8, md: 10 }}
+                  size="lg"
+                  height={{ base: "64px", md: "72px" }}
                   fontSize={{ base: 'lg', md: 'xl' }}
-                  fontWeight="black"
-                  bgGradient="linear(45deg, #FF0080 0%, #7928CA 50%, #FF0080 100%)"
+                  fontWeight="bold"
+                  bgGradient="linear(135deg, #FF0080, #7928CA, #FF0080)"
                   backgroundSize="200% 200%"
                   color="white"
-                  rightIcon={<Icon as={FiArrowRight} boxSize={6} />}
+                  rightIcon={<Icon as={FiArrowRight} boxSize={{ base: 5, md: 6 }} />}
                   _hover={{ 
-                  backgroundPosition: '100% 0',
-                  transform: { base: 'translateY(-2px)', md: 'translateY(-3px) scale(1.02)' },
-                  boxShadow: '0 20px 40px rgba(255, 0, 128, 0.6), 0 0 30px rgba(255, 0, 128, 0.4), 0 0 0 2px rgba(255,255,255,0.2)' 
+                    backgroundPosition: "right center",
+                    transform: 'translateY(-4px) scale(1.02)',
+                    boxShadow: '0 20px 40px rgba(255, 0, 128, 0.4)' 
                   }}
-                  _active={{
-                  transform: 'translateY(-1px) scale(1.01)',
-                  }}
-                  transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-                  w="full"
+                  transition="all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                  flex={{ lg: "1.2" }}
+                  borderRadius="full"
                   position="relative"
                   overflow="hidden"
-                  borderRadius="full"
-                  border="3px solid"
-                  borderColor="pink.400"
-                  boxShadow="0 15px 35px rgba(255, 0, 128, 0.4), 0 0 20px rgba(255, 0, 128, 0.2), inset 0 1px 0 rgba(255,255,255,0.4)"
-                  css={{
-                  animation: `${pulse} 2s infinite, gradient 3s ease infinite`,
-                  }}
+                  boxShadow="0 15px 35px rgba(255, 0, 128, 0.3)"
+                  border="2px solid transparent"
+                  backgroundClip="padding-box"
+                  animation={`${glow} 3s ease-in-out infinite`}
                   _before={{
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: '-100%',
-                  width: '100%',
-                  height: '100%',
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
-                  transition: 'left 0.6s ease',
-                  }}
-                  _groupHover={{
-                  _before: {
-                    left: '100%',
-                  }
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                    animation: `${shimmer} 3s infinite ease-out`,
                   }}
                 >
                   Start Your Claim Now
                 </Button>
-                </GridItem>
 
-                {/* Secondary Button */}
-                <GridItem>
+                {/* Enhanced secondary action */}
                 <Button
                   as="a"
                   href="#how-it-works"
-                  size={{ base: 'md', md: 'lg' }}
-                  h={{ base: '48px', md: '56px' }}
-                  px={{ base: 6, md: 8 }}
-                  fontSize={{ base: 'md', md: 'lg' }}
-                  variant="ghost"
+                  size="lg"
+                  variant="outline"
                   color="white"
-                  bg="whiteAlpha.100"
-                  border="1px solid"
-                  borderColor="whiteAlpha.300"
-                  leftIcon={<Icon as={FiBookOpen} />}
+                  borderColor="rgba(255, 255, 255, 0.3)"
+                  borderWidth="2px"
+                  leftIcon={<Icon as={FiBookOpen} boxSize={{ base: 5, md: 6 }} />}
                   _hover={{ 
-                  bg: 'whiteAlpha.200',
-                  borderColor: 'whiteAlpha.500',
-                  transform: { base: 'translateY(-1px)', md: 'translateY(-2px)' },
-                  boxShadow: { base: '0 4px 12px rgba(255,255,255,0.1)', md: '0 8px 20px rgba(255,255,255,0.15)' }
+                    bg: 'rgba(255, 255, 255, 0.1)',
+                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 15px 35px rgba(255, 255, 255, 0.2)'
                   }}
-                  _active={{
-                  bg: 'whiteAlpha.300',
-                  transform: 'scale(0.98)'
-                  }}
-                  transition="all 0.2s ease"
-                  w="full"
+                  flex={{ lg: "0.8" }}
                   borderRadius="full"
                   fontWeight="medium"
+                  height={{ base: "64px", md: "72px" }}
+                  fontSize={{ base: 'lg', md: 'xl' }}
+                  transition="all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
                   backdropFilter="blur(10px)"
-                  boxShadow="0 4px 15px rgba(0,0,0,0.1)"
+                  position="relative"
+                  _before={{
+                    content: '""',
+                    position: 'absolute',
+                    inset: 0,
+                    padding: '2px',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05))',
+                    borderRadius: 'inherit',
+                    mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                    maskComposite: 'exclude',
+                  }}
                 >
-                  How It Works
+                  Learn How It Works
                 </Button>
-                </GridItem>
-            </Grid>
-            
-            <Grid
-              templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }}
-              gap={{ base: 2, md: 4 }}
-              justifyItems={{ base: 'center', lg: 'start' }}
-              w="full"
-              maxW={{ base: 'full', lg: '600px' }}
-            >
-              <GridItem colSpan={{ base: 2, md: 1 }}>
-                <HStack 
-                  bg="whiteAlpha.200" 
-                  backdropFilter="blur(10px)"
-                  rounded="full" 
-                  px={{ base: 3, md: 4 }} 
-                  py={{ base: 1.5, md: 2 }}
-                  boxShadow="md"
-                  minW="fit-content"
-                >
-                  <Icon as={FiCheckCircle} color="green.300" />
-                  <Text fontSize={{ base: 'xs', md: 'sm' }} fontWeight="medium">No Solicitor Fees</Text>
-                </HStack>
-              </GridItem>
-              <GridItem>
-                <HStack 
-                  bg="whiteAlpha.200" 
-                  backdropFilter="blur(10px)"
-                  rounded="full" 
-                  px={{ base: 3, md: 4 }} 
-                  py={{ base: 1.5, md: 2 }}
-                  boxShadow="md"
-                  minW="fit-content"
-                >
-                  <Icon as={FiCheckCircle} color="green.300" />
-                  <Text fontSize={{ base: 'xs', md: 'sm' }} fontWeight="medium">Keep 100% of Refund</Text>
-                </HStack>
-              </GridItem>
-              <GridItem>
-                <HStack 
-                  bg="whiteAlpha.200" 
-                  backdropFilter="blur(10px)"
-                  rounded="full" 
-                  px={{ base: 3, md: 4 }}
-                  py={{ base: 1.5, md: 2 }}
-                  boxShadow="md"
-                  minW="fit-content"
-                >
-                  <Icon as={FiCheckCircle} color="green.300" />
-                  <Text fontSize={{ base: 'xs', md: 'sm' }} fontWeight="medium">AI-Powered Support</Text>
-                </HStack>
-              </GridItem>
-            </Grid>
+              </Flex>
+
+              {/* Enhanced features with better styling */}
+              <Flex 
+                wrap="wrap" 
+                gap={{ base: 3, md: 4 }} 
+                justify={{ base: "center", lg: "flex-start" }}
+                mt={{ base: 4, lg: 6 }}
+              >
+                {[
+                  { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.300" },
+                  { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.300" },
+                  { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.300" }
+                ].map((feature, index) => (
+                  <HStack 
+                    key={index}
+                    bg="rgba(255, 255, 255, 0.1)" 
+                    backdropFilter="blur(20px)"
+                    rounded="full" 
+                    px={{ base: 4, md: 6 }}
+                    py={{ base: 3, md: 4 }}
+                    boxShadow="0 8px 32px rgba(0, 0, 0, 0.2)"
+                    border="1px solid rgba(255, 255, 255, 0.1)"
+                    transition="all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                    _hover={{ 
+                      transform: 'translateY(-2px)', 
+                      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)',
+                      bg: "rgba(255, 255, 255, 0.15)"
+                    }}
+                    cursor="default"
+                  >
+                    <Icon as={feature.icon} color={feature.color} boxSize={{ base: 4, md: 5 }} />
+                    <Text 
+                      fontSize={{ base: 'sm', md: 'md' }} 
+                      fontWeight="medium"
+                      textShadow="0 1px 2px rgba(0,0,0,0.3)"
+                    >
+                      {feature.text}
+                    </Text>
+                  </HStack>
+                ))}
+              </Flex>
+            </VStack>
           </Box>
         </Flex>
       </Container>

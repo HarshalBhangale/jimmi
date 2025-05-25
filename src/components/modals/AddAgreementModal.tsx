@@ -17,6 +17,7 @@ import {
   Box,
   useColorModeValue,
   Divider,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 
 interface AddAgreementModalProps {
@@ -39,6 +40,11 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
     agreementNumber: '',
     carRegistration: '',
   });
+
+  // Responsive values
+  const modalPadding = useBreakpointValue({ base: "4", md: "6" });
+  const badgePadding = useBreakpointValue({ base: "2", md: "3" });
+  const stackSpacing = useBreakpointValue({ base: 4, md: 6 });
 
   // Reset state when modal opens or closes
   useEffect(() => {
@@ -88,8 +94,18 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
-      <ModalContent borderRadius="xl" bg={bgColor}>
-        <ModalHeader borderBottomWidth="1px" borderColor={borderColor} py={4}>
+      <ModalContent 
+        borderRadius="xl" 
+        bg={bgColor}
+        mx={{ base: "4", md: "0" }}
+        my={{ base: "4", md: "0" }}
+      >
+        <ModalHeader 
+          borderBottomWidth="1px" 
+          borderColor={borderColor}
+          px={modalPadding} 
+          py={{ base: 3, md: 4 }}
+        >
           <Text fontSize="xl" fontWeight="bold">Add Agreement Details</Text>
           <Text fontSize="sm" color="gray.500" mt={1}>
             Enter the agreement details from the documents you received
@@ -97,12 +113,12 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
         </ModalHeader>
         <ModalCloseButton />
         
-        <ModalBody py={6}>
-          <Stack spacing={6}>
+        <ModalBody py={{ base: 4, md: 6 }} px={modalPadding}>
+          <Stack spacing={stackSpacing}>
             {/* Lender Badge */}
             <Badge
               alignSelf="flex-start"
-              px={3}
+              px={badgePadding}
               py={2}
               borderRadius="md"
               bg={badgeBg}
@@ -113,11 +129,11 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
             </Badge>
 
             <Box>
-              <Text fontSize="lg" fontWeight="semibold" mb={4}>
+              <Text fontSize="lg" fontWeight="semibold" mb={{ base: 3, md: 4 }}>
                 Agreement Information
               </Text>
               
-              <Stack spacing={4}>
+              <Stack spacing={{ base: 3, md: 4 }}>
                 <FormControl isRequired>
                   <FormLabel>Agreement Number</FormLabel>
                   <Input 
@@ -126,6 +142,7 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
                     value={agreementData.agreementNumber}
                     onChange={handleInputChange}
                     bg={inputBg}
+                    size={{ base: "md", md: "md" }}
                   />
                 </FormControl>
                 
@@ -137,6 +154,7 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
                     value={agreementData.carRegistration}
                     onChange={handleInputChange}
                     bg={inputBg}
+                    size={{ base: "md", md: "md" }}
                   />
                 </FormControl>
               </Stack>
@@ -145,8 +163,20 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
           </Stack>
         </ModalBody>
 
-        <ModalFooter borderTopWidth="1px" borderColor={borderColor}>
-          <Button variant="outline" mr={3} onClick={onClose}>
+        <ModalFooter 
+          borderTopWidth="1px" 
+          borderColor={borderColor}
+          px={modalPadding}
+          py={{ base: 3, md: 4 }}
+          flexDirection={{ base: "column", sm: "row" }}
+          gap={{ base: 2, sm: 0 }}
+        >
+          <Button 
+            variant="outline" 
+            mr={{ base: 0, sm: 3 }} 
+            w={{ base: "full", sm: "auto" }}
+            onClick={onClose}
+          >
             Cancel
           </Button>
           <Button 
@@ -155,6 +185,7 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
             isLoading={isLoading}
             loadingText="Saving"
             isDisabled={!agreementData.agreementNumber || !agreementData.carRegistration}
+            w={{ base: "full", sm: "auto" }}
           >
             Save Agreement
           </Button>
@@ -164,4 +195,4 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
   );
 };
 
-export default AddAgreementModal; 
+export default AddAgreementModal;

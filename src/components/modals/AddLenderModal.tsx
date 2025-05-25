@@ -163,7 +163,14 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
-      <ModalContent borderRadius="xl" bg={cardBg}>
+      <ModalContent 
+        borderRadius="xl" 
+        bg={cardBg}
+        mx="16px" // Fixed margin on all screen sizes
+        width="calc(100% - 32px)" // Ensure width respects margins
+        maxWidth="calc(100% - 32px)" // Make sure it doesn't overflow
+        my={{ base: 4, md: "auto" }}
+      >
         <ModalHeader borderBottomWidth="1px" borderColor={borderColor}>
           <Text fontSize="xl" fontWeight="bold">Add Lenders</Text>
           <Text color={labelColor} fontSize="sm" mt={1}>
@@ -172,7 +179,7 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
         </ModalHeader>
         <ModalCloseButton />
         
-        <ModalBody py={6}>
+        <ModalBody py={6} px={{ base: 4, md: 6 }}>
           <VStack spacing={6} align="stretch">
             {/* Selected lenders tags */}
             {selectedLenders.length > 0 && (
@@ -182,10 +189,11 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
                   {selectedLenders.map(lender => (
                     <Tag 
                       key={lender._id}
-                      size="lg"
+                      size={{ base: "md", md: "lg" }}
                       borderRadius="full"
                       variant="solid"
                       colorScheme="blue"
+                      mb={1}
                     >
                       <TagLabel>{lender.name}</TagLabel>
                       <TagCloseButton onClick={() => handleToggleLender(lender)} />
@@ -237,11 +245,11 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
                   <Text color={labelColor}>No lenders found matching "{searchQuery}"</Text>
                 </Center>
               ) : (
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 2, md: 3 }}>
                   {filteredLenders.map((lender) => (
                     <Flex
                       key={lender._id}
-                      p={3}
+                      p={{ base: 3, md: 3 }}
                       borderWidth="1px"
                       borderRadius="md"
                       alignItems="center"
@@ -261,7 +269,7 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
                         colorScheme="blue"
                         mr={3}
                       />
-                      <Text>{lender.name}</Text>
+                      <Text fontSize={{ base: "sm", md: "md" }}>{lender.name}</Text>
                       {lender.major && (
                         <Tag 
                           size="sm" 
@@ -287,8 +295,18 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
           </VStack>
         </ModalBody>
 
-        <ModalFooter borderTopWidth="1px" borderColor={borderColor}>
-          <Button variant="outline" mr={3} onClick={onClose}>
+        <ModalFooter 
+          borderTopWidth="1px" 
+          borderColor={borderColor}
+          flexDirection={{ base: "column", sm: "row" }}
+          gap={{ base: 2, sm: 0 }}
+        >
+          <Button 
+            variant="outline" 
+            mr={{ base: 0, sm: 3 }} 
+            w={{ base: "full", sm: "auto" }}
+            onClick={onClose}
+          >
             Cancel
           </Button>
           <Button 
@@ -297,6 +315,7 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
             isLoading={isLoading}
             loadingText="Adding"
             leftIcon={<FiPlus />}
+            w={{ base: "full", sm: "auto" }}
           >
             Add Selected Lenders
           </Button>
