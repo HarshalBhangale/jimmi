@@ -125,7 +125,7 @@ const Hero: React.FC = () => {
         animation={`${pulse} 8s ease-in-out infinite`}
       />
       
-      {/* Enhanced limited-time offer banner */}
+      {/* Enhanced limited-time offer banner - REDUCED HEIGHT */}
       <Box 
         position="fixed"
         top={{ base: "60px", md: "70px" }}
@@ -133,7 +133,7 @@ const Hero: React.FC = () => {
         right="0"
         bgGradient="linear(to-r, #FF0080, #FF6B35, #F7931E)"
         color="white"
-        py={{ base: 1, md: 2 }}  // Reduced padding
+        py={{ base: "2px", md: "6px" }}  // Significantly reduced padding
         zIndex="banner"
         boxShadow="0 8px 32px rgba(255, 0, 128, 0.3)"
         backdropFilter="blur(10px)"
@@ -141,100 +141,104 @@ const Hero: React.FC = () => {
       >
         <Container maxW="container.xl">
           <Flex 
-        alignItems="center" 
-        justifyContent="center"
-        flexWrap="wrap"
-        gap={{ base: 1, md: 3 }}  // Reduced gap
+            alignItems="center" 
+            justifyContent="center"
+            flexWrap="wrap"
+            gap={{ base: 2, md: 3 }}
           >
-        <HStack spacing={1}>  // Reduced spacing
-          <Icon as={FaFire} boxSize={{ base: 3, md: 4 }} animation={`${pulse} 1s infinite`} />  // Reduced icon size
-          <Text fontSize={{ base: "xs", md: "md" }} fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.3)">
-            LIMITED TIME OFFER
-          </Text>
-        </HStack>
-        
-        {/* Enhanced countdown display */}
-        <HStack 
-          spacing={2} 
-          bg="rgba(0,0,0,0.3)" 
-          px={4}
-          py={2}
-          borderRadius="full"
-          backdropFilter="blur(10px)"
-          border="1px solid rgba(255, 255, 255, 0.2)"
-        >
-          <Icon 
-            as={FiClock} 
-            boxSize={{ base: 4, md: 5 }} 
-            color="yellow.300" 
-            animation={`${pulse} 2s infinite`}
-          />
-          <Text 
-            fontSize={{ base: "xs", md: "sm" }} 
-            fontWeight="bold"
-            color="yellow.100"
-          >
-            Offer ends in:
-          </Text>
-          <HStack spacing={1}>
-            <Box 
-              bg="rgba(255,255,255,0.15)" 
-              px={2}
-              py={1}
-              borderRadius="md" 
-              minW={{ base: "28px", md: "32px" }}
-              textAlign="center"
-              animation={timeRemaining.hours <= 24 ? `${glow} 2s infinite` : 'none'}
-              border="1px solid rgba(255,255,255,0.1)"
-            >
-              <Text 
-                fontSize={{ base: "sm", md: "md" }} 
-                fontWeight="bold"
-                color="yellow.100"
-              >
-                {String(timeRemaining.hours).padStart(2, '0')}
+            <HStack spacing={1}>
+              <Icon as={FaFire} boxSize={{ base: 3, md: 4 }} animation={`${pulse} 1s infinite`} />
+              <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.3)">
+                LIMITED TIME OFFER
               </Text>
-            </Box>
-            <Text fontSize={{ base: "sm", md: "md" }} color="yellow.100">:</Text>
-            <Box 
-              bg="rgba(255,255,255,0.15)" 
-              px={2}
-              py={1}
-              borderRadius="md" 
-              minW={{ base: "28px", md: "32px" }}
-              textAlign="center"
-              animation={timeRemaining.minutes === 0 ? `${countdownPulse} 0.5s` : 'none'}
-              border="1px solid rgba(255,255,255,0.1)"
-            >
-              <Text 
-                fontSize={{ base: "sm", md: "md" }} 
-                fontWeight="bold"
-                color="yellow.100"
-              >
-                {String(timeRemaining.minutes).padStart(2, '0')}
-              </Text>
-            </Box>
-            <Text fontSize={{ base: "sm", md: "md" }} color="yellow.100">:</Text>
-            <Box 
-              bg="rgba(255,255,255,0.15)" 
-              px={2}
-              py={1}
-              borderRadius="md" 
-              minW={{ base: "28px", md: "32px" }}
-              textAlign="center"
-              animation={`${countdownPulse} 1s infinite`}
-              border="1px solid rgba(255,255,255,0.1)"
-            >
-          <Text fontSize={{ base: "2xs", md: "xs" }} fontWeight="bold">
-            {String(timeRemaining.seconds).padStart(2, '0')}
-          </Text>
-            </Box>
-          </HStack>
-        </HStack>
+            </HStack>
             
-            <Text fontSize={{ base: "sm", md: "lg" }} fontWeight="medium" textShadow="0 2px 4px rgba(0,0,0,0.3)">
+            {/* Enhanced countdown display - REDUCED SIZE */}
+            <HStack 
+              spacing={2} 
+              bg="rgba(0,0,0,0.3)" 
+              px={3}  // Reduced padding
+              py={1}  // Reduced padding
+              borderRadius="full"
+              backdropFilter="blur(10px)"
+              border="1px solid rgba(255, 255, 255, 0.2)"
+            >
+              <Icon 
+                as={FiClock} 
+                boxSize={{ base: 3, md: 4 }} 
+                color="yellow.300" 
+                animation={`${pulse} 2s infinite`}
+              />
+              <Text 
+                fontSize={{ base: "2xs", md: "xs" }} 
+                fontWeight="bold"
+                color="yellow.100"
+              >
+                Offer ends in:
+              </Text>
+              <HStack spacing={1}>
+                <Box 
+                  bg="rgba(255,255,255,0.15)" 
+                  px={1.5}  // Reduced padding
+                  py={0.5}  // Reduced padding
+                  borderRadius="md" 
+                  minW={{ base: "24px", md: "28px" }}  // Reduced width
+                  textAlign="center"
+                  animation={timeRemaining.hours <= 24 ? `${glow} 2s infinite` : 'none'}
+                  border="1px solid rgba(255,255,255,0.1)"
+                >
+                  <Text 
+                    fontSize={{ base: "xs", md: "sm" }} 
+                    fontWeight="bold"
+                    color="yellow.100"
+                  >
+                    {String(timeRemaining.hours).padStart(2, '0')}
+                  </Text>
+                </Box>
+                <Text fontSize={{ base: "xs", md: "sm" }} color="yellow.100">:</Text>
+                <Box 
+                  bg="rgba(255,255,255,0.15)" 
+                  px={1.5}  // Reduced padding
+                  py={0.5}  // Reduced padding
+                  borderRadius="md" 
+                  minW={{ base: "24px", md: "28px" }}  // Reduced width
+                  textAlign="center"
+                  animation={timeRemaining.minutes === 0 ? `${countdownPulse} 0.5s` : 'none'}
+                  border="1px solid rgba(255,255,255,0.1)"
+                >
+                  <Text 
+                    fontSize={{ base: "xs", md: "sm" }} 
+                    fontWeight="bold"
+                    color="yellow.100"
+                  >
+                    {String(timeRemaining.minutes).padStart(2, '0')}
+                  </Text>
+                </Box>
+                <Text fontSize={{ base: "xs", md: "sm" }} color="yellow.100">:</Text>
+                <Box 
+                  bg="rgba(255,255,255,0.15)" 
+                  px={1.5}  // Reduced padding
+                  py={0.5}  // Reduced padding
+                  borderRadius="md" 
+                  minW={{ base: "24px", md: "28px" }}  // Reduced width
+                  textAlign="center"
+                  animation={`${countdownPulse} 1s infinite`}
+                  border="1px solid rgba(255,255,255,0.1)"
+                >
+                  <Text 
+                    fontSize={{ base: "2xs", md: "xs" }} 
+                    fontWeight="bold"
+                    color="yellow.100"
+                  >
+                    {String(timeRemaining.seconds).padStart(2, '0')}
+                  </Text>
+                </Box>
+              </HStack>
+            </HStack>
+                
+            <Text fontSize={{ base: "xs", md: "md" }} fontWeight="medium" textShadow="0 2px 4px rgba(0,0,0,0.3)">
               Get full access for just{' '}
-              <Text as="span" fontWeight="extrabold" fontSize={{ base: "md", md: "xl" }}>
+              <Text as="span" fontWeight="extrabold" fontSize={{ base: "sm", md: "lg" }}>
                 £39.99
               </Text>{' '}
               instead of{' '}
