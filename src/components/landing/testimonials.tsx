@@ -20,6 +20,51 @@ const Testimonials = () => {
     'linear(to-b, gray.800, gray.900)'
   );
   
+  const testimonials = [
+    {
+      quote: "My solicitor just stopped replying after a while. This felt so much easier. At least I could see what was going on!",
+      name: "Lisa M",
+      location: "London",
+      avatarColor: "pink",
+      rating: 5
+    },
+    {
+      quote: "I'd heard those 'no win no fee' firms can drag things out or take a big cut. This was clear and simple the whole way through.",
+      name: "Darren T",
+      location: "Liverpool",
+      avatarColor: "blue",
+      rating: 5
+    },
+    {
+      quote: "One claims company told me I didn't meet their criteria, but I still wanted to try. Glad I found a way to submit it myself.",
+      name: "Alisha K",
+      location: "Birmingham",
+      avatarColor: "purple",
+      rating: 5
+    },
+    {
+      quote: "I didn't think I could do this on my own. But once I got started, it all just made sense. Way less stressful than I expected.",
+      name: "Craig J",
+      location: "Newcastle",
+      avatarColor: "green",
+      rating: 5
+    },
+    {
+      quote: "It wasn't full of jargon or legal stuff. Just ticked some boxes, uploaded my ID, and followed the steps. Really straightforward.",
+      name: "Naomi F",
+      location: "Cardiff",
+      avatarColor: "teal",
+      rating: 5
+    },
+    {
+      quote: "Everything was in one place, I didn't have to chase anyone or wait for updates. Felt good to be doing it myself.",
+      name: "Josh B",
+      location: "Leeds",
+      avatarColor: "orange",
+      rating: 5
+    }
+  ];
+
   return (
     <Box 
       as="section" 
@@ -39,6 +84,18 @@ const Testimonials = () => {
         borderRadius="full"
         bgGradient="radial(purple.100, transparent 70%)"
         opacity={0.6}
+        zIndex={0}
+      />
+      
+      <Box
+        position="absolute"
+        bottom="10%"
+        left="5%"
+        width="250px"
+        height="250px"
+        borderRadius="full"
+        bgGradient="radial(blue.100, transparent 70%)"
+        opacity={0.5}
         zIndex={0}
       />
       
@@ -77,26 +134,21 @@ const Testimonials = () => {
         </VStack>
         
         <SimpleGrid 
-          columns={{ base: 1, md: 2 }} 
-          spacing={{ base: 8, md: 12 }} 
-          maxW="1000px" 
+          columns={{ base: 1, sm: 2, lg: 3 }} 
+          spacing={{ base: 6, md: 8 }}
           mx="auto"
+          px={{ base: 4, md: 0 }}
         >
-          <TestimonialCard
-            quote="I had no clue where to start until Buddy explained it all. I just followed the steps and ended up with over £2,000 back."
-            name="Jason M"
-            location="Leeds"
-            avatarColor="purple"
-            rating={5}
-          />
-          
-          <TestimonialCard
-            quote="It's like having a legal expert in your pocket… without the bill."
-            name="Priya S"
-            location="Birmingham"
-            avatarColor="blue"
-            rating={5}
-          />
+          {testimonials.map((testimonial, index) => (
+            <TestimonialCard
+              key={index}
+              quote={testimonial.quote}
+              name={testimonial.name}
+              location={testimonial.location}
+              avatarColor={testimonial.avatarColor}
+              rating={testimonial.rating}
+            />
+          ))}
         </SimpleGrid>
       </Container>
     </Box>
@@ -123,44 +175,56 @@ const TestimonialCard = ({ quote, name, location, avatarColor, rating }: Testimo
       position="relative"
       transition="all 0.3s ease"
       _hover={{ transform: 'translateY(-5px)' }}
+      height="100%"
     >
       {/* Quote background */}
       <Box
-        p={6}
+        p={5}
         bg={quoteBg}
-        borderRadius="2xl"
-        boxShadow="lg"
+        borderRadius="xl"
+        boxShadow="sm"
         borderWidth="1px"
         borderColor={quoteBorderColor}
         mb={6}
         position="relative"
+        height={{ base: "auto", md: "160px" }}
+        display="flex"
+        flexDirection="column"
+        opacity={0.9}
       >
         {/* Quote icon */}
-        <Box position="absolute" top={4} right={4} opacity={0.3}>
-          <Icon as={FiMessageSquare} boxSize={6} color={borderColor} />
+        <Box position="absolute" top={3} right={3} opacity={0.2}>
+          <Icon as={FiMessageSquare} boxSize={5} color={borderColor} />
         </Box>
         
         {/* Stars */}
-        <HStack spacing={1} mb={4}>
+        <HStack spacing={1} mb={3}>
           {[...Array(rating)].map((_, i) => (
-            <Icon key={i} as={FiStar} color="yellow.400" />
+            <Icon key={i} as={FiStar} color="yellow.400" fill="yellow.400" boxSize={4} />
           ))}
         </HStack>
         
-        <Text fontSize="lg" fontStyle="italic" mb={4}>
+        <Text 
+          fontSize={{ base: "md", md: "lg" }} 
+          fontStyle="italic" 
+          mb={3} 
+          flexGrow={1} 
+          overflowY="auto"
+          pr={2}
+        >
           "{quote}"
         </Text>
         
         {/* Triangle pointer */}
         <Box
           position="absolute"
-          bottom="-12px"
+          bottom="-10px"
           left="24px"
           width="0"
           height="0"
-          borderLeft="12px solid transparent"
-          borderRight="12px solid transparent"
-          borderTop={`12px solid ${quoteBg}`}
+          borderLeft="10px solid transparent"
+          borderRight="10px solid transparent"
+          borderTop={`10px solid ${quoteBg}`}
           zIndex={1}
         />
       </Box>
@@ -172,7 +236,7 @@ const TestimonialCard = ({ quote, name, location, avatarColor, rating }: Testimo
           color="white" 
           name={name} 
           size="md"
-          boxShadow="md"
+          boxShadow="sm"
         />
         <Box>
           <Text fontWeight="bold">{name}</Text>

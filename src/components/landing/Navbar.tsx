@@ -61,30 +61,27 @@ const Navbar = () => {
             transition="all 0.3s"
             _hover={{ transform: 'scale(1.05)' }}
           />
-          <HStack spacing={4}>
+          <HStack spacing={{ base: 2, md: 4 }}>
+            <Image 
+              src="/secure.svg"
+              alt="Secure Tag"
+              h={{ base: "24px", md: "34px" }}
+              display={{ base: "none", sm: "block" }}
+              borderRadius= "4px"
+              objectFit="contain"
+              transition="all 0.3s"
+              _hover={{ transform: 'scale(1.05)' }}
+            />
             <Button
               as={RouterLink}
               to="/auth/login"
-              variant="outline"
-              color="yellow.400"
-              bg="yellow.900"
-              borderColor="yellow.400"
-              _hover={{
-                bg: scrolled ? "yellow.900" : "purple.400"
-              }}
-            >
-              Login
-            </Button>
-            <Button
-              as={RouterLink}
-              to="/auth/signup/step-1"
               colorScheme="blue"
               bgGradient="linear(to-r, blue.400, purple.500)"
               _hover={{
                 bgGradient: "linear(to-r, blue.500, purple.600)",
               }}
             >
-              Get Started
+              Sign In
             </Button>
           </HStack>
         </Flex>

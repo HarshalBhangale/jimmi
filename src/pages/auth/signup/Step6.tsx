@@ -224,7 +224,7 @@ const getPreviewText = () => {
     .map((l: any) => l.name);
 
   return (
-  <Box maxW="1200px" mx="auto" h={{ base: "auto", md: "calc(100vh - 100px)" }} display="flex" flexDir="column" minH={{ base: "100vh", md: "auto" }}>
+  <Box maxW="1200px" mx="auto" py={4} px={{ base: 4, md: 6 }} h="100%" display="flex" flexDir="column">
     {/* Progress indicator - more compact */}
     <Box mb={4}>
       <HStack justify="space-between" mb={1}>
@@ -261,10 +261,10 @@ const getPreviewText = () => {
         </VStack>
       </Flex>
     ) : (
-      <Flex flex="1" direction="column">
-        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={4} w="full">
+      <Flex direction="column" h="100%" justifyContent="space-between" flex="1">
+        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={4} w="full" flexGrow={1}>
           {/* Left Column */}
-          <VStack spacing={4} align="stretch" maxH={{ base: "none", md: "calc(100vh - 200px)" }} overflowY={{ base: "visible", md: "auto" }}>
+          <VStack spacing={4} align="stretch">
             {/* Lender Selection - more compact */}
             <Box
               bg={cardBg}
@@ -275,6 +275,7 @@ const getPreviewText = () => {
               borderColor={borderColor}
               transition="all 0.2s"
               _hover={{ shadow: "md" }}
+              flex="1"
             >
               <Heading as="h3" size="md" mb={2} display="flex" alignItems="center">
                 <Box 
@@ -328,7 +329,7 @@ const getPreviewText = () => {
               
               {/* More compact lender list with scrollbar for many lenders */}
               <Box 
-                maxH={{ base: "250px", md: "200px" }} 
+                maxH="160px" 
                 overflowY="auto" 
                 px={1} 
                 py={1}
@@ -506,8 +507,6 @@ const getPreviewText = () => {
               p={4}
               borderWidth="1px"
               borderColor={borderColor}
-              height={{ base: "auto", md: "100%" }}
-              minH={{ base: "350px", md: "auto" }}
               display="flex"
               flexDirection="column"
               position="relative"
@@ -515,6 +514,7 @@ const getPreviewText = () => {
               _hover={{ shadow: "md" }}
               overflow="hidden"
               mb={{ base: 4, md: 0 }}
+              h="100%"
             >
               <Box mb={4}>
                 <Heading as="h3" size="md" mb={2} display="flex" alignItems="center">
@@ -610,7 +610,8 @@ const getPreviewText = () => {
                 position="relative"
                 display="flex"
                 flexDirection="column"
-                minH={{ base: "200px", md: "auto" }}
+                minH="250px"
+                maxH={{ base: "350px", md: "none" }}
               >
                 {selectedOption === 'custom' ? (
                   <Textarea
@@ -697,19 +698,15 @@ const getPreviewText = () => {
           )}
         </SimpleGrid>
 
-        {/* Navigation Buttons - now positioned at the bottom of the flex container with better mobile support */}
+        {/* Navigation Buttons - fixed at the bottom with proper spacing */}
         <Flex 
           justify="space-between" 
-          mt={{ base: 2, md: "auto" }} 
-          pt={4}
-          position={{ base: "relative", md: "static" }}
-          bottom={{ base: 0, md: "auto" }}
-          left={{ base: 0, md: "auto" }}
-          right={{ base: 0, md: "auto" }}
-          bg={{ base: cardBg, md: "transparent" }}
-          zIndex={{ base: 2, md: 1 }}
-          borderTopWidth={{ base: "1px", md: 0 }}
-          borderTopColor={{ base: borderColor, md: "transparent" }}
+          mt={4}
+          py={4}
+          borderTopWidth="1px"
+          borderTopColor={borderColor}
+          bg={cardBg}
+          w="full"
         >
           <Button 
             variant="outline" 

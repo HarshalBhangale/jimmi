@@ -34,7 +34,7 @@ const Pricing: React.FC = () => {
   
   // Calculate pricing and savings
   const solicitorFeePerAgreement = 1620;
-  const jimmiPrice = 29.99;
+  const jimmiPrice = 39.99;
   const solicitorFees = agreements * solicitorFeePerAgreement;
   const savings = solicitorFees - jimmiPrice;
   const savingsPercentage = Math.round((savings / solicitorFees) * 100);
@@ -336,7 +336,7 @@ const Pricing: React.FC = () => {
                       bgClip="text"
                       fontWeight="extrabold"
                     >
-                      £29.00
+                      £39.00
                     </Heading>
                   </HStack>
                   
@@ -407,60 +407,72 @@ const Pricing: React.FC = () => {
             >
               <Heading as="h4" size="lg">Why pay a one-time fee?</Heading>
               
-              <VStack spacing={6} align="start">
-                <HStack align="flex-start" spacing={4}>
-                  <Flex
+              <VStack spacing={6} align="start" width="100%">
+                <Flex align="center" width="100%">
+                  <Box
                     bg="blue.50"
                     color="blue.500"
                     borderRadius="full"
                     p={3}
-                    align="center"
-                    justify="center"
+                    width="40px"
+                    height="40px"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                     flexShrink={0}
+                    mr={4}
                   >
                     <Icon as={FiDollarSign} boxSize={5} />
-                  </Flex>
-                  <Box>
+                  </Box>
+                  <Box textAlign="left">
                     <Text fontWeight="bold" mb={1}>Keep your full refund</Text>
                     <Text color="gray.600">Others take up to 33% of your refund money</Text>
                   </Box>
-                </HStack>
+                </Flex>
                 
-                <HStack align="flex-start" spacing={4}>
-                  <Flex
+                <Flex align="center" width="100%">
+                  <Box
                     bg="purple.50"
                     color="purple.500"
                     borderRadius="full"
                     p={3}
-                    align="center"
-                    justify="center"
+                    width="40px"
+                    height="40px"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                     flexShrink={0}
+                    mr={4}
                   >
                     <Icon as={FiShield} boxSize={5} />
-                  </Flex>
-                  <Box>
+                  </Box>
+                  <Box textAlign="left">
                     <Text fontWeight="bold" mb={1}>No financial risk</Text>
                     <Text color="gray.600">Money-back guarantee if you're not satisfied</Text>
                   </Box>
-                </HStack>
+                </Flex>
                 
-                <HStack align="flex-start" spacing={4}>
-                  <Flex
+                <Flex align="center" width="100%">
+                  <Box
                     bg="green.50"
                     color="green.500"
                     borderRadius="full"
                     p={3}
-                    align="center"
-                    justify="center"
+                    width="40px"
+                    height="40px"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                     flexShrink={0}
+                    mr={4}
                   >
                     <Icon as={FiStar} boxSize={5} />
-                  </Flex>
-                  <Box>
+                  </Box>
+                  <Box textAlign="left">
                     <Text fontWeight="bold" mb={1}>Support when you need it</Text>
                     <Text color="gray.600">No being passed from person to person</Text>
                   </Box>
-                </HStack>
+                </Flex>
               </VStack>
             </VStack>
           </SimpleGrid>

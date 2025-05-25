@@ -396,7 +396,7 @@ const Profile = () => {
                 <Text mb={4}>{userData?.phoneNumber}</Text>
 
                 <Text fontWeight="medium" mb={1}>
-                  Jimmi Maid ID
+                  Buddy Mail ID
                 </Text>
                 <Text mb={4}>{userData?.jimmiMailId}</Text>
               </Box>

@@ -36,6 +36,7 @@ import {
   MenuItem,
   Spinner,
   Center,
+  SimpleGrid,
 } from '@chakra-ui/react';
 import { 
   FiMail, 
@@ -634,22 +635,68 @@ const Mailbox: React.FC = () => {
               
               <Divider mb={{ base: 4, md: 6 }} />
               
-              {/* Email body with improved mobile display */}
+              {/* Enhanced Email body with better quoted text formatting */}
               <Box 
                 fontSize={{ base: "sm", md: "md" }}
                 lineHeight="tall"
                 mb={{ base: 6, md: 8 }}
                 color={useColorModeValue("gray.700", "gray.200")}
-                whiteSpace="pre-line"
-                sx={{
-                  wordBreak: "break-word", // Better text wrapping
-                  "& a": {
-                    color: "blue.500",
-                    textDecoration: "underline"
-                  }
-                }}
               >
-                {selectedMail.body}
+                {selectedMail.body.split('\n').map((line, index) => {
+                  // Check if line starts with ">" for quoted text
+                  const isQuotedLine = line.trim().startsWith('>');
+                  
+                  // Check if line contains Google Maps links and skip it
+                  const hasGoogleMapsLink = line.includes('maps.google.com') || 
+                                          line.includes('goo.gl/maps') || 
+                                          line.includes('google.com/maps') ||
+                                          line.includes('maps.app.goo.gl');
+                  
+                  if (hasGoogleMapsLink) {
+                    return null; // Don't render lines with Google Maps links
+                  }
+                  
+                    if (isQuotedLine) {
+                    // Handle double ">>" and single ">" quotes
+                    const doubleQuoted = line.trim().startsWith('>>');
+                    const cleanedLine = line.replace(/^>+\s*/, '');
+                    return (
+                      <Box
+                      key={index}
+                      pl={doubleQuoted ? 6 : 4}
+                      py={1}
+                      px={3}
+                      my={1}
+                      borderRadius="md"
+                      fontSize={{ base: "xs", md: "sm" }}
+                      color={useColorModeValue("gray.500", "gray.400")}
+                      fontStyle="italic"
+                      >
+                      {cleanedLine}
+                      </Box>
+                    );
+                    }
+                  
+                  // Regular text lines
+                  return (
+                    <Text
+                      key={index}
+                      mb={line.trim() === '' ? 2 : 1}
+                      sx={{
+                        wordBreak: "break-word",
+                        "& a": {
+                          color: "blue.500",
+                          textDecoration: "underline",
+                          _hover: {
+                            color: "blue.600",
+                          }
+                        }
+                      }}
+                    >
+                      {line || '\u00A0'} {/* Non-breaking space for empty lines */}
+                    </Text>
+                  );
+                })}
               </Box>
               
               {/* Enhanced attachment display - Better mobile layout */}

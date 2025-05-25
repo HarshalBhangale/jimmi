@@ -914,7 +914,7 @@ const Dashboard = () => {
                   >
                     <VStack align="flex-start" spacing={3}>
                       <Heading size={{ base: "lg", md: "xl" }} fontWeight="bold">
-                        Welcome back, {user?.name || 'User'}! 👋
+                        Welcome back, {user?.firstName || 'User'}! 👋
                       </Heading>
                       <Text fontSize={{ base: "md", md: "lg" }} opacity={0.9}>
                         Manage your lenders, track claims, and monitor your progress

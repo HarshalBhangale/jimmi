@@ -43,7 +43,7 @@ const Step1 = () => {
   const avgClaimValue = 4500;
   
   // Calculated values
-  const jimmiCost = 29.99;
+  const jimmiCost = 39.99;
   const solicitorCost = numberOfAgreements * solicitorCostPerAgreement;
   const totalSavings = solicitorCost - jimmiCost;
   const percentageSavings = Math.round((totalSavings / solicitorCost) * 100);

@@ -45,8 +45,16 @@ import {
 } from 'react-icons/fi';
 import { createPaymentIntent } from '@api/services/payments';
 import { motion } from 'framer-motion';
+import { keyframes } from '@emotion/react';
 
 const MotionBox = motion(Box);
+
+// Keyframes for button animation
+const pulseAnimation = keyframes`
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(66, 153, 225, 0.7); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(66, 153, 225, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(66, 153, 225, 0); }
+`;
 
 const Step7 = () => {
   const [searchParams] = useSearchParams();
@@ -55,6 +63,7 @@ const Step7 = () => {
   const [error, setError] = useState('');
   const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
   const [numberOfAgreements, setNumberOfAgreements] = useState(1);
+  const [selectedLenders, setSelectedLenders] = useState([]);
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -64,6 +73,19 @@ const Step7 = () => {
     if (storedData) {
       setNumberOfAgreements(parseInt(storedData));
     }
+    
+    // Get selected lenders
+    const requestData = localStorage.getItem('documentRequestData');
+    if (requestData) {
+      try {
+        const parsedData = JSON.parse(requestData);
+        if (parsedData.selectedLenders && Array.isArray(parsedData.selectedLenders)) {
+          setSelectedLenders(parsedData.selectedLenders);
+        }
+      } catch (e) {
+        console.error('Error parsing lender data:', e);
+      }
+    }
   }, []);
 
   // Fixed costs for calculator
@@ -72,7 +94,8 @@ const Step7 = () => {
   const ourFee = 39.99;
 
   // Calculate potential values
-  const potentialRefund = numberOfAgreements * avgClaimValue;
+  const lenderCount = selectedLenders.length || 1;
+  const potentialRefund = lenderCount * avgClaimValue;
   const solicitorCost = potentialRefund * solicitorPercentage;
   const savings = solicitorCost - ourFee;
   const percentageSavings = Math.round((savings / solicitorCost) * 100);
@@ -336,64 +359,64 @@ const Step7 = () => {
                 borderRadius="xl"
                 boxShadow="xl"
                 p={{ base: 5, md: 6 }}
-                borderWidth="2px"
-                borderColor={highlightColor}
+                borderWidth="1px"
+                borderColor={borderColor}
                 position="relative"
                 overflow="hidden"
-                transform={{ md: "translateY(-20px)" }}
-                zIndex={2}
               >
                 {/* Discount ribbon */}
                 <Box 
                   position="absolute" 
-                  top="8px" 
-                  right="-40px" 
+                  top="0" 
+                  right="0" 
                   bg="red.500" 
                   color="white" 
-                  py={1} 
-                  px={10} 
-                  fontSize="sm" 
+                  py={1.5} 
+                  px={8} 
+                  fontSize="lg" 
                   fontWeight="bold" 
-                  transform="rotate(45deg)" 
+                  transform="rotate(45deg) translateX(30%) translateY(-60%)" 
                   width="180px" 
                   textAlign="center"
                   boxShadow="sm"
+                  zIndex={1}
                 >
                   50% OFF
                 </Box>
                 
                 <VStack spacing={6} align="stretch">
-                  {/* Plan header with improved layout */}
-                  <Flex 
-                    justify="space-between" 
-                    align="flex-start" 
+                  {/* Plan header with improved layout to match image */}
+                  <Box 
                     bg={useColorModeValue('blue.50', 'blue.900')}
-                    p={4}
-                    borderRadius="lg"
-                    mb={2}
+                    p={{ base: 4, md: 6 }}
+                    borderRadius="xl"
+                    mb={4}
+                    boxShadow="md"
                   >
-                    <Box>
-                      <Heading as="h3" size="lg" color={useColorModeValue('gray.800', 'white')}>
-                        Premium Plan
-                      </Heading>
-                      <HStack spacing={2} mt={1}>
-                        <Badge colorScheme="green" py={1} px={2} borderRadius="md">Discount applied</Badge>
-                        <Badge colorScheme="blue" py={1} px={2} borderRadius="md">Most popular</Badge>
-                      </HStack>
-                    </Box>
-                    <Box textAlign="right">
-                      <Text as="s" fontSize="lg" color={labelColor}>£79.99</Text>
-                      <Flex align="baseline">
-                        <Text fontWeight="bold" fontSize="3xl" color={highlightColor}>£39.99</Text>
-                        <Text fontSize="sm" ml={1} color={labelColor} alignSelf="flex-end">one-time</Text>
-                      </Flex>
-                    </Box>
-                  </Flex>
+                    <Flex direction={{ base: "column", md: "row" }} justify="space-between" align={{ base: "start", md: "center" }} wrap="wrap">
+                      <Box mb={{ base: 4, md: 0 }}>
+                        <Heading as="h3" size="2xl" color={useColorModeValue('gray.800', 'white')} fontWeight="extrabold">
+                          Premium Plan
+                        </Heading>
+                        <HStack spacing={2} mt={3}>
+                          <Badge colorScheme="green" py={1.5} px={3} borderRadius="full" bg="green.100" color="green.800" fontWeight="bold">DISCOUNT APPLIED</Badge>
+                          <Badge colorScheme="blue" py={1.5} px={3} borderRadius="full" fontWeight="bold">MOST POPULAR</Badge>
+                        </HStack>
+                      </Box>
+                      <Box textAlign={{ base: "left", md: "right" }} mt={{ base: 3, md: 0 }}>
+                        <Text as="s" fontSize="lg" color="gray.500" mb={1} mt= {{base: "0", md: "4"}}display="block" textAlign={{ base: "left", md: "left" }}>£79.99</Text>
+                        <Flex align="baseline" justifyContent={{ base: "flex-start", md: "flex-end" }}>
+                          <Text fontWeight="extrabold" fontSize={{ base: "5xl", md: "6xl" }} color="blue.500" lineHeight="1">£39.99</Text>
+                          <Text fontSize={{ base: "sm", md: "md" }} ml={2} color={labelColor} alignSelf="flex-end">one-time</Text>
+                        </Flex>
+                      </Box>
+                    </Flex>
+                  </Box>
                   
                   {/* Features list with improved visual styling */}
                   <Box>
-                    <Heading size="sm" mb={3} color={labelColor}>Everything you need to succeed:</Heading>
-                    <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
+                    <Heading size="lg" mb={4} color={labelColor} fontWeight="bold">Everything you need to succeed:</Heading>
+                    <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
                       {[
                         'Full access to all services',
                         'Priority document processing',
@@ -404,11 +427,11 @@ const Step7 = () => {
                         'Expert support team access',
                         'Secure document storage',
                       ].map((feature, index) => (
-                        <HStack key={index} align="center" bg={useColorModeValue('gray.50', 'gray.700')} p={2} borderRadius="md">
-                          <Circle size="24px" bg="green.100" color="green.500">
-                            <Icon as={FiCheck} boxSize={3} />
+                        <HStack key={index} align="center" bg={useColorModeValue('white', 'gray.700')} p={3} borderRadius="lg" boxShadow="sm" transition="all 0.3s" _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}>
+                          <Circle size="32px" bg="green.100" color="green.500">
+                            <Icon as={FiCheck} boxSize={4} />
                           </Circle>
-                          <Text fontSize="sm" fontWeight="medium">{feature}</Text>
+                          <Text fontSize={{ base: "sm", md: "md" }} fontWeight="medium">{feature}</Text>
                         </HStack>
                       ))}
                     </SimpleGrid>
@@ -426,7 +449,7 @@ const Step7 = () => {
                       What happens after payment?
                     </Heading>
                     <Text fontSize="sm" color={labelColor}>
-                      We'll immediately send your document requests to all selected lenders.
+                      We'll immediately send your document requests to {lenderCount} {lenderCount === 1 ? 'lender' : 'lenders'}.
                       You'll receive email confirmations as lenders respond, and our system will
                       guide you through each step of the process.
                     </Text>
@@ -440,7 +463,7 @@ const Step7 = () => {
                     </Alert>
                   )}
                   
-                  {/* Payment button with improved styling */}
+                  {/* Payment button with improved styling and animation */}
                   <Button
                     size="lg"
                     colorScheme="blue"
@@ -452,11 +475,14 @@ const Step7 = () => {
                     w="full"
                     py={7}
                     fontSize="lg"
+                    fontWeight="bold"
                     borderRadius="lg"
+                    boxShadow="lg"
+                    animation={`${pulseAnimation} 2s infinite`}
                     _hover={{
                       bgGradient: "linear(to-r, blue.500, purple.600)",
                       transform: "translateY(-2px)",
-                      boxShadow: "lg",
+                      boxShadow: "xl",
                     }}
                     _active={{
                       bgGradient: "linear(to-r, blue.600, purple.700)",
@@ -484,6 +510,16 @@ const Step7 = () => {
                   </Flex>
                 </VStack>
               </Box>
+              <Box
+                bg={cardBg}
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor={borderColor}
+                overflow="hidden"
+                boxShadow="lg"
+                mt={6}
+              >
+              </Box>
             </Box>
             
             {/* Right column - Benefits and Savings with improved visual hierarchy */}
@@ -506,6 +542,9 @@ const Step7 = () => {
                   <Heading as="h3" size="md" color="white">
                     Your Savings Calculator
                   </Heading>
+                  <Text fontSize="sm" color="white" opacity={0.9} mt={1}>
+                    Based on {lenderCount} {lenderCount === 1 ? 'lender' : 'lenders'} selected
+                  </Text>
                 </Box>
                 
                 <Box p={5}>
@@ -517,7 +556,7 @@ const Step7 = () => {
                       <StatNumber fontSize={statSize} color={useColorModeValue('purple.600', 'purple.300')}>
                         £{potentialRefund.toLocaleString()}
                       </StatNumber>
-                      <StatHelpText>Based on {numberOfAgreements} agreement(s)</StatHelpText>
+                      <StatHelpText>£{avgClaimValue.toLocaleString()} per lender × {lenderCount}</StatHelpText>
                     </Stat>
                     
                     <Stat bg={useColorModeValue('green.50', 'green.900')} p={3} borderRadius="lg">
@@ -608,98 +647,31 @@ const Step7 = () => {
                 </Box>
               </Box>
               
-              {/* Pros and Cons - redesigned for better readability and visual appeal */}
+              {/* Additional content for right column could go here */}
               <Box
                 bg={cardBg}
                 borderRadius="xl"
                 borderWidth="1px"
                 borderColor={borderColor}
                 overflow="hidden"
-                boxShadow="lg"
+                boxShadow="md"
+                p={5}
               >
-                <Box 
-                  bgGradient="linear(to-r, blue.400, blue.600)" 
-                  p={4} 
-                  borderBottomWidth="1px" 
-                  borderColor={borderColor}
-                >
-                  <Heading as="h3" size="md" color="white">
-                    Why Choose Our Service?
-                  </Heading>
-                </Box>
-                
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={0}>
-                  <Box 
-                    p={5} 
-                    borderRightWidth={{ base: 0, md: "1px" }} 
-                    borderBottomWidth={{ base: "1px", md: 0 }} 
-                    borderColor={borderColor}
-                    bg={useColorModeValue('white', 'gray.700')}
-                  >
-                    <Flex 
-                      align="center" 
-                      mb={4} 
-                      pb={2} 
-                      borderBottomWidth="2px" 
-                      borderColor={useColorModeValue('green.200', 'green.700')}
-                    >
-                      <Icon as={FiThumbsUp} color={prosColor} boxSize={5} mr={2} />
-                      <Heading size="sm" color={prosColor}>Our Advantages</Heading>
-                    </Flex>
-                    
-                    <List spacing={3}>
-                      {[
-                        'Fixed fee - no percentage of your refund',
-                        'No hidden costs or legal fees',
-                        'Easy-to-use platform',
-                        'Fast document processing',
-                        'Direct lender communication',
-                        'Full support for rejected claims',
-                      ].map((item, index) => (
-                        <ListItem key={index} display="flex" alignItems="center">
-                          <Circle size="24px" bg="green.100" color="green.500" mr={3} flexShrink={0}>
-                            <Icon as={FiCheck} boxSize={3} />
-                          </Circle>
-                          <Text fontSize="sm">{item}</Text>
-                        </ListItem>
-                      ))}
-                    </List>
+                <Heading size="md" mb={4}>Customer Testimonials</Heading>
+                <VStack spacing={4} align="stretch">
+                  <Box bg={useColorModeValue('gray.50', 'gray.700')} p={4} borderRadius="md">
+                    <Text fontSize="sm" fontStyle="italic">
+                      "I saved over £3,000 using this service instead of going through a solicitor. The process was straightforward and support was excellent."
+                    </Text>
+                    <Text fontSize="sm" fontWeight="bold" mt={2}>— John D.</Text>
                   </Box>
-                  
-                  <Box 
-                    p={5}
-                    bg={useColorModeValue('gray.50', 'gray.800')}
-                  >
-                    <Flex 
-                      align="center" 
-                      mb={4} 
-                      pb={2} 
-                      borderBottomWidth="2px" 
-                      borderColor={useColorModeValue('red.200', 'red.700')}
-                    >
-                      <Icon as={FiX} color={consColor} boxSize={5} mr={2} />
-                      <Heading size="sm" color={consColor}>Traditional Solicitors</Heading>
-                    </Flex>
-                    
-                    <List spacing={3}>
-                      {[
-                        'Take 25-40% of your refund amount',
-                        'Expensive hourly rates',
-                        'Complex legal processes',
-                        'Slow turnaround times',
-                        'Limited transparency',
-                        'Less control over your case',
-                      ].map((item, index) => (
-                        <ListItem key={index} display="flex" alignItems="center">
-                          <Circle size="24px" bg="red.100" color="red.500" mr={3} flexShrink={0}>
-                            <Icon as={FiX} boxSize={3} />
-                          </Circle>
-                          <Text fontSize="sm">{item}</Text>
-                        </ListItem>
-                      ))}
-                    </List>
+                  <Box bg={useColorModeValue('gray.50', 'gray.700')} p={4} borderRadius="md">
+                    <Text fontSize="sm" fontStyle="italic">
+                      "Within weeks of submitting my claim, I received positive responses from all my lenders. Highly recommend!"
+                    </Text>
+                    <Text fontSize="sm" fontWeight="bold" mt={2}>— Sarah M.</Text>
                   </Box>
-                </SimpleGrid>
+                </VStack>
               </Box>
             </VStack>
           </SimpleGrid>
