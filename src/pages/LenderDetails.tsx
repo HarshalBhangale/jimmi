@@ -204,13 +204,13 @@ const statusBadgeColors = {
 
 // Status colors for consistent usage throughout the component
 const statusColors = {
-  Pending: { bg: 'yellow.50', color: 'yellow.600', text: 'PENDING' },
-  Submitted: { bg: 'blue.50', color: 'blue.600', text: 'SUBMITTED' },
-  OfferMade: { bg: 'green.50', color: 'green.600', text: 'OFFER MADE' },
-  Rejected: { bg: 'red.50', color: 'red.600', text: 'REJECTED' },
-  ClaimAlreadySubmitted: { bg: 'yellow.50', color: 'yellow.600', text: 'ALREADY SUBMITTED' },
-  FOSEscalation: { bg: 'purple.50', color: 'purple.600', text: 'FOS ESCALATION' },
-  Completed: { bg: 'green.50', color: 'green.600', text: 'COMPLETED' }
+  'Pending': { bg: 'yellow.50', color: 'yellow.600', text: 'PENDING' },
+  'Submitted': { bg: 'blue.50', color: 'blue.600', text: 'SUBMITTED' },
+  'Offer Made': { bg: 'green.50', color: 'green.600', text: 'OFFER MADE' },
+  'Rejected': { bg: 'red.50', color: 'red.600', text: 'REJECTED' },
+  'Claim Already Submitted': { bg: 'yellow.50', color: 'yellow.600', text: 'ALREADY SUBMITTED' },
+  'FOS Escalation': { bg: 'purple.50', color: 'purple.600', text: 'FOS ESCALATION' },
+  'Completed': { bg: 'green.50', color: 'green.600', text: 'COMPLETED' }
 };
 
 // Status badge component for consistent styling

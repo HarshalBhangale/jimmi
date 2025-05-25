@@ -14,6 +14,8 @@ import {
   VStack,
   Link,
   Stack,
+  SimpleGrid,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import { FiArrowRight, FiBookOpen, FiCheckCircle } from 'react-icons/fi';
 import { keyframes } from '@emotion/react';
@@ -48,6 +50,8 @@ const Hero: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  const isMobile = useBreakpointValue({ base: true, lg: false });
   
   return (
     <Box 
@@ -286,45 +290,98 @@ const Hero: React.FC = () => {
               </Stack>
 
               {/* Enhanced features with better styling */}
-              <Flex 
-                wrap="wrap" 
-                gap={{ base: 3, md: 4 }} 
-                justify={{ base: "center", lg: "flex-start" }}
-                mt={{ base: 2, lg: 4 }}
-              >
-                {[
-                  { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.300" },
-                  { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.300" },
-                  { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.300" }
-                ].map((feature, index) => (
-                  <HStack 
-                    key={index}
-                    bg="rgba(255, 255, 255, 0.1)" 
-                    backdropFilter="blur(20px)"
-                    rounded="full" 
-                    px={{ base: 4, md: 6 }}
-                    py={{ base: 3, md: 4 }}
-                    boxShadow="0 8px 32px rgba(0, 0, 0, 0.2)"
-                    border="1px solid rgba(255, 255, 255, 0.1)"
-                    transition="all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-                    _hover={{ 
-                      transform: 'translateY(-2px)', 
-                      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)',
-                      bg: "rgba(255, 255, 255, 0.15)"
-                    }}
-                    cursor="default"
+              {isMobile ? (
+                <Box mt={6} width="100%">
+                  <SimpleGrid 
+                    columns={{ base: 3, lg: 3 }}
+                    spacing={{ base: 3, lg: 5 }}
+                    width="100%"
                   >
-                    <Icon as={feature.icon} color={feature.color} boxSize={{ base: 4, md: 5 }} />
-                    <Text 
-                      fontSize={{ base: 'sm', md: 'md' }} 
-                      fontWeight="medium"
-                      textShadow="0 1px 2px rgba(0,0,0,0.3)"
+                    {[
+                      { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.300" },
+                      { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.300" },
+                      { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.300" }
+                    ].map((feature, index) => (
+                      <Box
+                        key={index}
+                        bg="rgba(255, 255, 255, 0.1)"
+                        backdropFilter="blur(10px)"
+                        borderRadius="xl"
+                        p={{ base: 3, lg: 5 }}
+                        boxShadow="0 4px 6px rgba(0, 0, 0, 0.1)"
+                        border="1px solid rgba(255, 255, 255, 0.2)"
+                        transition="all 0.3s"
+                        _hover={{ 
+                          transform: 'translateY(-2px)', 
+                          boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)',
+                          bg: "rgba(255, 255, 255, 0.15)"
+                        }}
+                      >
+                        <Flex
+                          direction="row"
+                          align="center"
+                          justify="flex-start"
+                        >
+                          <Icon 
+                            as={feature.icon} 
+                            color={feature.color} 
+                            boxSize={{ base: 8, lg: 10 }} 
+                            mr={4}
+                          />
+                          <Text 
+                            fontSize={{ base: "md", lg: "lg" }} 
+                            fontWeight="semibold"
+                            color="white"
+                            lineHeight="tight"
+                          >
+                            {feature.text}
+                          </Text>
+                        </Flex>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                </Box>
+              ) : (
+                <Flex 
+                  wrap="wrap" 
+                  gap={{ base: 3, md: 4 }} 
+                  justify={{ base: "center", lg: "flex-start" }}
+                  mt={{ base: 2, lg: 4 }}
+                >
+                  {[
+                    { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.300" },
+                    { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.300" },
+                    { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.300" }
+                  ].map((feature, index) => (
+                    <HStack 
+                      key={index}
+                      bg="rgba(255, 255, 255, 0.1)" 
+                      backdropFilter="blur(20px)"
+                      rounded="full" 
+                      px={{ base: 4, md: 6 }}
+                      py={{ base: 3, md: 4 }}
+                      boxShadow="0 8px 32px rgba(0, 0, 0, 0.2)"
+                      border="1px solid rgba(255, 255, 255, 0.1)"
+                      transition="all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                      _hover={{ 
+                        transform: 'translateY(-2px)', 
+                        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)',
+                        bg: "rgba(255, 255, 255, 0.15)"
+                      }}
+                      cursor="default"
                     >
-                      {feature.text}
-                    </Text>
-                  </HStack>
-                ))}
-              </Flex>
+                      <Icon as={feature.icon} color={feature.color} boxSize={{ base: 4, md: 5 }} />
+                      <Text 
+                        fontSize={{ base: 'sm', md: 'md' }} 
+                        fontWeight="medium"
+                        textShadow="0 1px 2px rgba(0,0,0,0.3)"
+                      >
+                        {feature.text}
+                      </Text>
+                    </HStack>
+                  ))}
+                </Flex>
+              )}
             </VStack>
           </Box>
         </Flex>
