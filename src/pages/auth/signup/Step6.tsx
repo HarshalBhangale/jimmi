@@ -161,7 +161,7 @@ const getPreviewText = () => {
     Address: ${user.address?.address1}, ${user.address?.address2}, ${user.address?.city}, ${user.address?.postcode}
     `;
 
-  const docType = `${user.identityDoc}`;
+  const docType = `${user.identityDoc.type}`;
   
   // Replace placeholders for the current lender
   template = template.replace('[Lender]', currentLender ? currentLender.name : '');

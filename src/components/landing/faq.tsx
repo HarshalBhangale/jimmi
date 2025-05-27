@@ -13,6 +13,8 @@ import {
   Text,
   Icon,
 } from '@chakra-ui/react';
+import { Link as RouterLink } from 'react-router-dom';
+import { FiArrowRight } from 'react-icons/fi';
 import { FiHelpCircle } from 'react-icons/fi';
 
 // FAQ Component
@@ -154,6 +156,7 @@ const FAQ = () => {
               </AccordionPanel>
             </AccordionItem>
           </Accordion>
+
         </Box>
       </Container>
     </Box>

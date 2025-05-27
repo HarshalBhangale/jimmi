@@ -8,14 +8,14 @@ import {
   ListItem,
   ListIcon,
   useColorModeValue,
+  Button,
 } from '@chakra-ui/react';
 import { FiCheckCircle } from 'react-icons/fi';
 
-// Already Signed Up Component
 const AlreadySignedUp = () => {
   const bgColor = useColorModeValue('white', 'gray.800');
   const boxBg = useColorModeValue('blue.50', 'blue.900');
-  
+
   return (
     <Box as="section" py={20} id="already-signed">
       <Container maxW="container.xl">
@@ -66,13 +66,33 @@ const AlreadySignedUp = () => {
           
           <Box 
             bg={boxBg} 
-            p={4} 
+            p={6} 
             borderRadius="md" 
-            fontStyle="italic"
             borderLeft="4px solid"
             borderColor="blue.400"
+            textAlign="left"
           >
-            <Text>You're not stuck. My Claim Buddy is here to help you reclaim your refund — and your independence.</Text>
+            <Text fontStyle="italic" mb={4}>
+              You're not stuck. My Claim Buddy is here to help you reclaim your refund — and your independence.
+            </Text>
+
+            {/* CTA Button */}
+            <Box textAlign="center">
+              <Button 
+              colorScheme="blue" 
+              size="lg" 
+              fontWeight="bold" 
+              mt={2}
+              px={8}
+              transform="scale(1)"
+              transition="transform 0.2s"
+              _hover={{
+                transform: "scale(1.05)"
+              }}
+              >
+              Start now and save £1000s
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Container>
@@ -80,4 +100,4 @@ const AlreadySignedUp = () => {
   );
 };
 
-export default AlreadySignedUp; 
+export default AlreadySignedUp;

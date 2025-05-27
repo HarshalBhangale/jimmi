@@ -50,7 +50,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: 'dashboard',
+        path: 'dashboard', 
         element:
         <ProtectedRoute>
           <DashboardLayout />

@@ -90,7 +90,7 @@ const Navbar = ({ children }: NavbarProps) => {
             <Image
               src="/logo.png" 
               alt="Buddy"
-              h={{ base: "60px", md: "96px", lg: "140px" }}
+              h={{ base: "96px", md: "96px", lg: "140px" }}
               w="auto"
               objectFit="contain"
             />

@@ -187,11 +187,15 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
       title: "DCA & Hidden Commission",
       templateName: "submitClaimDcaHiddenCommission",
       text: "Hi [lender],\n\nI would regards,\n\n[fullName]",
+      tooltip: "**Discretionary Commission (DCA) Claims**\n\nThe DCA model was banned on **28 January 2021**.\n\nIf your finance agreement started after this date, it's unlikely to qualify under this type of claim.\n\n**Hidden Commission Claims**\n\nThese apply when you **weren't told** that a commission was being paid to the broker.\n\nYou may still have a valid claim even if your agreement is post-2021.",
+
     },
     hiddenCommission: {
       title: "Hidden Commissions Claim Only",
       templateName: "submitClaimHiddenCommissionsOnly",
       text: "Hi [lender],\n\nI would regards,\n\n[fullName]",
+      tooltip: "**Hidden Commission Claims**\n\nThese apply when you **weren't told** that a commission was being paid to the broker.\n\nYou may still have a valid claim even if your agreement is post-2021.",
+
     }
   };
   const selectedAgreement = agreements.find(a => a.id === selectedAgreements[0]);
@@ -215,7 +219,12 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
             { key: 'personalAndAgreementDetails', value: personalDetailsAndAgreementDetails }
 
             ]);
-            return { ...claimTemplates[templateKey], text: interpolatedText, subject: templateData.subject };
+            let interpolatedSubject = interpolateString(templateData.subject, [
+            { key: 'fullName', value: `${user.firstName} ${user.lastName},` },
+            { key: 'agreementNumber', value: selectedAgreement?.agreementNumber }
+            ]);
+            
+            return { ...claimTemplates[templateKey], text: interpolatedText, subject: interpolatedSubject };
           })
         );
         setDetailedTemplates(fetchedTemplates);
@@ -244,16 +253,16 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={useBreakpointValue({ base: "full", md: "xl" })}
+      size={useBreakpointValue({ base: "lg", md: "xl" })}
       scrollBehavior="inside"
     >
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
       <ModalContent
-        borderRadius={{ base: "0", md: "xl" }}
+        borderRadius={{ base: "lg", md: "xl" }}
         bg={bgColor}
-        mx={{ base: 0, md: "auto" }}
-        my={{ base: 0, md: "1.75rem" }}
-        maxH={{ base: "100vh", md: "calc(100vh - 3.5rem)" }}
+        mx={{ base: "4", md: "auto" }}
+        my={{ base: "3", md: "1.75rem" }}
+        maxH={{ base: "calc(100vh - 3rem)", md: "calc(100vh - 3.5rem)" }}
       >
         <ModalHeader
           borderBottomWidth="1px"
@@ -521,7 +530,7 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                           mt={1}
                           size={{ base: "md", md: "lg" }}
                         />
-                        <Box flex="1" w="full">
+                        <Box flex="1" w="full ">
                           <Text
                             fontWeight="bold"
                             fontSize={{ base: "sm", md: "md" }}

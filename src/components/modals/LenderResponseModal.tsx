@@ -29,6 +29,7 @@ import {
   Progress,
   Icon,
   Select,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import {
   FiCheck,
@@ -45,10 +46,10 @@ import {
 import { updateClaim } from '@/api/services/claims';
 import { getTemplates } from '@/api/services/templates';
 import { interpolateString } from '@/utils';
-import { userAtom } from '@/jotai/atoms';
-import { useAtomValue } from 'jotai';
-
-
+import { userAtom, refetchClaimsAtom  } from '@/jotai/atoms';
+import { useAtomValue, useSetAtom } from 'jotai';
+import FcaPauseModal from './FcaPauseModal';
+import FosEscalationModal from './FosEscalationModal';
 
 interface Agreement {
   id: string;
@@ -94,6 +95,16 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
   const [accountName, setAccountName] = useState('');
   const [sortCode, setSortCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [showFosEscalation, setShowFosEscalation] = useState(false);
+  const [fosEscalationChoice, setFosEscalationChoice] = useState<boolean | null>(null);
+  const [customEmailSubject, setCustomEmailSubject] = useState('');
+  const [customEmailBody, setCustomEmailBody] = useState('');
+  const [useCustomEmail, setUseCustomEmail] = useState(false);
+  
+  // Add modal control states
+  const [isFcaPauseModalOpen, setIsFcaPauseModalOpen] = useState(false);
+  const [isFosEscalationModalOpen, setIsFosEscalationModalOpen] = useState(false);
+  
   const toast = useToast();
   const user = useAtomValue(userAtom);
 
@@ -110,6 +121,13 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
     setAccountName('');
     setSortCode('');
     setAccountNumber('');
+    setShowFosEscalation(false);
+    setFosEscalationChoice(null);
+    setCustomEmailSubject('');
+    setCustomEmailBody('');
+    setUseCustomEmail(false);
+    setIsFcaPauseModalOpen(false);
+    setIsFosEscalationModalOpen(false);
   };
 
   // Reset state when modal opens or closes
@@ -153,9 +171,14 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
       takeOver: {
         title: "Already Claimed - Request Take Over",
         templateName: "alreadyClaimedRequestToTakeOverClaim",
+      },
+      custom: {
+        title: "Custom Email",
+        templateName: "customEmail",
       }
     }
   };
+  const refetchClaims = useSetAtom(refetchClaimsAtom);
 
   // Add useEffect to fetch templates
   useEffect(() => {
@@ -190,7 +213,10 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
               { key: 'sortCode', value: sortCode },
               { key: 'accNumber', value: accountNumber }
             ]),
-            subject: acceptTemplate.subject
+            subject: interpolateString(acceptTemplate.subject, [
+              { key: 'fullName', value: `${user.firstName} ${user.lastName}` },
+              { key: 'agreementNumber', value: selectedAgreement?.agreementNumber||'' }
+            ])
           });
 
           templates.push({
@@ -200,8 +226,11 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
               { key: 'fullName', value: `${user.firstName} ${user.lastName}` },
               { key: 'offerAmount', value: offerAmount.toString() }
             ]),
-            subject: rejectTemplate.subject
-          });
+            subject: interpolateString(rejectTemplate.subject, [
+              { key: 'fullName', value: `${user.firstName} ${user.lastName}` },
+              { key: 'agreementNumber', value: selectedAgreement?.agreementNumber||'' }
+            ])
+              });
         } else if (responseType === 'alreadySubmitted' && wantToTakeOver) {
           const takeOverTemplate = await getTemplates(responseTemplates.alreadySubmitted.takeOver.templateName);
 
@@ -211,10 +240,11 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
               { key: 'lender', value: lenderName },
               { key: 'fullName', value: `${user.firstName} ${user.lastName}` }
             ]),
-            subject: takeOverTemplate.subject
+            subject: interpolateString(takeOverTemplate.subject, [
+              { key: 'fullName', value: `${user.firstName} ${user.lastName}` },
+            ])
           });
         }
-
         setDetailedTemplates(templates);
       } catch (error) {
         console.error('Error fetching templates:', error);
@@ -264,6 +294,19 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
         return;
       }
 
+      // Validate FOS escalation choice if rejecting offer
+      if (responseType === 'offer' && selectedEmailTemplate === responseTemplates.offer.reject.templateName && fosEscalationChoice === null) {
+        toast({
+          title: "Missing FOS escalation choice",
+          description: "Please select whether to escalate to FOS",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        setIsLoading(false);
+        return;
+      }
+
       // Validate rejected action if rejected
       if (responseType === 'rejected' && !rejectedAction) {
         toast({
@@ -280,25 +323,46 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
       // Determine the new status and details based on response type
       let newStatus = '';
       let details = {};
+      let shouldShowFcaPauseModal = false;
+      let shouldShowFosEscalationModal = false;
 
       switch (responseType) {
         case 'offer':
-          newStatus = 'OfferMade';
-          details = {
-            offerAmount,
-            responseAction: 'offer'
-          };
+          if (selectedEmailTemplate === responseTemplates.offer.accept.templateName) {
+            newStatus = 'OfferMade';
+            details = {
+              offerAmount,
+              responseAction: 'offer'
+            };
+          } else {
+            newStatus = fosEscalationChoice ? 'FOSEscalation' : 'Rejected';
+            details = {
+              escalateToFOS: fosEscalationChoice,
+              responseAction: 'reject'
+            };
+            
+            // Show FOS escalation modal if user chose to escalate
+            if (fosEscalationChoice) {
+              shouldShowFosEscalationModal = true;
+            }
+          }
           break;
         case 'rejected':
-          newStatus = rejectedAction === 'fos Escalation' ? 'FOS Escalation' : 'Rejected';
+          newStatus = rejectedAction === 'fosEscalation' ? 'FOSEscalation' : 'Rejected';
           details = { 
             escalateToFCA: rejectedAction === 'fosEscalation',
             responseAction: rejectedAction
           };
+          
+          // Show FOS escalation modal if user chose to escalate
+          if (rejectedAction === 'fosEscalation') {
+            shouldShowFosEscalationModal = true;
+          }
           break;
         case 'fcaPause':
           newStatus = 'FCAPause';
           details = { responseAction: 'fcaPause' };
+          shouldShowFcaPauseModal = true;
           break;
         case 'alreadySubmitted':
           newStatus = 'ClaimAlreadySubmitted';
@@ -310,6 +374,22 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
       }
 
       // Create update payload for the backend
+      console.log("Selected agreement:", selectedAgreement);
+      
+      // Check if claimId exists
+      if (!selectedAgreement.claimId) {
+        console.error('Error: Missing claimId in selected agreement');
+        toast({
+          title: "Error updating status",
+          description: "The selected agreement is missing a claim ID. Please try another agreement or contact support.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       const updateData = {
         claimId: selectedAgreement.claimId,
         agreement: {
@@ -347,9 +427,16 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
           };
         }
       }
+      if (responseType === 'alreadySubmitted' && wantToTakeOver && useCustomEmail) {
+        updateData.mail = {
+          subject: customEmailSubject,
+          body: customEmailBody
+        };
+      }
 
       // Make the API call to update the claim in the backend
       await updateClaim(updateData);
+      refetchClaims();
 
       // Then call the parent component's onUpdateStatus for UI updates
       await onUpdateStatus(selectedAgreementId, newStatus, details);
@@ -362,7 +449,14 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
         isClosable: true,
       });
 
-      onClose();
+      // Show appropriate modal based on the response type
+      if (shouldShowFcaPauseModal) {
+        setIsFcaPauseModalOpen(true);
+      } else if (shouldShowFosEscalationModal) {
+        setIsFosEscalationModalOpen(true);
+      } else {
+        onClose();
+      }
     } catch (error) {
       console.error('Error updating agreement status:', error);
       toast({
@@ -372,6 +466,7 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
         duration: 5000,
         isClosable: true,
       });
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -542,6 +637,62 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
             </Stack>
           </Box>
         )}
+
+        {responseType === 'alreadySubmitted' && wantToTakeOver && (
+          <Box mt={6}>
+            <Text fontSize="md" fontWeight="semibold" mb={4}>
+              Email Template Options
+            </Text>
+            <Stack spacing={4}>
+              <Card mb={4}
+                variant="outline"
+                p={4}
+                borderColor={useCustomEmail ? 'blue.300' : borderColor}
+                bg={useCustomEmail ? 'blue.50' : bgColor}
+                _hover={{ boxShadow: 'md' }}
+                onClick={() => setUseCustomEmail(true)}
+                cursor="pointer"
+              >
+                <Flex align="center">
+                  <Radio value="custom" colorScheme="blue" mr={3} isChecked={useCustomEmail} />
+                  <Box>
+                    <Text fontWeight="bold">Custom Email</Text>
+                    <Text fontSize="sm" color="gray.600" mt={1}>
+                      Write a custom email for the take over request.
+                    </Text>
+                  </Box>
+                </Flex>
+              </Card>
+            </Stack>
+
+            {useCustomEmail && (
+              <Box mt={4}>
+                <Stack spacing={4}>
+                  <FormControl isRequired>
+                    <FormLabel>Email Subject</FormLabel>
+                    <Input
+                      value={customEmailSubject}
+                      onChange={(e) => setCustomEmailSubject(e.target.value)}
+                      placeholder="Enter email subject"
+                    />
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel>Email Body</FormLabel>
+                    <Input
+                      value={customEmailBody}
+                      onChange={(e) => setCustomEmailBody(e.target.value)}
+                      placeholder="Enter email body"
+                      as="textarea"
+                      rows={6}
+                    />
+                  </FormControl>
+                </Stack>
+              </Box>
+            )}
+          </Box>
+        )}
+
         <RadioGroup value={selectedEmailTemplate} onChange={setSelectedEmailTemplate}>
           <Stack spacing={4}>
             {detailedTemplates.map((template) => (
@@ -573,6 +724,55 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
             ))}
           </Stack>
         </RadioGroup>
+        {responseType === 'offer' && selectedEmailTemplate === responseTemplates.offer.reject.templateName && (
+          <Box my={6}>
+            <Text fontSize="md" fontWeight="semibold" mb={4}>
+              Would you like to escalate this to FOS?
+            </Text>
+            <Stack spacing={4}>
+              <Card
+                variant="outline"
+                p={4}
+                borderColor={fosEscalationChoice === true ? 'red.300' : borderColor}
+                bg={fosEscalationChoice === true ? 'red.50' : bgColor}
+                _hover={{ boxShadow: 'md' }}
+                onClick={() => setFosEscalationChoice(true)}
+                cursor="pointer"
+              >
+                <Flex align="center">
+                  <Icon as={FiAlertTriangle} mr={3} color="red.500" />
+                  <Box>
+                    <Text fontWeight="bold">Yes, escalate to FOS</Text>
+                    <Text fontSize="sm" color="gray.600" mt={1}>
+                      Escalate this claim to the Financial Ombudsman Service.
+                    </Text>
+                  </Box>
+                </Flex>
+              </Card>
+
+              <Card
+                variant="outline"
+                p={4}
+                borderColor={fosEscalationChoice === false ? 'gray.300' : borderColor}
+                bg={fosEscalationChoice === false ? 'gray.50' : bgColor}
+                _hover={{ boxShadow: 'md' }}
+                onClick={() => setFosEscalationChoice(false)}
+                cursor="pointer"
+              >
+                <Flex align="center">
+                  <Icon as={FiX} mr={3} color="gray.500" />
+                  <Box>
+                    <Text fontWeight="bold">No, do not escalate</Text>
+                    <Text fontSize="sm" color="gray.600" mt={1}>
+                      Keep the claim as rejected without FOS escalation.
+                    </Text>
+                  </Box>
+                </Flex>
+              </Card>
+            </Stack>
+          </Box>
+        )}
+
       </Box>
     );
   };
@@ -582,171 +782,213 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
     onClose();
   };
 
+  // Add handlers for the new modals
+  const handleFcaPauseModalClose = () => {
+    setIsFcaPauseModalOpen(false);
+    onClose();
+  };
+
+  const handleFosEscalationModalClose = () => {
+    setIsFosEscalationModalOpen(false);
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="lg" scrollBehavior="inside">
-      <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
-      <ModalContent borderRadius="xl" bg={bgColor}>
-        <ModalHeader borderBottomWidth="1px" borderColor={borderColor} py={4}>
-          <Text fontSize="xl" fontWeight="bold">
-            Record Lender Response
-          </Text>
-          <Text fontSize="sm" color="gray.500" mt={2}>
-            Lender: {lenderName}
-          </Text>
-        </ModalHeader>
-        <ModalCloseButton />
-
-        <ModalBody py={6}>
-          <Box>
-            {renderAgreementSelector()}
-            <Text fontSize="md" mb={4}>
-              What was the lender's response to the claim?
+    <>
+      <Modal 
+        isOpen={isOpen} 
+        onClose={handleClose} 
+        size={useBreakpointValue({ base: "lg", md: "xl" })} 
+        scrollBehavior="inside"
+      >
+        <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
+        <ModalContent 
+          borderRadius={{ base: "lg", md: "xl" }} 
+          bg={bgColor}
+          mx={{ base: "4", md: "auto" }}
+          my={{ base: "3", md: "1.75rem" }}
+          maxH={{ base: "calc(100vh - 3rem)", md: "calc(100vh - 3.5rem)" }}
+        >
+          <ModalHeader borderBottomWidth="1px" borderColor={borderColor} py={4}>
+            <Text fontSize="xl" fontWeight="bold">
+              Record Lender Response
             </Text>
-            {renderResponseTypeOptions()}
-            
-            {responseType === 'offer' && (
-              <Box mt={6}>
-                <FormControl>
-                  <FormLabel>Offer Amount (£)</FormLabel>
-                  <NumberInput
-                    value={offerAmount}
-                    onChange={(_, value) => setOfferAmount(value)}
-                    min={0}
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-              </Box>
-            )}
+            <Text fontSize="sm" color="gray.500" mt={2}>
+              Lender: {lenderName}
+            </Text>
+          </ModalHeader>
+          <ModalCloseButton />
 
-            {responseType === 'alreadySubmitted' && (
-              <Box mt={6}>
-                <Text fontSize="md" fontWeight="semibold" mb={4}>
-                  Would you like to take over this claim?
-                </Text>
-                <Stack spacing={4}>
-                  <Card
-                    variant="outline"
-                    p={4}
-                    borderColor={wantToTakeOver === true ? 'green.300' : borderColor}
-                    bg={wantToTakeOver === true ? 'green.50' : bgColor}
-                    _hover={{ boxShadow: 'md' }}
-                    onClick={() => setWantToTakeOver(true)}
-                    cursor="pointer"
-                  >
-                    <Flex align="center">
-                      <Icon as={FiThumbsUp} mr={3} color="green.500" />
-                      <Box>
-                        <Text fontWeight="bold">Yes, take over the claim</Text>
-                        <Text fontSize="sm" color="gray.600" mt={1}>
-                          Send a request to take over the claim from the previous representative.
-                        </Text>
-                      </Box>
-                    </Flex>
-                  </Card>
+          <ModalBody py={6}>
+            <Box>
+              {renderAgreementSelector()}
+              <Text fontSize="md" mb={4}>
+                What was the lender's response to the claim?
+              </Text>
+              {renderResponseTypeOptions()}
+              
+              {responseType === 'offer' && (
+                <Box mt={6}>
+                  <FormControl>
+                    <FormLabel>Offer Amount (£)</FormLabel>
+                    <NumberInput
+                      value={offerAmount}
+                      onChange={(_, value) => setOfferAmount(value)}
+                      min={0}
+                    >
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+                </Box>
+              )}
 
-                  <Card
-                    variant="outline"
-                    p={4}
-                    borderColor={wantToTakeOver === false ? 'red.300' : borderColor}
-                    bg={wantToTakeOver === false ? 'red.50' : bgColor}
-                    _hover={{ boxShadow: 'md' }}
-                    onClick={() => setWantToTakeOver(false)}
-                    cursor="pointer"
-                  >
-                    <Flex align="center">
-                      <Icon as={FiThumbsDown} mr={3} color="red.500" />
-                      <Box>
-                        <Text fontWeight="bold">No, do not take over</Text>
-                        <Text fontSize="sm" color="gray.600" mt={1}>
-                          Close this claim as it was already submitted by another representative.
-                        </Text>
-                      </Box>
-                    </Flex>
-                  </Card>
-                </Stack>
-              </Box>
-            )}
+              {responseType === 'alreadySubmitted' && (
+                <Box mt={6}>
+                  <Text fontSize="md" fontWeight="semibold" mb={4}>
+                    Would you like to take over this claim?
+                  </Text>
+                  <Stack spacing={4}>
+                    <Card
+                      variant="outline"
+                      p={4}
+                      borderColor={wantToTakeOver === true ? 'green.300' : borderColor}
+                      bg={wantToTakeOver === true ? 'green.50' : bgColor}
+                      _hover={{ boxShadow: 'md' }}
+                      onClick={() => setWantToTakeOver(true)}
+                      cursor="pointer"
+                    >
+                      <Flex align="center">
+                        <Icon as={FiThumbsUp} mr={3} color="green.500" />
+                        <Box>
+                          <Text fontWeight="bold">Yes, take over the claim</Text>
+                          <Text fontSize="sm" color="gray.600" mt={1}>
+                            Send a request to take over the claim from the previous representative.
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Card>
 
-            {responseType === 'rejected' && (
-              <Box mt={6}>
-                <Text fontSize="md" fontWeight="semibold" mb={4}>
-                  What would you like to do with this rejected claim?
-                </Text>
-                <Stack spacing={4}>
-                  <Card
-                    variant="outline"
-                    p={4}
-                    borderColor={rejectedAction === 'fosEscalation' ? 'red.300' : borderColor}
-                    bg={rejectedAction === 'fosEscalation' ? 'red.50' : bgColor}
-                    _hover={{ boxShadow: 'md' }}
-                    onClick={() => setRejectedAction('fosEscalation')}
-                    cursor="pointer"
-                  >
-                    <Flex align="center">
-                      <Icon as={FiAlertTriangle} mr={3} color="red.500" />
-                      <Box>
-                        <Text fontWeight="bold">Escalate to FOS</Text>
-                        <Text fontSize="sm" color="gray.600" mt={1}>
-                          Escalate this claim to the Financial Ombudsman Service.
-                        </Text>
-                      </Box>
-                    </Flex>
-                  </Card>
+                    <Card
+                      variant="outline"
+                      p={4}
+                      borderColor={wantToTakeOver === false ? 'red.300' : borderColor}
+                      bg={wantToTakeOver === false ? 'red.50' : bgColor}
+                      _hover={{ boxShadow: 'md' }}
+                      onClick={() => setWantToTakeOver(false)}
+                      cursor="pointer"
+                    >
+                      <Flex align="center">
+                        <Icon as={FiThumbsDown} mr={3} color="red.500" />
+                        <Box>
+                          <Text fontWeight="bold">No, do not take over</Text>
+                          <Text fontSize="sm" color="gray.600" mt={1}>
+                            Close this claim as it was already submitted by another representative.
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Card>
+                  </Stack>
+                </Box>
+              )}
 
-                  <Card
-                    variant="outline"
-                    p={4}
-                    borderColor={rejectedAction === 'leaveAsIs' ? 'gray.300' : borderColor}
-                    bg={rejectedAction === 'leaveAsIs' ? 'gray.50' : bgColor}
-                    _hover={{ boxShadow: 'md' }}
-                    onClick={() => setRejectedAction('leaveAsIs')}
-                    cursor="pointer"
-                  >
-                    <Flex align="center">
-                      <Icon as={FiX} mr={3} color="gray.500" />
-                      <Box>
-                        <Text fontWeight="bold">Leave as is</Text>
-                        <Text fontSize="sm" color="gray.600" mt={1}>
-                          Keep the claim as rejected without further action.
-                        </Text>
-                      </Box>
-                    </Flex>
-                  </Card>
-                </Stack>
-              </Box>
-            )}
+              {responseType === 'rejected' && (
+                <Box mt={6}>
+                  <Text fontSize="md" fontWeight="semibold" mb={4}>
+                    What would you like to do with this rejected claim?
+                  </Text>
+                  <Stack spacing={4}>
+                    <Card
+                      variant="outline"
+                      p={4}
+                      borderColor={rejectedAction === 'fosEscalation' ? 'red.300' : borderColor}
+                      bg={rejectedAction === 'fosEscalation' ? 'red.50' : bgColor}
+                      _hover={{ boxShadow: 'md' }}
+                      onClick={() => setRejectedAction('fosEscalation')}
+                      cursor="pointer"
+                    >
+                      <Flex align="center">
+                        <Icon as={FiAlertTriangle} mr={3} color="red.500" />
+                        <Box>
+                          <Text fontWeight="bold">Escalate to FOS</Text>
+                          <Text fontSize="sm" color="gray.600" mt={1}>
+                            Escalate this claim to the Financial Ombudsman Service.
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Card>
 
-            {renderEmailTemplateSelection()}
-          </Box>
-        </ModalBody>
+                    <Card
+                      variant="outline"
+                      p={4}
+                      borderColor={rejectedAction === 'leaveAsIs' ? 'gray.300' : borderColor}
+                      bg={rejectedAction === 'leaveAsIs' ? 'gray.50' : bgColor}
+                      _hover={{ boxShadow: 'md' }}
+                      onClick={() => setRejectedAction('leaveAsIs')}
+                      cursor="pointer"
+                    >
+                      <Flex align="center">
+                        <Icon as={FiX} mr={3} color="gray.500" />
+                        <Box>
+                          <Text fontWeight="bold">Leave as is</Text>
+                          <Text fontSize="sm" color="gray.600" mt={1}>
+                            Keep the claim as rejected without further action.
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Card>
+                  </Stack>
+                </Box>
+              )}
 
-        <ModalFooter borderTopWidth="1px" borderColor={borderColor}>
-          <Button variant="outline" mr={3} onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button
-            colorScheme="green"
-            onClick={handleSubmit}
-            isLoading={isLoading}
-            isDisabled={
-              (responseType === 'alreadySubmitted' && wantToTakeOver && !selectedEmailTemplate) || 
-              (responseType === 'offer' && 
-               selectedEmailTemplate === responseTemplates.offer.accept.templateName && 
-               (!accountName || !sortCode || !accountNumber)) ||
-              (responseType === 'rejected' && !rejectedAction)
-            }
-            leftIcon={<FiCheck />}
-          >
-            Record Response
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+              {renderEmailTemplateSelection()}
+            </Box>
+          </ModalBody>
+
+          <ModalFooter borderTopWidth="1px" borderColor={borderColor}>
+            <Button variant="outline" mr={3} onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              colorScheme="green"
+              onClick={handleSubmit}
+              isLoading={isLoading}
+              isDisabled={
+                (responseType === 'alreadySubmitted' && wantToTakeOver && 
+                 ((!useCustomEmail && !selectedEmailTemplate) || 
+                  (useCustomEmail && (!customEmailSubject || !customEmailBody)))) || 
+                (responseType === 'offer' && 
+                 selectedEmailTemplate === responseTemplates.offer.accept.templateName && 
+                 (!accountName || !sortCode || !accountNumber)) ||
+                (responseType === 'offer' &&
+                 selectedEmailTemplate === responseTemplates.offer.reject.templateName &&
+                 fosEscalationChoice === null) ||
+                (responseType === 'rejected' && !rejectedAction)
+              }
+              leftIcon={<FiCheck />}
+            >
+              Record Response
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Add the FCA Pause Modal */}
+      <FcaPauseModal 
+        isOpen={isFcaPauseModalOpen} 
+        onClose={handleFcaPauseModalClose} 
+        lenderName={lenderName}
+      />
+      
+      {/* Add the FOS Escalation Modal */}
+      <FosEscalationModal 
+        isOpen={isFosEscalationModalOpen} 
+        onClose={handleFosEscalationModalClose}
+      />
+    </>
   );
 };
 

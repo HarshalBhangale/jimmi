@@ -92,13 +92,19 @@ const AddAgreementModal: React.FC<AddAgreementModalProps> = ({
   const badgeColor = useColorModeValue('blue.600', 'blue.200');
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      size={useBreakpointValue({ base: "lg", md: "xl" })}
+      scrollBehavior="inside"
+    >
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
       <ModalContent 
-        borderRadius="xl" 
+        borderRadius={{ base: "lg", md: "xl" }}
         bg={bgColor}
-        mx={{ base: "4", md: "0" }}
-        my={{ base: "4", md: "0" }}
+        mx={{ base: "4", md: "auto" }}
+        my={{ base: "3", md: "1.75rem" }}
+        maxH={{ base: "calc(100vh - 3rem)", md: "calc(100vh - 3.5rem)" }}
       >
         <ModalHeader 
           borderBottomWidth="1px" 

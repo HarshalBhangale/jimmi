@@ -19,6 +19,7 @@
     "framer-motion": "^12.12.1",
     "jotai": "^2.6.5",
     "lottie-react": "^2.4.1",
+    "lucide-react": "^0.511.0",
     "next-themes": "^0.4.6",
     "progress-tracker": "^3.0.1",
     "react": "^19.1.0",

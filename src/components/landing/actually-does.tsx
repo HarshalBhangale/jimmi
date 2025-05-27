@@ -136,7 +136,7 @@ const ActuallyDoes: React.FC = () => {
               letterSpacing="tight"
               mb={4}
             >
-              🤖 What Our Buddy Actually Does
+              🤖 How buddy helps with your pcp claim ?
             </Heading>
             <Box
               position="absolute"
@@ -155,7 +155,7 @@ const ActuallyDoes: React.FC = () => {
             color={useColorModeValue('gray.600', 'gray.400')}
             lineHeight="tall"
           >
-            Buddy makes the claims process feel simple, supportive and stress-free.
+             Buddy makes the pcp claim feel stress free, simple and keeps you in control.
           </Text>
         </VStack>
 
@@ -179,8 +179,8 @@ const ActuallyDoes: React.FC = () => {
           />
           <Feature
             icon={<Icon as={FiFileText} />}
-            title="Auto-Generated Letters"
-            text="SARs, complaints, appeals — Buddy writes the right letters at the right time. Just review and send."
+            title="The correct templates"
+            text="Buddy has all the templates you need, exactly when you need them! Just review and send… or write your own with help from buddy."
             delay="0.2s"
           />
           <Feature

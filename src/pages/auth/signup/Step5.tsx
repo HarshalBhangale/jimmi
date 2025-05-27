@@ -43,6 +43,9 @@ import {
   FiLock,
   FiShield
 } from 'react-icons/fi';
+import { useAtomValue } from 'jotai';
+import { userAtom } from '@/jotai/atoms';
+
 
 // ID document types
 const idDocumentTypes = [
@@ -66,8 +69,10 @@ const Step5 = () => {
   const [selectedIdType, setSelectedIdType] = useState('passport');
   const [idDocument, setIdDocument] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const navigate = useNavigate();
+  const user = useAtomValue(userAtom);
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -88,6 +93,44 @@ const Step5 = () => {
       setPreviewUrl(null);
     }
   }, [idDocument]);
+
+  useEffect(() => {
+    if (user.identityDoc) {
+      setSelectedIdType(user.identityDoc.type);
+      
+      // If we have a signed URL, fetch and set the document
+      if (user.identityDoc.signedUrl) {
+        setIsPreloading(true);
+        fetch(user.identityDoc.signedUrl)
+          .then(response => response.blob())
+          .then(blob => {
+            // Create a File object from the blob
+            const file = new File([blob], 'identity-document', { type: blob.type });
+            setIdDocument(file);
+            
+            // Create preview URL if it's an image
+            if (blob.type.startsWith('image/')) {
+              const url = URL.createObjectURL(blob);
+              setPreviewUrl(url);
+            }
+          })
+          .catch(error => {
+            console.error('Error loading identity document:', error);
+            toast({
+              title: 'Error loading document',
+              description: 'There was an error loading your previously uploaded document.',
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+              position: 'top',
+            });
+          })
+          .finally(() => {
+            setIsPreloading(false);
+          });
+      }
+    }
+  }, [user.identityDoc, toast]);
 
   // Handle file drop
   const handleDrag = (e: React.DragEvent) => {
@@ -441,45 +484,68 @@ const Step5 = () => {
                     />
                     
                     <VStack spacing={4}>
-                      <Circle 
-                        size={{ base: "60px", md: "80px" }} 
-                        bg={dragActive 
-                          ? useColorModeValue('blue.100', 'blue.800') 
-                          : useColorModeValue('gray.100', 'gray.700')
-                        }
-                        color={dragActive ? 'blue.500' : labelColor}
-                      >
-                        <Icon as={FiUpload} boxSize={{ base: 6, md: 8 }} />
-                      </Circle>
-                      <Text fontWeight="medium" fontSize={{ base: "md", md: "lg" }}>
-                        {dragActive ? 'Drop your file here' : 'Drag and drop your file here'}
-                      </Text>
-                      <Text fontSize={{ base: "sm", md: "md" }} color={labelColor}>
-                        Supported formats: JPEG, PNG, PDF (max 10MB)
-                      </Text>
-                      <Text fontSize={{ base: "xs", md: "sm" }} color={labelColor}>
-                        or
-                      </Text>
-                      <Button
-                        colorScheme="blue"
-                        leftIcon={<FiUpload />}
-                        onClick={() => fileInputRef.current?.click()}
-                        size={{ base: "md", md: "lg" }}
-                        px={8}
-                        bgGradient="linear(to-r, blue.400, blue.600)"
-                        _hover={{
-                          bgGradient: "linear(to-r, blue.500, blue.700)",
-                          transform: "translateY(-2px)",
-                          boxShadow: "md",
-                        }}
-                        _active={{
-                          bgGradient: "linear(to-r, blue.600, blue.800)",
-                          transform: "translateY(0)",
-                        }}
-                        transition="all 0.2s"
-                      >
-                        Select File
-                      </Button>
+                      {isPreloading ? (
+                        <>
+                          <Circle 
+                            size={{ base: "60px", md: "80px" }} 
+                            bg={useColorModeValue('blue.100', 'blue.800')}
+                            color="blue.500"
+                          >
+                            <Icon as={FiUpload} boxSize={{ base: 6, md: 8 }} />
+                          </Circle>
+                          <Text fontWeight="medium" fontSize={{ base: "md", md: "lg" }}>
+                            Loading your document...
+                          </Text>
+                          <Progress 
+                            size="xs" 
+                            isIndeterminate 
+                            width="200px" 
+                            colorScheme="blue"
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Circle 
+                            size={{ base: "60px", md: "80px" }} 
+                            bg={dragActive 
+                              ? useColorModeValue('blue.100', 'blue.800') 
+                              : useColorModeValue('gray.100', 'gray.700')
+                            }
+                            color={dragActive ? 'blue.500' : labelColor}
+                          >
+                            <Icon as={FiUpload} boxSize={{ base: 6, md: 8 }} />
+                          </Circle>
+                          <Text fontWeight="medium" fontSize={{ base: "md", md: "lg" }}>
+                            {dragActive ? 'Drop your file here' : 'Drag and drop your file here'}
+                          </Text>
+                          <Text fontSize={{ base: "sm", md: "md" }} color={labelColor}>
+                            Supported formats: JPEG, PNG, PDF (max 10MB)
+                          </Text>
+                          <Text fontSize={{ base: "xs", md: "sm" }} color={labelColor}>
+                            or
+                          </Text>
+                          <Button
+                            colorScheme="blue"
+                            leftIcon={<FiUpload />}
+                            onClick={() => fileInputRef.current?.click()}
+                            size={{ base: "md", md: "lg" }}
+                            px={8}
+                            bgGradient="linear(to-r, blue.400, blue.600)"
+                            _hover={{
+                              bgGradient: "linear(to-r, blue.500, blue.700)",
+                              transform: "translateY(-2px)",
+                              boxShadow: "md",
+                            }}
+                            _active={{
+                              bgGradient: "linear(to-r, blue.600, blue.800)",
+                              transform: "translateY(0)",
+                            }}
+                            transition="all 0.2s"
+                          >
+                            Select File
+                          </Button>
+                        </>
+                      )}
                     </VStack>
                   </Box>
                 ) : (
@@ -539,6 +605,43 @@ const Step5 = () => {
                           <Text fontSize="xs" color={labelColor} mt={2}>
                             Preview
                           </Text>
+                        </Box>
+                      )}
+                      
+                      {idDocument && !previewUrl && idDocument.type === 'application/pdf' && (
+                        <Box 
+                          borderRadius="md" 
+                          overflow="hidden" 
+                          bg={cardBg} 
+                          p={2}
+                          borderWidth="1px"
+                          borderColor={borderColor}
+                          textAlign="center"
+                        >
+                          <Circle 
+                            size="60px" 
+                            bg={useColorModeValue('blue.100', 'blue.800')} 
+                            color="blue.500" 
+                            mx="auto"
+                            mb={2}
+                          >
+                            <Icon as={FiFileText} boxSize={6} />
+                          </Circle>
+                          <Text fontSize="sm" color={labelColor} mb={2}>
+                            PDF Document
+                          </Text>
+                          <Button
+                            size="sm"
+                            colorScheme="blue"
+                            variant="outline"
+                            leftIcon={<FiFileText />}
+                            onClick={() => {
+                              const url = URL.createObjectURL(idDocument);
+                              window.open(url, '_blank');
+                            }}
+                          >
+                            Preview PDF
+                          </Button>
                         </Box>
                       )}
                       

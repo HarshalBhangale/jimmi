@@ -33,8 +33,8 @@ const shimmer = keyframes`
 `;
 
 const glow = keyframes`
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 128, 0.3); }
-  50% { box-shadow: 0 0 30px rgba(255, 0, 128, 0.6); }
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
 `;
 
 const Hero: React.FC = () => {
@@ -51,44 +51,54 @@ const Hero: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
+  const [saversCount, setSaversCount] = useState(5631);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSaversCount(prev => prev + 1);
+    }, 5000); // Increment every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   const isMobile = useBreakpointValue({ base: true, lg: false });
-  
+
   return (
-    <Box 
-      as="section" 
+    <Box
+      as="section"
       position="relative"
       minH="100vh"
       display="flex"
       alignItems="center"
       justifyContent="center"
       overflow="hidden"
-      bg="black"
+      bg="gray.25"
+      bgGradient="linear(135deg, blue.50, purple.50, indigo.50, cyan.50)"
     >
-      {/* Enhanced animated background with multiple layers */}
+      {/* Enhanced animated background with multiple layers - Light theme */}
       <Box
         position="absolute"
         top={0}
         left={0}
         right={0}
         bottom={0}
-        bgGradient="linear(45deg, #0a0015, #1a0033, #000428, #004e92)"
-        opacity={0.9}
+        bgGradient="linear(45deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.15), rgba(165, 180, 252, 0.1), rgba(196, 181, 253, 0.15))"
+        opacity={0.8}
         zIndex={-2}
       />
       
-      {/* Animated mesh gradient overlay */}
+      {/* Animated mesh gradient overlay - Light theme */}
       <Box
         position="absolute"
         top={0}
         left={0}
         right={0}
         bottom={0}
-        background="radial-gradient(circle at 20% 80%, rgba(120, 40, 200, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 0, 128, 0.3) 0%, transparent 50%)"
+        background="radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)"
         zIndex={-1}
         animation={`${pulse} 8s ease-in-out infinite`}
       />
       
-      {/* Enhanced floating decorative elements */}
+      {/* Enhanced floating decorative elements - Light theme */}
       <Box
         position="absolute"
         top="15%"
@@ -96,10 +106,10 @@ const Hero: React.FC = () => {
         width={{ base: '200px', md: '400px' }}
         height={{ base: '200px', md: '400px' }}
         borderRadius="full"
-        bgGradient="radial(blue.400, purple.500, transparent 70%)"
-        opacity={0.3}
+        bgGradient="radial(blue.200, purple.200, transparent 70%)"
+        opacity={0.4}
         zIndex={0}
-        filter="blur(1px)"
+        filter="blur(2px)"
       />
       
       <Box
@@ -109,13 +119,13 @@ const Hero: React.FC = () => {
         width={{ base: '250px', md: '500px' }}
         height={{ base: '250px', md: '500px' }}
         borderRadius="full"
-        bgGradient="radial(pink.400, purple.500, transparent 70%)"
-        opacity={0.3}
+        bgGradient="radial(purple.200, pink.200, transparent 50%)"
+        opacity={0.4}
         zIndex={0}
-        filter="blur(1px)"
+        filter="blur(2px)"
       />
       
-      {/* Additional floating particles */}
+      {/* Additional floating particles - Light theme */}
       <Box
         position="absolute"
         top="30%"
@@ -123,7 +133,7 @@ const Hero: React.FC = () => {
         width="100px"
         height="100px"
         borderRadius="full"
-        bg="rgba(255, 255, 255, 0.1)"
+        bg="rgba(59, 130, 246, 0.1)"
         zIndex={0}
       />
       
@@ -134,7 +144,7 @@ const Hero: React.FC = () => {
         width="80px"
         height="80px"
         borderRadius="full"
-        bg="rgba(255, 0, 128, 0.2)"
+        bg="rgba(168, 85, 247, 0.15)"
         zIndex={0}
       />
       
@@ -159,68 +169,91 @@ const Hero: React.FC = () => {
               w="full"
               h="auto"
               objectFit="contain"
-              filter="drop-shadow(0 0 40px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 80px rgba(255, 0, 128, 0.3))"
+              filter="drop-shadow(0 0 25px rgba(59, 130, 246, 0.2)) drop-shadow(0 0 40px rgba(168, 85, 247, 0.15))"
             />
           </Box>
 
           {/* Enhanced hero text */}
           <Box 
             maxW={{ base: 'full', lg: '65%' }} 
-            color="white"
+            color="gray.800"
             textAlign={{ base: 'center', lg: 'left' }}
           >
-            <Box width="100%" mb={6}>
+            <Box width="100%" mb={4}>
               <Heading
                 as="h1"
-                fontSize={{ base: '3xl', sm: '4xl', md: '5xl', lg: '6xl', xl: '7xl' }}
+                fontSize={{ base: '2.2rem', sm: '2.4rem', md: '3.5rem', lg: '4.5rem' }}
                 fontWeight="900"
-                lineHeight={0.9}
-                bgGradient="linear(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)"
+                lineHeight={{ base: '1.2', md: '1.1' }}
+                bgGradient="linear(135deg, #1e40af, #7c3aed, #ec4899, #3b82f6)"
                 bgClip="text"
                 letterSpacing="tight"
-                textShadow="0 0 40px rgba(255, 255, 255, 0.3)"
                 mb={2}
+                whiteSpace="normal"
+                maxW={{ base: "100%", md: "90%" }}
               >
-                Take Control of Your Claim
+                Save £1000s in legal fees
               </Heading>
-              
+                            
               <Heading
                 as="h2"
-                fontSize={{ base: '2xl', sm: '3xl', md: '4xl', lg: '5xl', xl: '6xl' }}
+                fontSize={{ base: '1.8rem', sm: '2.2rem', md: '2.8rem', lg: '3.5rem' }}
                 fontWeight="700"
-                lineHeight={1.1}
-                bgGradient="linear(135deg, #f093fb 0%, #f5576c 25%, #4facfe 50%, #00f2fe 75%, #4facfe 100%)"
+                lineHeight={{ base: '1.2', md: '1.1' }}
+                bgGradient="linear(135deg, #7c3aed, #ec4899, #3b82f6, #06b6d4)"
                 bgClip="text"
                 letterSpacing="tight"
-                textShadow="0 0 30px rgba(255, 255, 255, 0.2)"
+                whiteSpace="normal"
+                maxW={{ base: "100%", md: "90%" }}
               >
-                Without the Hassle, Fees, or Firms
+                Don't pay 36% away when you can do it yourself!
               </Heading>
             </Box>
-            
+
+            {/* Counter with reduced spacing */}
             <Text
-              fontSize={{ base: 'lg', md: 'xl', lg: '2xl' }}
-              lineHeight="tall"
-              mb={8}
-              color="whiteAlpha.900"
+              fontSize={{ base: 'md', md: 'lg' }}
+              color="gray.700"
+              textAlign={{ base: "center", lg: "left" }}
+              mb={4}
+              fontWeight="bold"
+              letterSpacing="wide"
+            >
+              Join the{' '}
+              <Text
+                as="span"
+                fontWeight="bold"
+                fontSize={{ base: 'lg', md: 'xl' }}
+                bgGradient="linear(to-r,rgb(226, 11, 245),rgb(22, 124, 249))"
+                bgClip="text"
+              >
+                {saversCount.toLocaleString()}
+              </Text>{' '}
+              people already saving with Buddy!
+            </Text>
+                      
+            <Text
+              fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
+              lineHeight={{ base: 1.3, md: 1.4 }}
+              mb={6}
+              color="gray.700"
               maxW={{ base: "100%", lg: "95%" }}
-              textShadow="0 2px 4px rgba(0,0,0,0.3)"
               fontWeight="400"
             >
               You don't need a solicitor to make a car finance claim. You just need the{' '}
               <Text 
                 as="span" 
                 fontWeight="bold" 
-                bgGradient="linear(to-r, #4facfe, #00f2fe)"
+                bgGradient="linear(to-r, #3b82f6, #06b6d4)"
                 bgClip="text"
               >
                 right guide
               </Text>. 
               Buddy makes it easy to reclaim what you're owed — step by step.
             </Text>
-            
+                      
             {/* Enhanced CTAs and Features Container */}
-            <VStack spacing={8} align={{ base: "stretch", lg: "flex-start" }} width="100%">
+            <VStack spacing={6} align={{ base: "stretch", lg: "flex-start" }} width="100%">
               {/* Enhanced CTAs */}
               <Stack 
                 direction={{ base: "column", lg: "row" }} 
@@ -229,7 +262,7 @@ const Hero: React.FC = () => {
                 maxW={{ base: "100%", lg: "95%" }}
                 align={{ base: "stretch", lg: "center" }}
               >
-                {/* Main CTA with enhanced effects */}
+                {/* Main CTA with enhanced effects - Light theme */}
                 <Button
                   as={RouterLink}
                   to="/auth/signup/step-1"
@@ -237,28 +270,28 @@ const Hero: React.FC = () => {
                   height={{ base: "64px", md: "70px" }}
                   fontSize={{ base: 'lg', md: 'xl' }}
                   fontWeight="bold"
-                  bgGradient="linear(135deg, #FF0080, #7928CA)"
+                  bgGradient="linear(135deg, #3b82f6, #7c3aed)"
                   color="white"
                   rightIcon={<Icon as={FiArrowRight} boxSize={{ base: 5, md: 6 }} />}
                   _hover={{ 
-                    bgGradient: "linear(135deg, #FF1493, #9370DB)",
+                    bgGradient: "linear(135deg, #2563eb, #6d28d9)",
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 15px 30px rgba(255, 0, 128, 0.4)' 
+                    boxShadow: '0 15px 30px rgba(59, 130, 246, 0.4)' 
                   }}
                   _active={{
                     transform: 'translateY(1px)',
-                    boxShadow: '0 5px 15px rgba(255, 0, 128, 0.4)'
+                    boxShadow: '0 5px 15px rgba(59, 130, 246, 0.4)'
                   }}
                   transition="all 0.3s ease"
                   flex={{ lg: "0.8" }}
                   borderRadius="full"
                   position="relative"
-                  boxShadow="0 10px 25px rgba(255, 0, 128, 0.3)"
+                  boxShadow="0 10px 25px rgba(59, 130, 246, 0.3)"
                 >
                   Start Your Claim Now
                 </Button>
 
-                {/* Secondary CTA as button for better visibility */}
+                {/* Secondary CTA as button for better visibility - Light theme */}
                 <Button
                   as="a"
                   href="#how-it-works"
@@ -267,18 +300,19 @@ const Hero: React.FC = () => {
                   fontSize={{ base: 'lg', md: 'xl' }}
                   fontWeight="semibold"
                   variant="outline"
-                  color="white"
-                  borderColor="rgba(255, 255, 255, 0.4)"
+                  color="gray.700"
+                  borderColor="gray.300"
                   borderWidth="2px"
+                  bg="white"
                   _hover={{ 
-                    bg: "whiteAlpha.100",
-                    borderColor: "white",
+                    bg: "gray.50",
+                    borderColor: "gray.400",
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 10px 25px rgba(255, 255, 255, 0.2)' 
+                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)' 
                   }}
                   _active={{
                     transform: 'translateY(1px)',
-                    boxShadow: '0 5px 15px rgba(255, 255, 255, 0.1)'
+                    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
                   }}
                   transition="all 0.3s ease"
                   flex={{ lg: "0.8" }}
@@ -290,28 +324,29 @@ const Hero: React.FC = () => {
               </Stack>
 
               {isMobile ? (
-                <Box mt={8} width="100%">
+                <Box mt={4} width="100%">
                   <SimpleGrid 
                     columns={{ base: 3 }}
                     spacing={{ base: 3 }}
                     width="100%"
                   >
                     {[
-                      { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.400" },
-                      { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.400" },
-                      { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.400" }
+                      { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.600" },
+                      { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.600" },
+                      { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.600" }
                     ].map((feature, index) => (
                       <Box
                         key={index}
-                        bg="rgba(20, 20, 20, 0.85)"
+                        bg="white"
                         borderRadius="xl"
                         p={4}
-                        boxShadow="0 8px 16px rgba(0, 0, 0, 0.3)"
-                        border="1px solid rgba(50, 50, 50, 0.8)"
+                        boxShadow="0 8px 16px rgba(0, 0, 0, 0.1)"
+                        border="1px solid"
+                        borderColor="gray.200"
                         transition="all 0.3s ease"
                         _hover={{ 
                           transform: 'translateY(-2px)', 
-                          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.4)'
+                          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)'
                         }}
                         height="100%"
                       >
@@ -335,7 +370,7 @@ const Hero: React.FC = () => {
                           <Text 
                             fontSize={{ base: "xs", sm: "sm" }}
                             fontWeight="semibold"
-                            color="white"
+                            color="gray.700"
                             lineHeight="tight"
                           >
                             {feature.text}
@@ -350,27 +385,28 @@ const Hero: React.FC = () => {
                   wrap="wrap" 
                   gap={{ base: 3, md: 4 }} 
                   justify={{ base: "center", lg: "flex-start" }}
-                  mt={{ base: 2, lg: 4 }}
+                  mt={{ base: 2, lg: 2 }}
                 >
                   {[
-                    { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.300" },
-                    { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.300" },
-                    { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.300" }
+                    { icon: FiCheckCircle, text: "No Solicitor Fees", color: "green.600" },
+                    { icon: FiCheckCircle, text: "Keep 100% of Refund", color: "blue.600" },
+                    { icon: FiCheckCircle, text: "AI-Powered Support", color: "purple.600" }
                   ].map((feature, index) => (
                     <HStack 
                       key={index}
-                      bg="rgba(255, 255, 255, 0.1)" 
+                      bg="white" 
                       backdropFilter="blur(20px)"
                       rounded="full" 
                       px={{ base: 4, md: 6 }}
                       py={{ base: 3, md: 4 }}
-                      boxShadow="0 8px 32px rgba(0, 0, 0, 0.2)"
-                      border="1px solid rgba(255, 255, 255, 0.1)"
+                      boxShadow="0 8px 32px rgba(0, 0, 0, 0.1)"
+                      border="1px solid"
+                      borderColor="gray.200"
                       transition="all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
                       _hover={{ 
                         transform: 'translateY(-2px)', 
-                        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)',
-                        bg: "rgba(255, 255, 255, 0.15)"
+                        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
+                        bg: "gray.50"
                       }}
                       cursor="default"
                     >
@@ -378,7 +414,7 @@ const Hero: React.FC = () => {
                       <Text 
                         fontSize={{ base: 'sm', md: 'md' }} 
                         fontWeight="medium"
-                        textShadow="0 1px 2px rgba(0,0,0,0.3)"
+                        color="gray.700"
                       >
                         {feature.text}
                       </Text>

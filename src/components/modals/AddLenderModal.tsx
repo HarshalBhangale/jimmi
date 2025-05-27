@@ -27,6 +27,7 @@ import {
   TagLabel,
   TagCloseButton,
   useToast,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import { FiX, FiPlus, FiSearch } from 'react-icons/fi';
 import { getLenders, addLenders } from '@api/services/lender';
@@ -161,15 +162,19 @@ const AddLenderModal: React.FC<AddLenderModalProps> = ({
   const selectedBorder = useColorModeValue('blue.500', 'blue.300');
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      size={useBreakpointValue({ base: "lg", md: "xl" })}
+      scrollBehavior="inside"
+    >
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(5px)" />
       <ModalContent 
-        borderRadius="xl" 
+        borderRadius={{ base: "lg", md: "xl" }}
         bg={cardBg}
-        mx="16px" // Fixed margin on all screen sizes
-        width="calc(100% - 32px)" // Ensure width respects margins
-        maxWidth="calc(100% - 32px)" // Make sure it doesn't overflow
-        my={{ base: 4, md: "auto" }}
+        mx={{ base: "4", md: "auto" }}
+        my={{ base: "3", md: "1.75rem" }}
+        maxH={{ base: "calc(100vh - 3rem)", md: "calc(100vh - 3.5rem)" }}
       >
         <ModalHeader borderBottomWidth="1px" borderColor={borderColor}>
           <Text fontSize="xl" fontWeight="bold">Add Lenders</Text>

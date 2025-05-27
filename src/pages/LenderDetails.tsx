@@ -47,6 +47,22 @@ import {
   Stepper,
   useSteps,
   Progress,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Link,
+  Image,
+  ListItem,
+  List,
+  ListIcon,
+  Textarea,
+  FormControl,
+  FormLabel,
+  Input,
 } from '@chakra-ui/react';
 import {
   FiArrowLeft,
@@ -68,10 +84,16 @@ import {
   FiFlag,
   FiFilter,
   FiCheck,
+  FiExternalLink,
+  FiDownload,
+  FiInfo,
+  FiAlertCircle,
 } from 'react-icons/fi';
 import AddAgreementModal from '../components/modals/AddAgreementModal';
 import SubmitClaimModal from '../components/modals/SubmitClaimModal';
 import LenderResponseModal from '../components/modals/LenderResponseModal';
+import FcaPauseModal from '../components/modals/FcaPauseModal';
+import FosEscalationModal from '../components/modals/FosEscalationModal';
 import { useAtomValue } from 'jotai';
 import { claimsAtom, refetchClaimsAtom } from '@/jotai/atoms';
 import { useSetAtom } from 'jotai';
@@ -264,7 +286,7 @@ const AgreementCard = ({ agreement, onRecordResponse }: { agreement: any, onReco
   const statusColor = statusColors[agreementStatus as keyof typeof statusColors] || 
                       { bg: 'gray.50', color: 'gray.600', text: agreementStatus.toUpperCase() };
   
-  const canRecordResponse = agreementStatus === 'Submitted';
+  const canRecordResponse = agreementStatus === 'Submitted' || agreementStatus === 'FCAPause';
 
   // Format date for display
   const formatDate = (date: string) => {
@@ -446,7 +468,9 @@ const AgreementCard = ({ agreement, onRecordResponse }: { agreement: any, onReco
               w="full"
               mt={4}
             >
-              Record Lender Response
+              {
+                  agreementStatus === 'FCAPause' ? 'Update Lender Response' : 'Record Lender Response'
+              }
             </Button>
           )}
         </Box>
@@ -533,6 +557,19 @@ const LenderDetails = () => {
     isOpen: isLenderResponseOpen,
     onOpen: onLenderResponseOpen,
     onClose: onLenderResponseClose
+  } = useDisclosure();
+
+  // Add state for FCA Pause and FOS Escalation modals
+  const {
+    isOpen: isFcaPauseModalOpen,
+    onOpen: onFcaPauseModalOpen,
+    onClose: onFcaPauseModalClose
+  } = useDisclosure();
+  
+  const {
+    isOpen: isFosEscalationModalOpen,
+    onOpen: onFosEscalationModalOpen,
+    onClose: onFosEscalationModalClose
   } = useDisclosure();
 
   const bgColor = useColorModeValue('gray.50', 'gray.900');
@@ -744,11 +781,15 @@ const LenderDetails = () => {
         activityTitle = 'Claim Rejected';
         activityDescription = `${lender.name} rejected the claim for agreement #${agreementId}`;
         activityIcon = FiX;
+        // Show FOS Escalation modal when claim is rejected
+        onFosEscalationModalOpen();
         break;
       case 'FOSEscalation':
         activityTitle = 'FCA Pause Requested';
         activityDescription = `${lender.name} requested a 28-day FCA pause for agreement #${agreementId}`;
         activityIcon = FiClock;
+        // Show FCA Pause modal when FCA pause is requested
+        onFcaPauseModalOpen();
         break;
       case 'ClaimAlreadySubmitted':
         activityTitle = 'Already Submitted';
@@ -1019,13 +1060,119 @@ const LenderDetails = () => {
         </Card>
 
         {/* Tabs section */}
-        <Tabs colorScheme="blue" variant="enclosed" bg={cardBg} borderRadius="xl" boxShadow="md">
+        <Tabs colorScheme="blue" variant="enclosed" bg={cardBg} borderRadius="xl" boxShadow="md" defaultIndex={0}>
           <TabList px={6} pt={4}>
-            <Tab fontWeight="medium">Overview</Tab>
             <Tab fontWeight="medium">Agreements</Tab>
+            <Tab fontWeight="medium">Status</Tab>
           </TabList>
 
           <TabPanels>
+            {/* Agreements Tab - Simplified and clearer */}
+            <TabPanel p={6}>
+              <Flex 
+                direction={{ base: 'column', md: 'row' }} 
+                justify={{ base: 'flex-start', md: 'space-between' }} 
+                align={{ base: 'stretch', md: 'center' }} 
+                mb={6} 
+                gap={4}
+              >
+                <Heading size="md">All Agreements</Heading>
+                <HStack spacing={3} width={{ base: 'full', md: 'auto' }}>
+                  <Menu closeOnSelect={false}>
+                    <MenuButton 
+                      as={Button} 
+                      rightIcon={<FiFilter />} 
+                      size="sm"
+                      variant="outline"
+                      width={{ base: 'full', md: 'auto' }}
+                    >
+                      Filter
+                    </MenuButton>
+                    <MenuList minWidth="240px">
+                      <MenuOptionGroup title="Status" type="checkbox" value={statusFilter}>
+                        <MenuItemOption value="Pending" onClick={() => toggleStatusFilter('Pending')}>
+                          Pending
+                        </MenuItemOption>
+                        <MenuItemOption value="Submitted" onClick={() => toggleStatusFilter('Submitted')}>
+                          Submitted
+                        </MenuItemOption>
+                        <MenuItemOption value="OfferMade" onClick={() => toggleStatusFilter('OfferMade')}>
+                          Offer Made
+                        </MenuItemOption>
+                        <MenuItemOption value="Rejected" onClick={() => toggleStatusFilter('Rejected')}>
+                          Rejected
+                        </MenuItemOption>
+                        <MenuItemOption value="ClaimAlreadySubmitted" onClick={() => toggleStatusFilter('ClaimAlreadySubmitted')}>
+                          Already Submitted
+                        </MenuItemOption>
+                        <MenuItemOption value="FOSEscalation" onClick={() => toggleStatusFilter('FOSEscalation')}>
+                          FOS Escalation
+                        </MenuItemOption>
+                        <MenuItemOption value="Completed" onClick={() => toggleStatusFilter('Completed')}>
+                          Completed
+                        </MenuItemOption>
+                      </MenuOptionGroup>
+                    </MenuList>
+                  </Menu>
+                  <Button 
+                    leftIcon={<FiPlus />} 
+                    colorScheme="blue" 
+                    onClick={onAddAgreementOpen} 
+                    size="sm"
+                    width={{ base: 'full', md: 'auto' }}
+                  >
+                    Add Agreement
+                  </Button>
+                </HStack>
+              </Flex>
+
+              {agreements.length === 0 ? (
+                <Box
+                  p={10}
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                  borderRadius="lg"
+                >
+                  <Icon as={FiFileText} boxSize={10} color="gray.400" mb={4} />
+                  <Heading size="md" mb={2}>No agreements added yet</Heading>
+                  <Text color="gray.500" mb={6}>
+                    Add your first agreement to continue with your claim process.
+                  </Text>
+                  <Button colorScheme="blue" leftIcon={<FiPlus />} onClick={onAddAgreementOpen}>
+                    Add Agreement
+                  </Button>
+                </Box>
+              ) : (
+                <>
+                  {/* Status summary counts */}
+                  <Flex mb={6} wrap="wrap" gap={3}>
+                    {renderStatusCounts()}
+                  </Flex>
+                  
+                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+                    {filteredAgreements.map((agreement, index) => (
+                      <AgreementCard 
+                        key={index} 
+                        agreement={agreement} 
+                        onRecordResponse={handleRecordResponse}
+                      />
+                    ))}
+                  </SimpleGrid>
+                  
+                  {/* Show message if no agreements match the filter */}
+                  {filteredAgreements.length === 0 && (
+                    <Box textAlign="center" p={6} color="gray.500">
+                      <Text>No agreements match the selected filters.</Text>
+                      <Button size="sm" variant="link" colorScheme="blue" onClick={clearStatusFilter} mt={2}>
+                        Clear Filters
+                      </Button>
+                    </Box>
+                  )}
+                </>
+              )}
+            </TabPanel>
+            
             {/* Overview Tab */}
             <TabPanel p={6}>
               {/* 1. Stats Overview */}
@@ -1289,112 +1436,6 @@ const LenderDetails = () => {
                 )}
               </Box>
             </TabPanel>
-
-            {/* Agreements Tab - Simplified and clearer */}
-            <TabPanel p={6}>
-              <Flex 
-                direction={{ base: 'column', md: 'row' }} 
-                justify={{ base: 'flex-start', md: 'space-between' }} 
-                align={{ base: 'stretch', md: 'center' }} 
-                mb={6} 
-                gap={4}
-              >
-                <Heading size="md">All Agreements</Heading>
-                <HStack spacing={3} width={{ base: 'full', md: 'auto' }}>
-                  <Menu closeOnSelect={false}>
-                    <MenuButton 
-                      as={Button} 
-                      rightIcon={<FiFilter />} 
-                      size="sm"
-                      variant="outline"
-                      width={{ base: 'full', md: 'auto' }}
-                    >
-                      Filter
-                    </MenuButton>
-                    <MenuList minWidth="240px">
-                      <MenuOptionGroup title="Status" type="checkbox" value={statusFilter}>
-                        <MenuItemOption value="Pending" onClick={() => toggleStatusFilter('Pending')}>
-                          Pending
-                        </MenuItemOption>
-                        <MenuItemOption value="Submitted" onClick={() => toggleStatusFilter('Submitted')}>
-                          Submitted
-                        </MenuItemOption>
-                        <MenuItemOption value="OfferMade" onClick={() => toggleStatusFilter('OfferMade')}>
-                          Offer Made
-                        </MenuItemOption>
-                        <MenuItemOption value="Rejected" onClick={() => toggleStatusFilter('Rejected')}>
-                          Rejected
-                        </MenuItemOption>
-                        <MenuItemOption value="ClaimAlreadySubmitted" onClick={() => toggleStatusFilter('ClaimAlreadySubmitted')}>
-                          Already Submitted
-                        </MenuItemOption>
-                        <MenuItemOption value="FOSEscalation" onClick={() => toggleStatusFilter('FOSEscalation')}>
-                          FOS Escalation
-                        </MenuItemOption>
-                        <MenuItemOption value="Completed" onClick={() => toggleStatusFilter('Completed')}>
-                          Completed
-                        </MenuItemOption>
-                      </MenuOptionGroup>
-                    </MenuList>
-                  </Menu>
-                  <Button 
-                    leftIcon={<FiPlus />} 
-                    colorScheme="blue" 
-                    onClick={onAddAgreementOpen} 
-                    size="sm"
-                    width={{ base: 'full', md: 'auto' }}
-                  >
-                    Add Agreement
-                  </Button>
-                </HStack>
-              </Flex>
-
-              {agreements.length === 0 ? (
-                <Box
-                  p={10}
-                  textAlign="center"
-                  borderWidth="1px"
-                  borderColor={borderColor}
-                  borderRadius="lg"
-                >
-                  <Icon as={FiFileText} boxSize={10} color="gray.400" mb={4} />
-                  <Heading size="md" mb={2}>No agreements added yet</Heading>
-                  <Text color="gray.500" mb={6}>
-                    Add your first agreement to continue with your claim process.
-                  </Text>
-                  <Button colorScheme="blue" leftIcon={<FiPlus />} onClick={onAddAgreementOpen}>
-                    Add Agreement
-                  </Button>
-                </Box>
-              ) : (
-                <>
-                  {/* Status summary counts */}
-                  <Flex mb={6} wrap="wrap" gap={3}>
-                    {renderStatusCounts()}
-                  </Flex>
-                  
-                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                    {filteredAgreements.map((agreement, index) => (
-                      <AgreementCard 
-                        key={index} 
-                        agreement={agreement} 
-                        onRecordResponse={handleRecordResponse}
-                      />
-                    ))}
-                  </SimpleGrid>
-                  
-                  {/* Show message if no agreements match the filter */}
-                  {filteredAgreements.length === 0 && (
-                    <Box textAlign="center" p={6} color="gray.500">
-                      <Text>No agreements match the selected filters.</Text>
-                      <Button size="sm" variant="link" colorScheme="blue" onClick={clearStatusFilter} mt={2}>
-                        Clear Filters
-                      </Button>
-                    </Box>
-                  )}
-                </>
-              )}
-            </TabPanel>
           </TabPanels>
         </Tabs>
       </Container>
@@ -1403,8 +1444,8 @@ const LenderDetails = () => {
       <AddAgreementModal
         isOpen={isAddAgreementOpen}
         onClose={onAddAgreementClose}
-        lenderName={lender.name}
-        lenderId={lender.id}
+        lenderName={lender?.name || ''}
+        lenderId={lender?.id}
         onAddAgreement={handleAddAgreement}
       />
 
@@ -1412,7 +1453,7 @@ const LenderDetails = () => {
       <SubmitClaimModal
         isOpen={isSubmitClaimOpen}
         onClose={onSubmitClaimClose}
-        lenderName={lender.name}
+        lenderName={lender?.name || ''}
         agreements={agreements.filter(agreement => agreement.status === 'Pending')}
         onSubmitClaim={async (templateType: string, customText?: string, selectedAgreements?: string[], mail?: { subject: string, body: string }) => {
           await handleSubmitClaim(templateType, customText, selectedAgreements, mail);
@@ -1424,14 +1465,38 @@ const LenderDetails = () => {
         <LenderResponseModal
           isOpen={isLenderResponseOpen}
           onClose={onLenderResponseClose}
-          lenderName={lender.name}
+          lenderName={lender?.name || ''}
           agreement={selectedAgreement}
           agreements={agreements.filter(agreement => agreement.status != 'Pending')}
           onUpdateStatus={handleUpdateAgreementStatus}
         />
       )}
+
+      {/* Add FCA Pause Modal */}
+      <FcaPauseModal 
+        isOpen={isFcaPauseModalOpen} 
+        onClose={onFcaPauseModalClose} 
+        lenderName={lender?.name || ''}
+      />
+      
+      {/* Add FOS Escalation Modal */}
+      <FosEscalationModal 
+        isOpen={isFosEscalationModalOpen} 
+        onClose={onFosEscalationModalClose}
+      />
     </Box>
   );
 };
 
 export default LenderDetails; 
+const GuidelineModal = ()=>{
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Guidelines</ModalHeader>
+      </ModalContent>
+    </Modal>
+  )
+}
+

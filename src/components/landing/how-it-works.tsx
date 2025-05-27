@@ -61,7 +61,7 @@ const HowItWorks = () => {
       details: [
         "Enter your phone number and verify with OTP",
         "Provide basic details like name and email",
-        "Choose a plan: one-time £99",
+        "Choose a plan: one-time £79.99",
         "Get your secure Buddy Mail email and portal",
         "Check if your lenders were involved in the scandal"
       ],
@@ -226,7 +226,7 @@ const HowItWorks = () => {
             color={useColorModeValue('gray.600', 'gray.400')}
             px={4}
           >
-            Let Buddy walk you through the process. You've got this — and he's got your back.
+            Let Buddy walk you through the process. <br/> Submit your claims today wit Buddy guiding you every step of the way
           </Text>
         </VStack>
         
@@ -437,7 +437,7 @@ const HowItWorks = () => {
                 color={useColorModeValue('gray.700', 'gray.200')}
                 fontWeight="bold"
               >
-                Ready to Start Your Journey?
+                Ready to Submit Your Claims with the help of Buddy ? 
               </Heading>
               
               <Text 

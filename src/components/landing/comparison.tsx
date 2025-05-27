@@ -227,7 +227,7 @@ const Comparison: React.FC = () => {
               borderRadius: 'full',
             }}
           >
-            ⚖️ Buddy vs Solicitors: The Honest Comparison
+            ⚖️ Buddy vs Solicitors: It’s a no brainer!
           </Heading>
           <Text 
             fontSize={{ base: "sm", md: "lg" }}
@@ -312,7 +312,7 @@ const Comparison: React.FC = () => {
                   px={{ base: 2, md: 4 }}
                   width="35%"
                 >
-                  Jimmi
+                  Buddy
                 </Td>
                 <Td 
                   fontWeight="bold" 

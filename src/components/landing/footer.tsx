@@ -76,8 +76,8 @@ const Footer = () => {
               </Text>
             </Flex>
             <Text color={textColor} maxW="md">
-              Making car finance claims simple, transparent, and fair for everyone. 
-              We help you take control of your claims without the hassle of solicitors.
+              Buddy makes car finance claims simple, transparent and fair for everyone. 
+              Take control of your claims without the hassle and fees of solicitors today!
             </Text>
           </Box>
           

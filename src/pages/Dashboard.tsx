@@ -46,6 +46,7 @@ import {
   InputGroup,
   InputLeftElement,
   Spacer,
+  useToast,
 } from '@chakra-ui/react';
 import {
   FiPlus,
@@ -62,15 +63,19 @@ import {
   FiSearch,
   FiUser,
   FiX,
+  FiMessageSquare,
+  FiMessageCircle,
+  FiAlertTriangle,
 } from 'react-icons/fi';
 import AddLenderModal from '../components/modals/AddLenderModal';
 import AddAgreementModal from '../components/modals/AddAgreementModal';
 import SubmitClaimModal from '../components/modals/SubmitClaimModal';
-import { userAtom } from '@/jotai/atoms';
-import { useAtomValue } from 'jotai';
-import { getClaims, createClaim } from '@/api/services/claims';
-import { formatStatusText, statusColors } from '@/utils/statusFormat';
+import { userAtom,  claimsAtom, refetchClaimsAtom  } from '@/jotai/atoms';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { createClaim, submitClaim, updateClaim, getClaims } from '@/api/services/claims';
+import LenderResponseModal from '@/components/modals/LenderResponseModal';
 
+import { formatStatusText, statusColors } from '@/utils/statusFormat';
 const CLAIM_RESPONSE_STATUSES =  ['OfferMade', 'Accepted', 'Rejected', 'Declined', 'Escalated', 'FCA Pause']
 
 interface Agreement {
@@ -105,6 +110,8 @@ interface DashboardAgreement {
   status: string;
   carRegistration: string;
   startDate: string;
+  agreementNumber?: string;
+  claimId?: string;
 }
 
 interface DashboardLender {
@@ -224,13 +231,16 @@ const StatisticsCards = ({ statistics, isLoading }: { statistics: any, isLoading
 };
 
 // Enhanced Agreement card component
-const AgreementCard = ({ id = '001', status = 'Pending', carRegistration = '', createdAt = '', onClick }: { id?: string, status?: string, carRegistration?: string, createdAt?: string, onClick?: () => void }) => {
+const AgreementCard = ({ id = '001', agreementNumber = '', status = 'Pending', carRegistration = '', createdAt = '', onClick }: { id?: string, agreementNumber?: string, status?: string, carRegistration?: string, createdAt?: string, onClick?: () => void }) => {
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const cardBg = useColorModeValue('white', 'gray.800');
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
 
   const statusColor = statusColors[status as keyof typeof statusColors] ||
     { bg: 'gray.100', color: 'gray.800', text: formatStatusText(status), borderColor: 'gray.200' };
+
+  // Use agreementNumber if available, otherwise fall back to id
+  const displayId = agreementNumber || id;
 
   return (
     <Card
@@ -262,7 +272,7 @@ const AgreementCard = ({ id = '001', status = 'Pending', carRegistration = '', c
         >
           <VStack align="flex-start" spacing={1}>
             <Text fontWeight="bold" fontSize={{ base: "md", md: "lg" }} color="gray.800">
-              Agreement #{id}
+              Agreement #{displayId}
             </Text>
             <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500">
               {new Date(createdAt).toLocaleDateString('en-GB', {
@@ -321,17 +331,20 @@ const LenderSection = ({
   lender,
   onAddAgreement,
   onViewDetails,
-  onSubmitClaim
+  onSubmitClaim,
+  onRecordResponse
 }: {
   lender: DashboardLender,
   onAddAgreement: (lenderId: string) => void,
   onViewDetails: (lenderId: string) => void,
-  onSubmitClaim: (lenderId: string) => void
+  onSubmitClaim: (lenderId: string) => void,
+  onRecordResponse: (lenderId: string) => void
 }) => {
   const statusBgColor = useColorModeValue('blue.50', 'blue.900');
   const sectionBgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const headerBg = useColorModeValue('gray.50', 'gray.700');
+  const buttonBg = useColorModeValue('white', 'gray.700');
 
   // Enhanced active step logic based on lender status and agreements
   let activeStep = 0;
@@ -367,6 +380,12 @@ const LenderSection = ({
     { title: "Lender Responded", description: "Response received from lender", icon: FiCheck }
   ];
 
+  // Check if there are any submitted agreements that need responses
+  const hasSubmittedAgreements = lender.agreements.some(agreement => agreement.status === 'Submitted');
+  
+  // Check if there are any agreements that can be submitted
+  const hasSubmittableAgreements = lender.agreements.some(agreement => agreement.status !== 'Submitted');
+
   return (
     <Card
       mb={8}
@@ -384,7 +403,7 @@ const LenderSection = ({
       }}
       onClick={() => onViewDetails(lender.id)}
     >
-      {/* Enhanced Header */}
+      {/* Enhanced Header with Action Buttons */}
       <CardHeader
         px={{ base: 5, md: 8 }}
         py={{ base: 5, md: 6 }}
@@ -392,13 +411,14 @@ const LenderSection = ({
         borderColor={borderColor}
         bg={headerBg}
       >
-        <Flex
-          justify="space-between"
-          align={{ base: "flex-start", md: "center" }}
-          direction={{ base: "column", md: "row" }}
-          gap={{ base: 4, md: 0 }}
-        >
-          <VStack align="flex-start" spacing={2}>
+        <VStack spacing={4} align="stretch">
+          {/* Lender Info Row */}
+          <Flex
+            justify="space-between"
+            align={{ base: "flex-start", md: "center" }}
+            direction={{ base: "column", md: "row" }}
+            gap={{ base: 4, md: 0 }}
+          >
             <Flex align="center" gap={3}>
               <Avatar 
                 name={lender.name} 
@@ -416,9 +436,7 @@ const LenderSection = ({
                 </Text>
               </Box>
             </Flex>
-          </VStack>
-          
-          <VStack align={{ base: "stretch", md: "flex-end" }} spacing={3}>
+            
             <Badge
               px={4}
               py={2}
@@ -434,24 +452,120 @@ const LenderSection = ({
             >
               {lender.status}
             </Badge>
-            {/* <Button
-              size={{ base: "sm", md: "md" }}
-              colorScheme="green"
-              variant={lender.claimSubmitted ? "outline" : "solid"}
-              leftIcon={<Icon as={lender.claimSubmitted ? FiCheck : FiTarget} />}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSubmitClaim(lender.id);
-              }}
-              isDisabled={lender.agreementsCount === 0 || lender.claimSubmitted}
-              fontSize={{ base: "sm", md: "md" }}
-              px={{ base: 4, md: 6 }}
-              minW={{ base: "auto", md: "140px" }}
+          </Flex>
+          
+          {/* Action Buttons Row - NEW */}
+          <Flex 
+            justify="space-between" 
+            gap={2}
+            mt={{ base: 2, md: 3 }}
+            wrap={{ base: "wrap", md: "nowrap" }}
+          >
+            {/* Desktop View - Full size buttons */}
+            <HStack 
+              spacing={3} 
+              display={{ base: 'none', md: 'flex' }} 
+              width="100%"
+              justify="flex-start"
             >
-              {lender.claimSubmitted ? 'Claim Submitted' : 'Submit Claim'}
-            </Button> */}
-          </VStack>
-        </Flex>
+              <Button
+                leftIcon={<Icon as={FiPlus} />}
+                colorScheme="teal"
+                variant="solid"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddAgreement(lender.id);
+                }}
+                size="sm"
+              >
+                Add Agreement
+              </Button>
+              
+              <Button
+                leftIcon={<Icon as={FiTarget} />}
+                colorScheme="green"
+                variant="solid"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSubmitClaim(lender.id);
+                }}
+                size="sm"
+                isDisabled={!hasSubmittableAgreements}
+              >
+                Submit Claim
+              </Button>
+              
+              <Button
+                leftIcon={<Icon as={FiMessageSquare} />}
+                colorScheme="purple"
+                variant="solid"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRecordResponse(lender.id);
+                }}
+                size="sm"
+                isDisabled={!hasSubmittedAgreements}
+              >
+                Record Response
+              </Button>
+            </HStack>
+            
+            {/* Mobile View - Compact buttons */}
+            <Flex 
+              display={{ base: 'flex', md: 'none' }} 
+              width="100%" 
+              justify="space-between"
+              gap={2}
+            >
+              <Button
+                leftIcon={<Icon as={FiPlus} boxSize="1.1em" />}
+                colorScheme="teal"
+                variant="solid"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddAgreement(lender.id);
+                }}
+                size="sm"
+                flex={1}
+                fontSize="sm"
+                px={2}
+              >
+                Add
+              </Button>
+              
+              <Button
+                leftIcon={<Icon as={FiTarget} boxSize="1.1em" />}
+                colorScheme="green"
+                variant="solid"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSubmitClaim(lender.id);
+                }}
+                size="sm"
+                flex={1}
+                fontSize="sm"
+                px={2}
+                isDisabled={!hasSubmittableAgreements}
+              >
+                Submit
+              </Button>
+              
+              <Button
+                leftIcon={<Icon as={FiMessageSquare} boxSize={4} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRecordResponse(lender.id);
+                }}
+                size="sm"
+                isFullWidth
+                colorScheme="purple"
+                isDisabled={!hasSubmittedAgreements}
+              >
+                Record Response
+              </Button>
+            </Flex>
+          </Flex>
+        </VStack>
       </CardHeader>
 
       {/* Enhanced Progress Tracker */}
@@ -525,6 +639,7 @@ const LenderSection = ({
               <AgreementCard
                 key={agreement.id}
                 id={agreement.id}
+                agreementNumber={agreement.agreementNumber}
                 status={agreement.status}
                 carRegistration={agreement.carRegistration}
                 createdAt={agreement.startDate}
@@ -544,36 +659,6 @@ const LenderSection = ({
             </VStack>
           </Center>
         )}
-
-        {/* Enhanced Add Agreement button */}
-        <Flex justify="center" mt={{ base: 6, md: 8 }}>
-          <Button
-            variant="outline"
-            borderStyle="dashed"
-            borderWidth="2px"
-            leftIcon={<FiPlus />}
-            colorScheme="blue"
-            borderColor="blue.300"
-            _hover={{ 
-              bg: 'blue.50', 
-              borderColor: 'blue.400',
-              transform: 'translateY(-1px)',
-              boxShadow: 'md'
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddAgreement(lender.id);
-            }}
-            size={{ base: "md", md: "lg" }}
-            fontSize={{ base: "md", md: "lg" }}
-            px={{ base: 6, md: 8 }}
-            py={{ base: 6, md: 7 }}
-            borderRadius="xl"
-            transition="all 0.2s ease"
-          >
-            Add Agreement
-          </Button>
-        </Flex>
       </CardBody>
     </Card>
   );
@@ -637,44 +722,37 @@ const DashboardSkeleton = () => {
 // Main Dashboard component
 const Dashboard = () => {
   const navigate = useNavigate();
+  const claims = useAtomValue(claimsAtom);
+  const refetchClaims = useSetAtom(refetchClaimsAtom);
   const user = useAtomValue(userAtom);
+  const toast = useToast();
+  
   const [lenders, setLenders] = useState<DashboardLender[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [claims, setClaims] = useState<LenderWithClaims[]>([]);
-  
-  // Search state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredLenders, setFilteredLenders] = useState<DashboardLender[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  
   const [statistics, setStatistics] = useState({
     totalLenders: 0,
     activeLenders: 0,
-    potentialRefund: 0,
     totalAgreements: 0,
-    percentIncrease: 23
+    potentialRefund: 0
   });
-
-  const {
-    isOpen: isAddLenderOpen,
-    onOpen: onAddLenderOpen,
-    onClose: onAddLenderClose
-  } = useDisclosure();
-
-  const {
-    isOpen: isAddAgreementOpen,
-    onOpen: onAddAgreementOpen,
-    onClose: onAddAgreementClose
-  } = useDisclosure();
-
-  const {
-    isOpen: isSubmitClaimOpen,
-    onOpen: onSubmitClaimOpen,
-    onClose: onSubmitClaimClose
-  } = useDisclosure();
-
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedLenderId, setSelectedLenderId] = useState<string | null>(null);
+  const [selectedLenderName, setSelectedLenderName] = useState<string>('');
+  const [filteredLenders, setFilteredLenders] = useState<DashboardLender[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  // Modal disclosures
+  const { isOpen: isAddLenderOpen, onOpen: onAddLenderOpen, onClose: onAddLenderClose } = useDisclosure();
+  const { isOpen: isAddAgreementOpen, onOpen: onAddAgreementOpen, onClose: onAddAgreementClose } = useDisclosure();
+  const { isOpen: isSubmitClaimOpen, onOpen: onSubmitClaimOpen, onClose: onSubmitClaimClose } = useDisclosure();
+  
+  // Add state for LenderResponseModal
+  const { isOpen: isLenderResponseOpen, onOpen: onLenderResponseOpen, onClose: onLenderResponseClose } = useDisclosure();
+  const [selectedAgreement, setSelectedAgreement] = useState<any>(null);
+  const [selectedLenderAgreements, setSelectedLenderAgreements] = useState<any[]>([]);
 
   // UI colors
   const bgColor = useColorModeValue('gray.50', 'gray.900');
@@ -688,11 +766,59 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const claimsData = await getClaims();
-      setClaims(claimsData.data);
+      console.log("Fetching claims data...");
       
-      // Update lenders based on claims data with proper typing
-      const updatedLenders: DashboardLender[] = claimsData.data.map((lenderData: LenderWithClaims) => {
+      // First try to fetch directly, and if it fails, use the refetchClaims atom
+      try {
+        const claimsResponse = await getClaims();
+        console.log("Claims data received directly:", claimsResponse);
+        
+        if (claimsResponse && claimsResponse.data) {
+          processClaimsData(claimsResponse.data);
+        } else {
+          // If direct fetch returned empty data, try using the atom
+          await refetchClaims();
+          if (claims && claims.length > 0) {
+            console.log("Using claims data from atom");
+            processClaimsData(claims);
+          } else {
+            console.log("No claims data available from either source");
+          }
+        }
+      } catch (error) {
+        console.error("Error with direct claims fetch, trying atom:", error);
+        await refetchClaims();
+        if (claims && claims.length > 0) {
+          console.log("Using claims data from atom after direct fetch failed");
+          processClaimsData(claims);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching claims:', error);
+      toast({
+        title: "Failed to load claims",
+        description: "Could not load your lenders data. Please try refreshing the page.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Process claims data into lenders
+  const processClaimsData = (claimsData: LenderWithClaims[]) => {
+    if (!claimsData || !Array.isArray(claimsData)) {
+      console.error("Claims data is not an array:", claimsData);
+      return;
+    }
+    
+    console.log("Processing claims data to update lenders...");
+    try {
+      const updatedLenders: DashboardLender[] = claimsData.map((lenderData: LenderWithClaims) => {
+        console.log("Processing lender:", lenderData.lender.name, "with ID:", lenderData.lender.id);
+        
         // Check if any agreement in the claims has a status of "Submitted"
         const hasSubmittedClaim = lenderData.claims.some(claim => 
           claim.agreement.status === 'Submitted' 
@@ -703,6 +829,25 @@ const Dashboard = () => {
           CLAIM_RESPONSE_STATUSES.includes(claim.agreement.status)
         );
         
+        // Map claims to agreements
+        const agreements = lenderData.claims.map(claim => {
+          console.log("Processing claim:", claim._id, "with agreement:", claim.agreement.agreementNumber);
+          return {
+            id: claim._id, // Use claim ID as agreement ID
+            agreementNumber: claim.agreement.agreementNumber, // Add the agreement number
+            startDate: new Date(claim.createdAt).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            }),
+            status: claim.agreement.status || 'Pending',
+            carRegistration: claim.agreement.carRegistration,
+            claimId: claim._id // Include the claim ID for the LenderResponseModal
+          };
+        });
+        
+        console.log(`Lender ${lenderData.lender.name} has ${agreements.length} agreements`);
+        
         return {
           id: lenderData.lender.id,
           name: lenderData.lender.name,
@@ -712,19 +857,11 @@ const Dashboard = () => {
           claimSubmitted: hasSubmittedClaim,
           lenderResponded: hasLenderResponse,
           potentialRefund: 0,
-          agreements: lenderData.claims.map(claim => ({
-            id: claim.agreement.agreementNumber,
-            startDate: new Date(claim.createdAt).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric'
-            }),
-            status: claim.agreement.status,
-            carRegistration: claim.agreement.carRegistration
-          }))
+          agreements: agreements
         };
       });
 
+      console.log("Setting updated lenders:", updatedLenders);
       setLenders(updatedLenders);
 
       // Calculate statistics
@@ -737,19 +874,24 @@ const Dashboard = () => {
         totalLenders,
         activeLenders,
         potentialRefund,
-        totalAgreements,
-        percentIncrease: 23
+        totalAgreements
       });
-    } catch (error) {
-      console.error('Error fetching claims:', error);
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error("Error processing claims data:", err);
     }
   };
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Add a new effect:
+  useEffect(() => {
+    if (claims && claims.length > 0) {
+      console.log("Claims data updated, reprocessing...");
+      processClaimsData(claims);
+    }
+  }, [claims]);
 
   const handleAddLender = async (newLenders: { _id: string; name: string }[]) => {
     // Add new lenders to the list with proper typing
@@ -813,8 +955,38 @@ const Dashboard = () => {
   };
 
   const handleSubmitClaim = (lenderId: string) => {
-    setSelectedLenderId(lenderId);
-    onSubmitClaimOpen();
+    console.log("Submit claim clicked for lender ID:", lenderId);
+    console.log("Available lenders:", lenders);
+    
+    const lender = lenders.find(l => String(l.id) === String(lenderId));
+    console.log("Found lender:", lender);
+    
+    if (lender) {
+      setSelectedLenderName(lender.name);
+      setSelectedLenderId(lenderId);
+      console.log("About to open modal with lender:", lender.name);
+      
+      // Log the specific agreements being passed to the modal
+      const agreementsToPass = lender.agreements.filter(
+        agreement => agreement.status !== 'Submitted'
+      ) || [];
+      
+      // Make sure all agreements have an id property
+      agreementsToPass.forEach(agreement => {
+        if (!agreement.id) {
+          console.warn("Agreement missing ID:", agreement);
+        }
+      });
+      
+      console.log("Agreements being passed to modal:", agreementsToPass);
+      
+      setTimeout(() => {
+        onSubmitClaimOpen();
+      }, 300); // Increased to 300ms to avoid race conditions
+    } else {
+      console.error("Lender not found:", lenderId);
+      alert("Error: Could not find lender data. Please try again.");
+    }
   };
 
   const handleProcessClaimSubmission = async (
@@ -829,7 +1001,14 @@ const Dashboard = () => {
     const actionTimestamp = new Date().toISOString();
     
     try {
-      console.log(mail, "mail");
+      console.log("Processing claim submission with data:", {
+        lenderId: selectedLenderId,
+        templateType,
+        customText,
+        agreementIds: selectedAgreements,
+        mail
+      });
+      
       const response = await submitClaim({
         lenderId: selectedLenderId,
         templateType,
@@ -838,17 +1017,24 @@ const Dashboard = () => {
         mail
       });
 
+      console.log("Claim submission response:", response);
+
       if (!response.success) {
+        console.error("Claim submission failed:", response.message);
         throw new Error(response.message || 'Failed to submit claim');
       }
       
       if (selectedAgreements && selectedAgreements.length > 0) {
+        console.log("Updating lenders with submitted agreements:", selectedAgreements);
+        
         const updatedLenders = lenders.map(lender => {
-          if (lender.id === selectedLenderId) {
+          if (String(lender.id) === String(selectedLenderId)) {
+            console.log("Updating lender:", lender.name);
             // Update the status of submitted agreements
             const updatedAgreements = lender.agreements.map(agreement => {
               // Check if this agreement's ID is in the selectedAgreements array
               if (selectedAgreements.includes(agreement.id)) {
+                console.log("Updating agreement status to Submitted:", agreement.id);
                 return { 
                   ...agreement, 
                   status: 'Submitted',
@@ -872,12 +1058,14 @@ const Dashboard = () => {
           return lender;
         });
         
+        console.log("Setting updated lenders:", updatedLenders);
         setLenders(updatedLenders);
       }
       
       return true;
     } catch (error) {
       console.error('Error submitting claim:', error);
+      alert(`Failed to submit claim: ${error.message || 'Unknown error'}`);
       throw error;
     }
   };
@@ -973,6 +1161,150 @@ const Dashboard = () => {
     }
   }, [isSearching]);
 
+  // Add handler for Record Response button
+  const handleRecordResponse = (lenderId: string) => {
+    console.log("Record response clicked for lender ID:", lenderId);
+    
+    const lender = lenders.find(l => String(l.id) === String(lenderId));
+    console.log("Found lender:", lender);
+    
+    if (lender) {
+      setSelectedLenderName(lender.name);
+      setSelectedLenderId(lenderId);
+      
+      // Find submitted agreements for this lender
+      const submittedAgreements = lender.agreements.filter(
+        agreement => agreement.status === 'Submitted'
+      );
+      
+      console.log("Submitted agreements:", submittedAgreements);
+      
+      if (submittedAgreements.length > 0) {
+        // Set the first submitted agreement as the selected one
+        setSelectedAgreement(submittedAgreements[0]);
+        // Store all submitted agreements for the lender
+        setSelectedLenderAgreements(submittedAgreements);
+        // Open the modal
+        onLenderResponseOpen();
+      } else {
+        toast({
+          title: "No submitted agreements",
+          description: "This lender has no submitted agreements to record responses for.",
+          status: "info",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } else {
+      console.error("Lender not found:", lenderId);
+      toast({
+        title: "Error",
+        description: "Could not find lender data. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  // Handle updating agreement status after response
+  const handleUpdateAgreementStatus = async (agreementId: string, newStatus: string, details?: any) => {
+    const actionTimestamp = new Date().toISOString();
+    
+    try {
+      console.log("Updating agreement status:", agreementId, newStatus, details);
+      
+      // Find the agreement in the lenders data
+      const lender = lenders.find(l => String(l.id) === String(selectedLenderId));
+      const agreement = lender?.agreements.find(a => a.id === agreementId);
+      
+      if (!lender || !agreement) {
+        throw new Error('Agreement not found');
+      }
+      
+      // Create update payload for the backend
+      const updateData = {
+        claimId: agreementId, // Use agreement.id which should be the claim ID
+        agreement: {
+          status: newStatus,
+          agreementNumber: agreement.agreementNumber || agreement.id
+        }
+      };
+
+      // Add offerAmount if this is an offer
+      if (details?.offerAmount) {
+        updateData.agreement = {
+          ...updateData.agreement,
+          offerAmount: details.offerAmount
+        } as any;
+      }
+
+      // Add email details if available
+      if (details?.mail) {
+        updateData.mail = details.mail;
+      }
+      
+      // Make the API call to update the claim in the backend
+      await updateClaim(updateData);
+      
+      // Update lenders data in state
+      const updatedLenders = lenders.map(lender => {
+        if (String(lender.id) === String(selectedLenderId)) {
+          // Find and update the specific agreement
+          const updatedAgreements = lender.agreements.map(agreement => {
+            if (agreement.id === agreementId) {
+              return { 
+                ...agreement, 
+                status: newStatus,
+                updated: actionTimestamp,
+                responseDetails: details
+              };
+            }
+            return agreement;
+          });
+          
+          // If any agreement has a response status, update the lender status
+          const hasResponses = updatedAgreements.some(agreement => 
+            CLAIM_RESPONSE_STATUSES.includes(agreement.status)
+          );
+          
+          return {
+            ...lender,
+            lenderResponded: hasResponses,
+            status: hasResponses ? 'Lender Responded' : lender.status,
+            agreements: updatedAgreements
+          };
+        }
+        return lender;
+      });
+      
+      setLenders(updatedLenders);
+      
+      // Refresh claims data to keep everything in sync
+      refetchClaims();
+      
+      toast({
+        title: "Response recorded",
+        description: `The lender's response has been recorded for agreement #${agreement.agreementNumber || agreement.id}`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating agreement status:', error);
+      toast({
+        title: "Error updating status",
+        description: "There was an error recording the lender's response. Please try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      throw error;
+    }
+  };
+
   return (
     <Box bg={bgColor} minH="100vh" py={{ base: 6, md: 10 }}>
       <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
@@ -1025,7 +1357,7 @@ const Dashboard = () => {
                       >
                         Messages
                       </Button>
-                      <Button
+                      {/* <Button
                         leftIcon={<FiPlus />}
                         bg="white"
                         color="blue.600"
@@ -1035,7 +1367,7 @@ const Dashboard = () => {
                         boxShadow="lg"
                       >
                         Add Lender
-                      </Button>
+                      </Button> */}
                     </HStack>
                   </Flex>
                 </Box>
@@ -1234,13 +1566,14 @@ const Dashboard = () => {
                 </Card>
               ) : (
                 <VStack spacing={{ base: 6, md: 8 }} align="stretch">
-                  {filteredLenders.map(lender => (
+                  {filteredLenders.map((lender) => (
                     <LenderSection
                       key={lender.id}
                       lender={lender}
                       onAddAgreement={handleAddAgreement}
                       onViewDetails={handleViewLenderDetails}
                       onSubmitClaim={handleSubmitClaim}
+                      onRecordResponse={handleRecordResponse}
                     />
                   ))}
                 </VStack>
@@ -1263,7 +1596,7 @@ const Dashboard = () => {
         <AddAgreementModal
           isOpen={isAddAgreementOpen}
           onClose={onAddAgreementClose}
-          lenderName={lenders.find(l => l.id === selectedLenderId)?.name || ''}
+          lenderName={selectedLenderName}
           lenderId={selectedLenderId}
           onAddAgreement={handleSaveAgreement}
         />
@@ -1274,11 +1607,21 @@ const Dashboard = () => {
         <SubmitClaimModal
           isOpen={isSubmitClaimOpen}
           onClose={onSubmitClaimClose}
-          lenderName={lenders.find(l => l.id === selectedLenderId)?.name || ''}
-          agreements={lenders.find(l => l.id === selectedLenderId)?.agreements.filter(agreement => agreement.status !== 'Submitted') || []}
-          onSubmitClaim={async (templateType: string, customText?: string, selectedAgreements?: string[], mail?: { subject: string, body: string }) => {
-            await handleProcessClaimSubmission(templateType, customText, selectedAgreements, mail);
-          }}
+          lenderName={selectedLenderName}
+          agreements={lenders.find(l => l.id === selectedLenderId)?.agreements.filter(a => a.status !== 'Submitted') || []}
+          onSubmitClaim={handleProcessClaimSubmission}
+        />
+      )}
+
+      {/* Add LenderResponseModal */}
+      {selectedAgreement && (
+        <LenderResponseModal
+          isOpen={isLenderResponseOpen}
+          onClose={onLenderResponseClose}
+          lenderName={selectedLenderName}
+          agreement={selectedAgreement}
+          agreements={selectedLenderAgreements}
+          onUpdateStatus={handleUpdateAgreementStatus}
         />
       )}
     </Box>
