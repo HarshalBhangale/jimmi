@@ -35,12 +35,38 @@ const calculateTimeToNextSunday = () => {
   return { totalHours, minutes, seconds };
 };
 
+// Function to extract URL parameters
+const getUrlParameters = () => {
+  const hash = window.location.hash;
+  if (!hash || hash.length <= 1) return {};
+  
+  const paramString = hash.substring(1); // Remove the # character
+  const params = {};
+  
+  paramString.split('&').forEach(param => {
+    const [key, value] = param.split('=');
+    if (key && value) {
+      params[key] = decodeURIComponent(value);
+    }
+  });
+  
+  return params;
+};
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(calculateTimeToNextSunday());
+  const [discountCode, setDiscountCode] = useState("CLAIMBACK");
 
   useEffect(() => {
+    // Extract URL parameters and set discount code
+    const params = getUrlParameters();
+    if (params.name && params.name.trim() !== "") {
+      // Convert to uppercase and ensure it's formatted properly
+      const formattedName = params.name.toUpperCase().trim();
+      setDiscountCode(formattedName);
+    }
+    
     const handleScroll = () => {
       const offset = window.scrollY;
       if (offset > 50) {
@@ -152,7 +178,7 @@ const Navbar = () => {
               textAlign="center"
               display={{ base: "none", md: "block" }}
             >
-              🔥 Discount code <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">JAMES50</Box> applied - 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.{' '}
+              🔥 Discount code <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">{discountCode}50</Box> applied - 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.{' '}
               <Box as="span" animation={`${pulse} 2s infinite`} color="yellow.100">Act Now!</Box>
             </Text>
 
@@ -162,7 +188,7 @@ const Navbar = () => {
               textAlign="center"
               display={{ base: "block", md: "none" }}
             >
-            <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">JAMES50</Box> applied - 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.
+            <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">{discountCode}50</Box> applied - 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.
             </Text>
           </Flex>
         </Container>

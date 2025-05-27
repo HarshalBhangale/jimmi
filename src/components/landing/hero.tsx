@@ -77,7 +77,7 @@ const Hero: React.FC = () => {
       overflow="hidden"
       bg="gray.25"
       bgGradient="linear(135deg, blue.50, purple.50, indigo.50, cyan.50)"
-      pb={{ base: "80px", md: 0 }}
+      pb={{ base: "100px", md: 0 }}
       pt={{ base: "90px", md: "100px" }}
     >
       {/* Enhanced animated background with multiple layers - Light theme */}
@@ -333,10 +333,10 @@ const Hero: React.FC = () => {
               </Stack>
 
               {isMobile ? (
-                <Box mt={2} width="100%">
+                <Box mt={2} width="100%" mb={{ base: 6, md: 0 }}>
                   <SimpleGrid 
-                    columns={{ base: 3 }}
-                    spacing={{ base: 2 }}
+                    columns={{ base: 1, sm: 3 }}
+                    spacing={{ base: 3 }}
                     width="100%"
                   >
                     {[
@@ -348,22 +348,28 @@ const Hero: React.FC = () => {
                         key={index}
                         bg="white"
                         borderRadius="xl"
-                        p={3}
+                        p={{ base: 4, sm: 3 }}
                         boxShadow="0 4px 8px rgba(0, 0, 0, 0.1)"
                         border="1px solid"
                         borderColor="gray.200"
                         transition="all 0.3s ease"
                         height="100%"
+                        minH={{ base: "70px", sm: "auto" }}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
                       >
                         <Flex
-                          direction="column"
+                          direction={{ base: "row", sm: "column" }}
                           align="center"
                           justify="center"
                           textAlign="center"
                           height="100%"
+                          width="100%"
+                          gap={{ base: 3, sm: 1 }}
                         >
                           <Box
-                            mb={2}
+                            mb={{ base: 0, sm: 2 }}
                             p={1}
                           >
                             <Icon 
@@ -373,10 +379,11 @@ const Hero: React.FC = () => {
                             />
                           </Box>
                           <Text 
-                            fontSize={{ base: "2xs", sm: "xs" }}
+                            fontSize={{ base: "sm", sm: "xs" }}
                             fontWeight="semibold"
                             color="gray.700"
                             lineHeight="tight"
+                            ml={{ base: 0, sm: 0 }}
                           >
                             {feature.text}
                           </Text>
