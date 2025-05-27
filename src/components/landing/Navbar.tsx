@@ -162,7 +162,7 @@ const Navbar = () => {
               textAlign="center"
               display={{ base: "block", md: "none" }}
             >
-              🔥 Discount code <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">JAMES50</Box> applied - 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.
+            <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">JAMES50</Box> applied - 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.
             </Text>
           </Flex>
         </Container>

@@ -16,6 +16,7 @@ import {
   Stack,
   SimpleGrid,
   useBreakpointValue,
+  useMediaQuery,
 } from '@chakra-ui/react';
 import { FiArrowRight, FiBookOpen, FiCheckCircle } from 'react-icons/fi';
 import { keyframes } from '@emotion/react';
@@ -39,12 +40,15 @@ const glow = keyframes`
 
 const Hero: React.FC = () => {
   const [showRobot, setShowRobot] = useState(false);
+  const [isScrolledDown, setIsScrolledDown] = useState(false);
+  const [isMobileDevice] = useMediaQuery("(max-width: 768px)");
 
-  // Scroll handler for robot visibility
+  // Scroll handler for robot visibility and scroll position
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
       setShowRobot(scrollPosition > 100);
+      setIsScrolledDown(scrollPosition > 300);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -66,13 +70,15 @@ const Hero: React.FC = () => {
     <Box
       as="section"
       position="relative"
-      minH="100vh"
+      minH={{ base: "auto", md: "100vh" }}
       display="flex"
       alignItems="center"
       justifyContent="center"
       overflow="hidden"
       bg="gray.25"
       bgGradient="linear(135deg, blue.50, purple.50, indigo.50, cyan.50)"
+      pb={{ base: "80px", md: 0 }}
+      pt={{ base: "90px", md: "100px" }}
     >
       {/* Enhanced animated background with multiple layers - Light theme */}
       <Box
@@ -148,20 +154,22 @@ const Hero: React.FC = () => {
         zIndex={0}
       />
       
-      <Container maxW="container.xl" position="relative" zIndex={1} pt={{ base: "140px", md: "160px" }}>
+      <Container maxW="container.xl" position="relative" zIndex={1} pt={{ base: "30px", md: "90px" }}>
         <Flex
           direction={{ base: 'column', lg: 'row' }}
           align="center"
           justify="center"
-          gap={{ base: 6, md: 8, lg: 16 }}
+          gap={{ base: 4, md: 8, lg: 16 }}
           px={{ base: 4, md: 6 }}
         >
-          {/* Robot logo - Now appears only after scroll, no floating animation, reduced padding */}
+          {/* Robot logo - Smaller on mobile */}
           <Box 
-            maxW={{ base: '45%', md: '40%', lg: '35%' }}
+            maxW={{ base: '35%', md: '40%', lg: '35%' }}
             mb={{ base: 2, md: 0 }}
             opacity={showRobot ? 1 : 1}
             transition="opacity 0.3s ease"
+            display={{ base: 'flex', md: 'block' }}
+            justifyContent="center"
           >
             <Image
               src="/jimmi-logo.png"
@@ -173,22 +181,22 @@ const Hero: React.FC = () => {
             />
           </Box>
 
-          {/* Enhanced hero text */}
+          {/* Hero text - Reduced font sizes and spacing on mobile */}
           <Box 
             maxW={{ base: 'full', lg: '65%' }} 
             color="gray.800"
             textAlign={{ base: 'center', lg: 'left' }}
           >
-            <Box width="100%" mb={4}>
+            <Box width="100%" mb={{ base: 2, md: 4 }}>
               <Heading
                 as="h1"
-                fontSize={{ base: '2.2rem', sm: '2.4rem', md: '3.5rem', lg: '4.5rem' }}
+                fontSize={{ base: '1.8rem', sm: '2.2rem', md: '3.5rem', lg: '4.5rem' }}
                 fontWeight="900"
-                lineHeight={{ base: '1.2', md: '1.1' }}
+                lineHeight={{ base: '1.1', md: '1.1' }}
                 bgGradient="linear(135deg, #1e40af, #7c3aed, #ec4899, #3b82f6)"
                 bgClip="text"
                 letterSpacing="tight"
-                mb={2}
+                mb={{ base: 1, md: 2 }}
                 whiteSpace="normal"
                 maxW={{ base: "100%", md: "90%" }}
               >
@@ -197,9 +205,9 @@ const Hero: React.FC = () => {
                             
               <Heading
                 as="h2"
-                fontSize={{ base: '1.8rem', sm: '2.2rem', md: '2.8rem', lg: '3.5rem' }}
+                fontSize={{ base: '1.4rem', sm: '1.8rem', md: '2.8rem', lg: '3.5rem' }}
                 fontWeight="700"
-                lineHeight={{ base: '1.2', md: '1.1' }}
+                lineHeight={{ base: '1.1', md: '1.1' }}
                 bgGradient="linear(135deg, #7c3aed, #ec4899, #3b82f6, #06b6d4)"
                 bgClip="text"
                 letterSpacing="tight"
@@ -210,12 +218,12 @@ const Hero: React.FC = () => {
               </Heading>
             </Box>
 
-            {/* Counter with reduced spacing */}
+            {/* Counter - Reduced spacing */}
             <Text
-              fontSize={{ base: 'md', md: 'lg' }}
+              fontSize={{ base: 'sm', md: 'lg' }}
               color="gray.700"
               textAlign={{ base: "center", lg: "left" }}
-              mb={4}
+              mb={{ base: 2, md: 4 }}
               fontWeight="bold"
               letterSpacing="wide"
             >
@@ -223,7 +231,7 @@ const Hero: React.FC = () => {
               <Text
                 as="span"
                 fontWeight="bold"
-                fontSize={{ base: 'lg', md: 'xl' }}
+                fontSize={{ base: 'md', md: 'xl' }}
                 bgGradient="linear(to-r,rgb(226, 11, 245),rgb(22, 124, 249))"
                 bgClip="text"
               >
@@ -233,9 +241,9 @@ const Hero: React.FC = () => {
             </Text>
                       
             <Text
-              fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
+              fontSize={{ base: 'sm', md: 'lg', lg: 'xl' }}
               lineHeight={{ base: 1.3, md: 1.4 }}
-              mb={6}
+              mb={{ base: 4, md: 6 }}
               color="gray.700"
               maxW={{ base: "100%", lg: "95%" }}
               fontWeight="400"
@@ -252,27 +260,27 @@ const Hero: React.FC = () => {
               Buddy makes it easy to reclaim what you're owed — step by step.
             </Text>
                       
-            {/* Enhanced CTAs and Features Container */}
-            <VStack spacing={6} align={{ base: "stretch", lg: "flex-start" }} width="100%">
-              {/* Enhanced CTAs */}
+            {/* CTAs and Features - Sticky container for mobile */}
+            <VStack spacing={{ base: 3, md: 6 }} align={{ base: "stretch", lg: "flex-start" }} width="100%">
+              {/* CTAs - Made more compact for mobile */}
               <Stack 
                 direction={{ base: "column", lg: "row" }} 
-                spacing={{ base: 4, lg: 6 }} 
+                spacing={{ base: 2, lg: 6 }} 
                 width="100%"
                 maxW={{ base: "100%", lg: "95%" }}
                 align={{ base: "stretch", lg: "center" }}
               >
-                {/* Main CTA with enhanced effects - Light theme */}
+                {/* Main CTA - Reduced height on mobile */}
                 <Button
                   as={RouterLink}
                   to="/auth/signup/step-1"
                   size="lg"
-                  height={{ base: "64px", md: "70px" }}
-                  fontSize={{ base: 'lg', md: 'xl' }}
+                  height={{ base: "54px", md: "70px" }}
+                  fontSize={{ base: 'md', md: 'xl' }}
                   fontWeight="bold"
                   bgGradient="linear(135deg, #3b82f6, #7c3aed)"
                   color="white"
-                  rightIcon={<Icon as={FiArrowRight} boxSize={{ base: 5, md: 6 }} />}
+                  rightIcon={<Icon as={FiArrowRight} boxSize={{ base: 4, md: 6 }} />}
                   _hover={{ 
                     bgGradient: "linear(135deg, #2563eb, #6d28d9)",
                     transform: 'translateY(-2px)',
@@ -287,17 +295,18 @@ const Hero: React.FC = () => {
                   borderRadius="full"
                   position="relative"
                   boxShadow="0 10px 25px rgba(59, 130, 246, 0.3)"
+                  zIndex={2}
                 >
                   Start Your Claim Now
                 </Button>
 
-                {/* Secondary CTA as button for better visibility - Light theme */}
+                {/* Secondary CTA - Reduced height on mobile */}
                 <Button
                   as="a"
                   href="#how-it-works"
                   size="lg"
-                  height={{ base: "64px", md: "70px" }}
-                  fontSize={{ base: 'lg', md: 'xl' }}
+                  height={{ base: "54px", md: "70px" }}
+                  fontSize={{ base: 'md', md: 'xl' }}
                   fontWeight="semibold"
                   variant="outline"
                   color="gray.700"
@@ -317,17 +326,17 @@ const Hero: React.FC = () => {
                   transition="all 0.3s ease"
                   flex={{ lg: "0.8" }}
                   borderRadius="full"
-                  leftIcon={<Icon as={FiBookOpen} boxSize={{ base: 5, md: 6 }} />}
+                  leftIcon={<Icon as={FiBookOpen} boxSize={{ base: 4, md: 6 }} />}
                 >
                   How It Works
                 </Button>
               </Stack>
 
               {isMobile ? (
-                <Box mt={4} width="100%">
+                <Box mt={2} width="100%">
                   <SimpleGrid 
                     columns={{ base: 3 }}
-                    spacing={{ base: 3 }}
+                    spacing={{ base: 2 }}
                     width="100%"
                   >
                     {[
@@ -339,15 +348,11 @@ const Hero: React.FC = () => {
                         key={index}
                         bg="white"
                         borderRadius="xl"
-                        p={4}
-                        boxShadow="0 8px 16px rgba(0, 0, 0, 0.1)"
+                        p={3}
+                        boxShadow="0 4px 8px rgba(0, 0, 0, 0.1)"
                         border="1px solid"
                         borderColor="gray.200"
                         transition="all 0.3s ease"
-                        _hover={{ 
-                          transform: 'translateY(-2px)', 
-                          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)'
-                        }}
                         height="100%"
                       >
                         <Flex
@@ -358,17 +363,17 @@ const Hero: React.FC = () => {
                           height="100%"
                         >
                           <Box
-                            mb={3}
-                            p={2}
+                            mb={2}
+                            p={1}
                           >
                             <Icon 
                               as={feature.icon} 
                               color={feature.color} 
-                              boxSize={{ base: 6, sm: 7 }}
+                              boxSize={{ base: 5, sm: 6 }}
                             />
                           </Box>
                           <Text 
-                            fontSize={{ base: "xs", sm: "sm" }}
+                            fontSize={{ base: "2xs", sm: "xs" }}
                             fontWeight="semibold"
                             color="gray.700"
                             lineHeight="tight"
@@ -426,6 +431,44 @@ const Hero: React.FC = () => {
           </Box>
         </Flex>
       </Container>
+
+      {/* Sticky CTA for Mobile */}
+      {isMobileDevice && (
+        <Box
+          position="fixed"
+          bottom={0}
+          left={0}
+          right={0}
+          bg="white"
+          py={3}
+          px={4}
+          boxShadow="0 -4px 10px rgba(0, 0, 0, 0.1)"
+          zIndex={999}
+          transform={isScrolledDown ? "translateY(0)" : "translateY(100%)"}
+          transition="transform 0.3s ease-in-out"
+          borderTopRadius="xl"
+        >
+          <Button
+            as={RouterLink}
+            to="/auth/signup/step-1"
+            size="lg"
+            width="100%"
+            height="54px"
+            fontSize="md"
+            fontWeight="bold"
+            bgGradient="linear(135deg, #3b82f6, #7c3aed)"
+            color="white"
+            rightIcon={<Icon as={FiArrowRight} boxSize={5} />}
+            _hover={{ 
+              bgGradient: "linear(135deg, #2563eb, #6d28d9)",
+            }}
+            borderRadius="full"
+            boxShadow="0 10px 25px rgba(59, 130, 246, 0.3)"
+          >
+            Start Your Claim Now
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
