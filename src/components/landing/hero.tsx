@@ -333,10 +333,10 @@ const Hero: React.FC = () => {
               </Stack>
 
               {isMobile ? (
-                <Box mt={2} width="100%" mb={{ base: 6, md: 0 }}>
+                <Box mt={2} width="100%">
                   <SimpleGrid 
-                    columns={{ base: 1, sm: 3 }}
-                    spacing={{ base: 3 }}
+                    columns={{ base: 3 }}
+                    spacing={{ base: 2 }}
                     width="100%"
                   >
                     {[
@@ -348,28 +348,22 @@ const Hero: React.FC = () => {
                         key={index}
                         bg="white"
                         borderRadius="xl"
-                        p={{ base: 4, sm: 3 }}
+                        p={3}
                         boxShadow="0 4px 8px rgba(0, 0, 0, 0.1)"
                         border="1px solid"
                         borderColor="gray.200"
                         transition="all 0.3s ease"
                         height="100%"
-                        minH={{ base: "70px", sm: "auto" }}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
                       >
                         <Flex
-                          direction={{ base: "row", sm: "column" }}
+                          direction="column"
                           align="center"
                           justify="center"
                           textAlign="center"
                           height="100%"
-                          width="100%"
-                          gap={{ base: 3, sm: 1 }}
                         >
                           <Box
-                            mb={{ base: 0, sm: 2 }}
+                            mb={2}
                             p={1}
                           >
                             <Icon 
@@ -379,11 +373,10 @@ const Hero: React.FC = () => {
                             />
                           </Box>
                           <Text 
-                            fontSize={{ base: "sm", sm: "xs" }}
+                            fontSize={{ base: "2xs", sm: "xs" }}
                             fontWeight="semibold"
                             color="gray.700"
                             lineHeight="tight"
-                            ml={{ base: 0, sm: 0 }}
                           >
                             {feature.text}
                           </Text>
