@@ -28,7 +28,6 @@ export const refetchUserAtom = atom(null, (get, set) => {
 
 export const isAuthenticatedAtom = atom(async (get) => {
   const user = await get(userAtom);
-  console.log('User is authenticated', user);
   return user !== null;
 });
 

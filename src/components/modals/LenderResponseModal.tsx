@@ -596,9 +596,136 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
 
     return (
       <Box>
-        <Text fontSize="md" fontWeight="semibold" mb={4}>
-          Select Email Template
-        </Text>
+       
+        {responseType === 'alreadySubmitted' && wantToTakeOver && (
+          <Box mt={6}>
+            <Text fontSize="md" fontWeight="semibold" mb={4}>
+              Email Template Options
+            </Text>
+            <RadioGroup value={selectedEmailTemplate} onChange={(value) => {
+              setSelectedEmailTemplate(value);
+              setUseCustomEmail(value === 'custom');
+              if (value !== 'custom') {
+                setCustomEmailSubject('');
+                setCustomEmailBody('');
+              }
+            }}>
+              <Stack spacing={4}>
+                <Card mb={4}
+                  variant="outline"
+                  p={4}
+                  borderColor={selectedEmailTemplate === 'custom' ? 'blue.300' : borderColor}
+                  bg={selectedEmailTemplate === 'custom' ? 'blue.50' : bgColor}
+                  _hover={{ boxShadow: 'md' }}
+                  cursor="pointer"
+                >
+                  <Flex align="center">
+                    <Radio value="custom" colorScheme="blue" mr={3} />
+                    <Box>
+                      <Text fontWeight="bold">Custom Email</Text>
+                      <Text fontSize="sm" color="gray.600" mt={1}>
+                        Write a custom email for the take over request.
+                      </Text>
+                    </Box>
+                  </Flex>
+                </Card>
+
+                {selectedEmailTemplate === 'custom' && (
+                  <Box mt={4}>
+                    <Stack spacing={4}>
+                      <FormControl isRequired>
+                        <FormLabel>Email Subject</FormLabel>
+                        <Input
+                          value={customEmailSubject}
+                          onChange={(e) => setCustomEmailSubject(e.target.value)}
+                          placeholder="Enter email subject"
+                        />
+                      </FormControl>
+
+                      <FormControl isRequired>
+                        <FormLabel>Email Body</FormLabel>
+                        <Input
+                          value={customEmailBody}
+                          onChange={(e) => setCustomEmailBody(e.target.value)}
+                          placeholder="Enter email body"
+                          as="textarea"
+                          rows={6}
+                        />
+                      </FormControl>
+                    </Stack>
+                  </Box>
+                )}
+
+
+                {detailedTemplates.map((template) => (
+                  <Card
+                    key={template.templateName}
+                    variant="outline"
+                    p={4}
+                    borderColor={selectedEmailTemplate === template.templateName ? 'blue.300' : borderColor}
+                    bg={selectedEmailTemplate === template.templateName ? 'blue.50' : bgColor}
+                    _hover={{ boxShadow: 'md' }}
+                    cursor="pointer"
+                  >
+                    <Flex align="center">
+                      <Radio value={template.templateName} colorScheme="blue" mr={3} />
+                      <Box>
+                        <Text fontWeight="bold">{template.title}</Text>
+                        <Text fontSize="sm" color="gray.600" mt={1}>
+                          {template.subject}
+                        </Text>
+                        {selectedEmailTemplate === template.templateName && (
+                          <Text fontSize="sm" color="gray.600" mt={2} whiteSpace="pre-line">
+                            {template.text}
+                          </Text>
+                        )}
+                      </Box>
+                    </Flex>
+                  </Card>
+                ))}
+              </Stack>
+            </RadioGroup>
+          </Box>
+        )}
+
+        {responseType === 'offer' && (
+          <Box mt={6}>
+            <Text fontSize="md" fontWeight="semibold" mb={4}>
+              Select Email Template
+            </Text>
+            <RadioGroup value={selectedEmailTemplate} onChange={setSelectedEmailTemplate}>
+              <Stack spacing={4}>
+                {detailedTemplates.map((template) => (
+                  <Card
+                    key={template.templateName}
+                    variant="outline"
+                    p={4}
+                    borderColor={selectedEmailTemplate === template.templateName ? 'blue.300' : borderColor}
+                    bg={selectedEmailTemplate === template.templateName ? 'blue.50' : bgColor}
+                    _hover={{ boxShadow: 'md' }}
+                    cursor="pointer"
+                  >
+                    <Flex align="center">
+                      <Radio value={template.templateName} colorScheme="blue" mr={3} />
+                      <Box>
+                        <Text fontWeight="bold">{template.title}</Text>
+                        <Text fontSize="sm" color="gray.600" mt={1}>
+                          {template.subject}
+                        </Text>
+                        {selectedEmailTemplate === template.templateName && (
+                          <Text fontSize="sm" color="gray.600" mt={2} whiteSpace="pre-line">
+                            {template.text}
+                          </Text>
+                        )}
+                      </Box>
+                    </Flex>
+                  </Card>
+                ))}
+              </Stack>
+            </RadioGroup>
+          </Box>
+        )}
+
         {responseType === 'offer' && selectedEmailTemplate === responseTemplates.offer.accept.templateName && (
           <Box my={6}>
             <Text fontSize="md" fontWeight="semibold" mb={4}>
@@ -638,92 +765,6 @@ const LenderResponseModal: React.FC<LenderResponseModalProps> = ({
           </Box>
         )}
 
-        {responseType === 'alreadySubmitted' && wantToTakeOver && (
-          <Box mt={6}>
-            <Text fontSize="md" fontWeight="semibold" mb={4}>
-              Email Template Options
-            </Text>
-            <Stack spacing={4}>
-              <Card mb={4}
-                variant="outline"
-                p={4}
-                borderColor={useCustomEmail ? 'blue.300' : borderColor}
-                bg={useCustomEmail ? 'blue.50' : bgColor}
-                _hover={{ boxShadow: 'md' }}
-                onClick={() => setUseCustomEmail(true)}
-                cursor="pointer"
-              >
-                <Flex align="center">
-                  <Radio value="custom" colorScheme="blue" mr={3} isChecked={useCustomEmail} />
-                  <Box>
-                    <Text fontWeight="bold">Custom Email</Text>
-                    <Text fontSize="sm" color="gray.600" mt={1}>
-                      Write a custom email for the take over request.
-                    </Text>
-                  </Box>
-                </Flex>
-              </Card>
-            </Stack>
-
-            {useCustomEmail && (
-              <Box mt={4}>
-                <Stack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>Email Subject</FormLabel>
-                    <Input
-                      value={customEmailSubject}
-                      onChange={(e) => setCustomEmailSubject(e.target.value)}
-                      placeholder="Enter email subject"
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>Email Body</FormLabel>
-                    <Input
-                      value={customEmailBody}
-                      onChange={(e) => setCustomEmailBody(e.target.value)}
-                      placeholder="Enter email body"
-                      as="textarea"
-                      rows={6}
-                    />
-                  </FormControl>
-                </Stack>
-              </Box>
-            )}
-          </Box>
-        )}
-
-        <RadioGroup value={selectedEmailTemplate} onChange={setSelectedEmailTemplate}>
-          <Stack spacing={4}>
-            {detailedTemplates.map((template) => (
-              <Card
-                key={template.templateName}
-                variant="outline"
-                p={4}
-                borderColor={selectedEmailTemplate === template.templateName ? 'blue.300' : borderColor}
-                bg={selectedEmailTemplate === template.templateName ? 'blue.50' : bgColor}
-                _hover={{ boxShadow: 'md' }}
-                onClick={() => setSelectedEmailTemplate(template.templateName)}
-                cursor="pointer"
-              >
-                <Flex align="center">
-                  <Radio value={template.templateName} colorScheme="blue" mr={3} />
-                  <Box>
-                    <Text fontWeight="bold">{template.title}</Text>
-                    <Text fontSize="sm" color="gray.600" mt={1}>
-                      {template.subject}
-                    </Text>
-                    {selectedEmailTemplate === template.templateName && (
-                      <Text fontSize="sm" color="gray.600" mt={2} whiteSpace="pre-line">
-                        {template.text}
-                      </Text>
-                    )}
-                  </Box>
-                </Flex>
-              </Card>
-            ))}
-          </Stack>
-        </RadioGroup>
         {responseType === 'offer' && selectedEmailTemplate === responseTemplates.offer.reject.templateName && (
           <Box my={6}>
             <Text fontSize="md" fontWeight="semibold" mb={4}>

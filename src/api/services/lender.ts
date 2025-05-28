@@ -12,3 +12,7 @@ export const addLenders = async (lenders: string[]) => {
   return response.data;
 };
 
+export const requestDocument = async (data: any) => {
+  const response = await axiosClient.post(routes.lenders.documentRequest.path, data);
+  return response.data;
+};

@@ -81,6 +81,12 @@ const routes = {
         method: 'GET',
         description: 'Get user\'s lenders',
         auth: true
+      },
+      documentRequest: {
+        path: '/api/lenders/request-document',
+        method: 'POST',
+        description: 'Request document for a lender',
+        auth: true
       }
     },
     claims: {
