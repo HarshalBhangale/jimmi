@@ -226,7 +226,7 @@ const HowItWorks = () => {
             color={useColorModeValue('gray.600', 'gray.400')}
             px={4}
           >
-            Let Buddy walk you through the process. <br/> Submit your claims today wit Buddy guiding you every step of the way
+            Let Buddy walk you through the process. <br/> Submit your claims today with Buddy guiding you every step of the way
           </Text>
         </VStack>
         
