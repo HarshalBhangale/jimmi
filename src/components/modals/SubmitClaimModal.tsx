@@ -32,6 +32,10 @@ import {
   Input,
   useBreakpointValue,
   VStack,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
 } from '@chakra-ui/react';
 import { FiInfo, FiCheckCircle, FiArrowRight } from 'react-icons/fi';
 import { getTemplates } from '@/api/services/templates';
@@ -94,6 +98,8 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
   const cardBg = useColorModeValue('gray.50', 'gray.700');
   const selectedCardBg = useColorModeValue('blue.50', 'blue.900');
   const selectedCardBorder = useColorModeValue('blue.200', 'blue.700');
+  const infoBg = useColorModeValue('blue.50', 'blue.900');
+  const infoBorder = useColorModeValue('blue.100', 'blue.800');
 
   const handleToggleAgreement = (agreementId: string) => {
     if (selectedAgreements.includes(agreementId)) {
@@ -424,6 +430,43 @@ const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
             </Stack>
           ) : (
             <Stack spacing={{ base: 4, md: 6 }}>
+              {/* Info Box - Only shown in step 2 */}
+              <Box 
+                bg={infoBg} 
+                p={4} 
+                borderRadius="md" 
+                borderWidth="1px" 
+                borderColor={infoBorder}
+                mb={2}
+              >
+                <Flex align="flex-start" mb={2}>
+                  <Icon as={FiInfo} color="blue.500" boxSize={5} mr={2} mt={0.5} />
+                  <Text fontWeight="bold" fontSize={{ base: "md", md: "lg" }}>
+                    Understanding the Types of Claims
+                  </Text>
+                </Flex>
+                
+                <Text fontWeight="bold" mt={3} mb={1} fontSize="sm">
+                  Discretionary Commission (DCA) Claims
+                </Text>
+                <Text fontSize="sm" mb={3}>
+                  The DCA model was banned on <strong>28 January 2021</strong>.
+                </Text>
+                <Text fontSize="sm" mb={4}>
+                  If your finance agreement started after this date, it's unlikely to qualify under this type of claim.
+                </Text>
+                
+                <Text fontWeight="bold" mb={1} fontSize="sm">
+                  Hidden Commission Claims
+                </Text>
+                <Text fontSize="sm" mb={3}>
+                  These apply when you <strong>weren't told</strong> that a commission was being paid to the broker.
+                </Text>
+                <Text fontSize="sm">
+                  You may still have a valid claim even if your agreement is post-2021.
+                </Text>
+              </Box>
+
               <Box>
                 <Text
                   fontSize={{ base: "md", md: "lg" }}
