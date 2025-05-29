@@ -21,18 +21,74 @@ const pulse = keyframes`
   100% { transform: scale(1); }
 `;
 
+// Function to calculate time until a specific date or default to next Sunday
+const calculateTimeRemaining = (targetDate = null) => {
+  const now = new Date();
+  
+  // If a target date is provided, use it
+  if (targetDate) {
+    const diff = targetDate.getTime() - now.getTime();
+    
+    if (diff <= 0) {
+      // If date is in the past, default to next Sunday
+      return calculateTimeUntilNextSunday();
+    }
+    
+    const totalHours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return { totalHours, minutes, seconds, hasTargetDate: true };
+  } else {
+    // Default to next Sunday if no date provided
+    return calculateTimeUntilNextSunday();
+  }
+};
+
 // Function to calculate time until next Sunday midnight (next next Sunday)
-const calculateTimeToNextSunday = () => {
+const calculateTimeUntilNextSunday = () => {
   const now = new Date();
   const nextSunday = new Date();
   const daysToSunday = 7 - now.getDay();
-  nextSunday.setDate(now.getDate() + (daysToSunday === 0 ? 14 : daysToSunday + 7));
+  nextSunday.setDate(now.getDate() + (daysToSunday === 0 ? 7 : daysToSunday));
   nextSunday.setHours(23, 59, 59, 999);
   const diff = nextSunday.getTime() - now.getTime();
   const totalHours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-  return { totalHours, minutes, seconds };
+  return { totalHours, minutes, seconds, hasTargetDate: false };
+};
+
+// Function to parse date from URL format
+const parseDateFromURL = (dateString) => {
+  if (!dateString) return null;
+  
+  try {
+    // Expected format: YYYYMMDDHHMMSS
+    // For example: 20250603000000 (June 3, 2025, 00:00:00)
+    if (dateString.length !== 14) {
+      return null;
+    }
+    
+    const year = parseInt(dateString.substring(0, 4));
+    const month = parseInt(dateString.substring(4, 6)) - 1; // JS months are 0-indexed
+    const day = parseInt(dateString.substring(6, 8));
+    const hour = parseInt(dateString.substring(8, 10));
+    const minute = parseInt(dateString.substring(10, 12));
+    const second = parseInt(dateString.substring(12, 14));
+    
+    // Create a simple date object
+    const date = new Date(year, month, day, hour, minute, second);
+    
+    // Validate the date
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    
+    return date;
+  } catch (error) {
+    return null;
+  }
 };
 
 // Function to extract URL parameters
@@ -55,18 +111,47 @@ const getUrlParameters = () => {
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(calculateTimeToNextSunday());
+  const [timeRemaining, setTimeRemaining] = useState({ totalHours: 0, minutes: 0, seconds: 0, hasTargetDate: false });
   const [discountCode, setDiscountCode] = useState("CLAIMBACK");
+  const [targetDate, setTargetDate] = useState(null);
 
-  useEffect(() => {
-    // Extract URL parameters and set discount code
+  // Function to initialize data from URL parameters
+  const initializeFromURLParams = () => {
     const params = getUrlParameters();
+    
+    // Handle name parameter
     if (params.name && params.name.trim() !== "") {
       // Convert to uppercase and ensure it's formatted properly
       const formattedName = params.name.toUpperCase().trim();
       setDiscountCode(formattedName);
     }
     
+    // Handle date parameter
+    if (params.date && params.date.trim() !== "") {
+      const parsedDate = parseDateFromURL(params.date.trim());
+      
+      if (parsedDate) {
+        setTargetDate(parsedDate);
+        const remaining = calculateTimeRemaining(parsedDate);
+        setTimeRemaining(remaining);
+      } else {
+        setTimeRemaining(calculateTimeUntilNextSunday());
+      }
+    } else {
+      setTimeRemaining(calculateTimeUntilNextSunday());
+    }
+  };
+
+  useEffect(() => {
+    // Initialize data from URL parameters
+    initializeFromURLParams();
+    
+    // Handle hash change (if URL parameters change)
+    const handleHashChange = () => {
+      initializeFromURLParams();
+    };
+    
+    // Handle scroll events
     const handleScroll = () => {
       const offset = window.scrollY;
       if (offset > 50) {
@@ -77,17 +162,27 @@ const Navbar = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
+    window.addEventListener('hashchange', handleHashChange);
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('hashchange', handleHashChange);
     };
   }, []);
 
   useEffect(() => {
+    // Update the countdown every second
     const timer = setInterval(() => {
-      setTimeRemaining(calculateTimeToNextSunday());
+      if (targetDate) {
+        const newTimeRemaining = calculateTimeRemaining(targetDate);
+        setTimeRemaining(newTimeRemaining);
+      } else {
+        setTimeRemaining(calculateTimeUntilNextSunday());
+      }
     }, 1000);
+    
     return () => clearInterval(timer);
-  }, []);
+  }, [targetDate]);
 
   return (
 <>
@@ -178,7 +273,13 @@ const Navbar = () => {
               textAlign="center"
               display={{ base: "none", md: "block" }}
             >
-              🔥 Discount code <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">{discountCode}50</Box> applied - 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.{' '}
+              🔥 Discount code <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">{discountCode}50</Box> applied - 
+              {timeRemaining.hasTargetDate ? (
+                <> 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.</>
+              ) : (
+                <> Offer now - on 50% off for a limited time.</>
+              )}
+              {' '}
               <Box as="span" animation={`${pulse} 2s infinite`} color="yellow.100">Act Now!</Box>
             </Text>
 
@@ -188,7 +289,12 @@ const Navbar = () => {
               textAlign="center"
               display={{ base: "block", md: "none" }}
             >
-            <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">{discountCode}50</Box> applied - 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.
+              <Box as="span" color="white" px={2} py={0.5} bg="whiteAlpha.300" borderRadius="md">{discountCode}50</Box> applied - 
+              {timeRemaining.hasTargetDate ? (
+                <> 50% off ends in {String(timeRemaining.totalHours).padStart(2, '0')}h {String(timeRemaining.minutes).padStart(2, '0')}m {String(timeRemaining.seconds).padStart(2, '0')}s.</>
+              ) : (
+                <> Offer now - on 50% off for a limited time.</>
+              )}
             </Text>
           </Flex>
         </Container>
