@@ -136,7 +136,7 @@ const Footer = () => {
             <Link as={RouterLink} to="/privacy" fontSize="sm" color={textColor} _hover={{ color: "blue.400" }}>
               Privacy Policy
             </Link>
-            <Link as={RouterLink} to="/terms" fontSize="sm" color={textColor} _hover={{ color: "blue.400" }}>
+            <Link as={RouterLink} to="/tnc" fontSize="sm" color={textColor} _hover={{ color: "blue.400" }}>
               Terms of Service
             </Link>
           </HStack>
